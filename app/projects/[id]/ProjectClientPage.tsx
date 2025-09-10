@@ -421,7 +421,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       case "completed":
         return "text-chart-4"
       case "in-progress":
-        return "text-primary"
+        return "text-chart-3"
       case "pending":
         return "text-muted-foreground"
       default:
@@ -434,7 +434,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       case "completed":
         return <CheckCircle className="h-4 w-4 text-chart-4" />
       case "in-progress":
-        return <Clock className="h-4 w-4 text-primary" />
+        return <Clock className="h-4 w-4 text-chart-3" />
       case "pending":
         return <AlertCircle className="h-4 w-4 text-muted-foreground" />
       default:
