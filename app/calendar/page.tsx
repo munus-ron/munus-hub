@@ -36,6 +36,7 @@ import {
   Edit,
   Trash2,
   Pencil,
+  Calendar,
 } from "lucide-react"
 import { AdminOnly } from "@/components/admin-only"
 import { useAuth } from "@/contexts/auth-context"
@@ -240,7 +241,25 @@ export default function CalendarPage() {
 
   const handleCreateEvent = () => {
     console.log("Creating event:", newEvent)
-    setEvents([...events, { ...newEvent, id: String(Date.now()) }])
+    const eventWithId = {
+      ...newEvent,
+      id: String(Date.now()),
+      attendees: Number.parseInt(newEvent.attendees) || 0,
+    }
+    const updatedEvents = [...events, eventWithId]
+    setEvents(updatedEvents)
+
+    // Save to localStorage for persistence
+    localStorage.setItem("calendar_events", JSON.stringify(updatedEvents))
+
+    // Dispatch storage event for cross-tab synchronization
+    window.dispatchEvent(
+      new StorageEvent("storage", {
+        key: "calendar_events",
+        newValue: JSON.stringify(updatedEvents),
+      }),
+    )
+
     setNewEvent({
       title: "",
       type: "meeting",
@@ -384,7 +403,20 @@ export default function CalendarPage() {
 
   const handleUpdateEvent = () => {
     if (editingEvent) {
-      setEvents(events.map((event) => (event.id === editingEvent.id ? editingEvent : event)))
+      const updatedEvents = events.map((event) => (event.id === editingEvent.id ? editingEvent : event))
+      setEvents(updatedEvents)
+
+      // Save to localStorage
+      localStorage.setItem("calendar_events", JSON.stringify(updatedEvents))
+
+      // Dispatch storage event
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "calendar_events",
+          newValue: JSON.stringify(updatedEvents),
+        }),
+      )
+
       setIsEditEventModalOpen(false)
       setEditingEvent(null)
     }
@@ -607,33 +639,83 @@ export default function CalendarPage() {
                 </CardContent>
               </Card>
 
-              {/* Today's Events */}
               <Card className="border-gray-100 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-2xl font-semibold text-gray-900 font-serif">Today's Schedule</CardTitle>
-                  <CardDescription className="text-gray-600">Events and meetings for today</CardDescription>
+                  <CardTitle className="text-2xl font-semibold text-gray-900 font-serif">
+                    This Week's Schedule
+                  </CardTitle>
+                  <CardDescription className="text-gray-600">Events and meetings for this week</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
-                      <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                        <Users className="h-6 w-6 text-primary" />
+                    <div className="border-b border-gray-100 pb-4">
+                      <h5 className="font-medium text-gray-700 mb-3">Monday</h5>
+                      <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
+                        <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                          <Users className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-gray-900 text-lg">Daily Standup</h4>
+                          <p className="text-gray-600 truncate">9:00 AM - 9:30 AM • Conference Room B</p>
+                        </div>
+                        <Badge className="bg-primary text-white hidden sm:inline-flex">Meeting</Badge>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-gray-900 text-lg">Daily Standup</h4>
-                        <p className="text-gray-600 truncate">9:00 AM - 9:30 AM • Conference Room B</p>
-                      </div>
-                      <Badge className="bg-primary text-white hidden sm:inline-flex">Meeting</Badge>
                     </div>
-                    <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
-                      <div className="h-12 w-12 rounded-xl bg-chart-4/10 flex items-center justify-center flex-shrink-0">
-                        <Coffee className="h-6 w-6 text-chart-4" />
+
+                    <div className="border-b border-gray-100 pb-4">
+                      <h5 className="font-medium text-gray-700 mb-3">Tuesday</h5>
+                      <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
+                        <div className="h-12 w-12 rounded-xl bg-chart-2/10 flex items-center justify-center">
+                          <Calendar className="h-6 w-6 text-chart-2" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-gray-900 text-lg">Project Review Meeting</h4>
+                          <p className="text-gray-600 truncate">2:00 PM - 3:30 PM • Conference Room A</p>
+                        </div>
+                        <Badge className="bg-chart-2 text-white hidden sm:inline-flex">Meeting</Badge>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-gray-900 text-lg">Coffee Chat with Design Team</h4>
-                        <p className="text-gray-600 truncate">3:00 PM - 4:00 PM • Kitchen Area</p>
+                    </div>
+
+                    <div className="border-b border-gray-100 pb-4">
+                      <h5 className="font-medium text-gray-700 mb-3">Wednesday</h5>
+                      <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
+                        <div className="h-12 w-12 rounded-xl bg-chart-4/10 flex items-center justify-center flex-shrink-0">
+                          <Coffee className="h-6 w-6 text-chart-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-gray-900 text-lg">Coffee Chat with Design Team</h4>
+                          <p className="text-gray-600 truncate">3:00 PM - 4:00 PM • Kitchen Area</p>
+                        </div>
+                        <Badge className="bg-chart-4 text-white hidden sm:inline-flex">Social</Badge>
                       </div>
-                      <Badge className="bg-chart-4 text-white hidden sm:inline-flex">Social</Badge>
+                    </div>
+
+                    <div className="border-b border-gray-100 pb-4">
+                      <h5 className="font-medium text-gray-700 mb-3">Thursday</h5>
+                      <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
+                        <div className="h-12 w-12 rounded-xl bg-chart-3/10 flex items-center justify-center">
+                          <Users className="h-6 w-6 text-chart-3" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-gray-900 text-lg">Team Building Workshop</h4>
+                          <p className="text-gray-600 truncate">10:00 AM - 12:00 PM • Training Room</p>
+                        </div>
+                        <Badge className="bg-chart-3 text-white hidden sm:inline-flex">Workshop</Badge>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h5 className="font-medium text-gray-700 mb-3">Friday</h5>
+                      <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
+                        <div className="h-12 w-12 rounded-xl bg-chart-1/10 flex items-center justify-center">
+                          <Calendar className="h-6 w-6 text-chart-1" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-gray-900 text-lg">Weekly Retrospective</h4>
+                          <p className="text-gray-600 truncate">4:00 PM - 5:00 PM • Conference Room C</p>
+                        </div>
+                        <Badge className="bg-chart-1 text-white hidden sm:inline-flex">Meeting</Badge>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -668,7 +750,9 @@ export default function CalendarPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                         <div className="flex items-center gap-2">
                           <CalendarIcon className="h-4 w-4 text-gray-500" />
-                          <span className="text-gray-700">{new Date(event.date).toLocaleDateString()}</span>
+                          <span className="text-gray-700">
+                            {new Date(event.date + "T00:00:00").toLocaleDateString()}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-gray-500" />

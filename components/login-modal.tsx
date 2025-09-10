@@ -79,16 +79,6 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
             </Alert>
           )}
 
-          <div className="bg-muted p-4 rounded-lg text-sm">
-            <p className="font-medium mb-2">Demo Credentials:</p>
-            <p>
-              <strong>Admin:</strong> admin@company.com / password
-            </p>
-            <p>
-              <strong>User:</strong> user@company.com / password
-            </p>
-          </div>
-
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Signing in..." : "Sign In"}
           </Button>

@@ -295,7 +295,7 @@ function getStatusColor(status: string) {
     case "Active":
       return "bg-chart-4 text-white"
     case "In Progress":
-      return "bg-primary text-primary-foreground"
+      return "bg-chart-3 text-white"
     case "Planning":
       return "bg-muted text-muted-foreground"
     case "Completed":
@@ -818,7 +818,7 @@ export default function ProjectsPage() {
                     </div>
 
                     <div className="flex justify-between items-center pt-2 border-t border-border">
-                      <span className="text-sm text-muted-foreground">{project.department}</span>
+                      <div></div>
                       <span className="text-sm font-medium">{project.budget}</span>
                     </div>
                   </CardContent>
@@ -1048,25 +1048,21 @@ export default function ProjectsPage() {
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-department" className="text-right">
-                  Department
+                <Label htmlFor="edit-progress" className="text-right">
+                  Progress (%)
                 </Label>
-                <Select
-                  value={editingProject.department}
-                  onValueChange={(value) => setEditingProject({ ...editingProject, department: value })}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Marketing">Marketing</SelectItem>
-                    <SelectItem value="Development">Development</SelectItem>
-                    <SelectItem value="Strategy">Strategy</SelectItem>
-                    <SelectItem value="Customer Success">Customer Success</SelectItem>
-                    <SelectItem value="Data Science">Data Science</SelectItem>
-                    <SelectItem value="IT Security">IT Security</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="edit-progress"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={editingProject.progress || 0}
+                  onChange={(e) =>
+                    setEditingProject({ ...editingProject, progress: Number.parseInt(e.target.value) || 0 })
+                  }
+                  className="col-span-3"
+                  placeholder="Enter progress percentage (0-100)"
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-budget" className="text-right">

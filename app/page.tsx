@@ -1,32 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  Calendar,
-  Users,
-  Bell,
-  FolderOpen,
-  Clock,
-  TrendingUp,
-  Menu,
-  LogOut,
-  UserPlus,
-  Edit,
-  Trash2,
-  Settings,
-} from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar, Users, Bell, FolderOpen, Clock, TrendingUp, Menu, LogOut } from "lucide-react"
 import { LoginModal } from "@/components/login-modal"
 import { useAuth } from "@/contexts/auth-context"
-import { AdminOnly } from "@/components/admin-only"
 import Link from "next/link"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useRouter } from "next/navigation"
+import { loadTeamDataFromStorage } from "@/lib/utils"
 
 export default function Dashboard() {
   const [showLoginModal, setShowLoginModal] = useState(false)
@@ -81,7 +66,308 @@ export default function Dashboard() {
     },
   ])
 
+  const [recentAnnouncements, setRecentAnnouncements] = useState([])
+  const [dashboardStats, setDashboardStats] = useState({
+    activeProjects: 0,
+    teamMembers: 0,
+    upcomingEvents: 0,
+    pendingTasks: 0,
+  })
+
+  const [notifications, setNotifications] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [showNotifications, setShowNotifications] = useState(false)
+
   const { user, logout, isAuthenticated } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    const loadAnnouncements = () => {
+      try {
+        const stored = localStorage.getItem("announcements")
+        if (stored) {
+          const announcements = JSON.parse(stored)
+          const sortedAnnouncements = announcements.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 2)
+          setRecentAnnouncements(sortedAnnouncements)
+        } else {
+          setRecentAnnouncements([
+            {
+              id: 1,
+              title: "New Office Opening",
+              content: "We're excited to announce our new branch office in Austin, Texas...",
+              author: "Sarah Miller",
+              date: new Date().toISOString(),
+              avatar: "/ceo-headshot.png",
+            },
+            {
+              id: 2,
+              title: "Holiday Schedule Update",
+              content: "Please note the updated holiday schedule for the remainder of the year...",
+              author: "Robert Johnson",
+              date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+              avatar: "/placeholder-wb2g6.png",
+            },
+          ])
+        }
+      } catch (error) {
+        console.error("Error loading announcements:", error)
+      }
+    }
+
+    loadAnnouncements()
+
+    const handleStorageChange = (e) => {
+      if (e.key === "announcements") {
+        loadAnnouncements()
+      }
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+
+    const handleAnnouncementUpdate = () => {
+      loadAnnouncements()
+    }
+
+    window.addEventListener("announcementUpdate", handleAnnouncementUpdate)
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+      window.removeEventListener("announcementUpdate", handleAnnouncementUpdate)
+    }
+  }, [])
+
+  useEffect(() => {
+    const calculateStats = () => {
+      try {
+        // Calculate active projects (status not "Complete")
+        const storedProjects = localStorage.getItem("projects")
+        let activeProjectsCount = 0
+        if (storedProjects) {
+          const projects = JSON.parse(storedProjects)
+          activeProjectsCount = projects.filter(
+            (project) => project.status && project.status !== "Complete" && project.status !== "Completed",
+          ).length
+        } else {
+          // Fallback to static projects if no localStorage data
+          const staticProjects = [
+            { id: 1, title: "Website Redesign", status: "In Progress" },
+            { id: 2, title: "Mobile App Launch", status: "Active" },
+            { id: 3, title: "Q4 Planning Initiative", status: "Planning" },
+            { id: 4, title: "Customer Support Portal", status: "In Progress" },
+            { id: 5, title: "Data Analytics Dashboard", status: "Active" },
+            { id: 6, title: "Security Audit & Compliance", status: "Planning" },
+          ]
+          activeProjectsCount = staticProjects.filter(
+            (project) => project.status !== "Complete" && project.status !== "Completed",
+          ).length
+        }
+
+        // Calculate team members from founders, advisors, consultants
+        const teamData = loadTeamDataFromStorage()
+        const totalTeamMembers = teamData.founders.length + teamData.advisors.length + teamData.consultants.length
+
+        // Calculate upcoming events from today onwards
+        const now = new Date()
+        now.setHours(0, 0, 0, 0) // Start from beginning of today
+
+        const storedEvents = localStorage.getItem("calendar_events")
+        let upcomingEventsCount = 0
+        if (storedEvents) {
+          const events = JSON.parse(storedEvents)
+          upcomingEventsCount = events.filter((event) => {
+            const eventDate = new Date(event.date || event.start)
+            eventDate.setHours(0, 0, 0, 0) // Normalize to start of day for comparison
+            return eventDate >= now // Events from today onwards
+          }).length
+        } else {
+          // Fallback count for static events from today onwards
+          upcomingEventsCount = 3 // Static fallback
+        }
+
+        // Calculate pending tasks/milestones due this week
+        let pendingTasksCount = 0
+        if (storedProjects) {
+          const projects = JSON.parse(storedProjects)
+          projects.forEach((project) => {
+            const projectTimeline = localStorage.getItem(`project_${project.id}_timeline`)
+            if (projectTimeline) {
+              const milestones = JSON.parse(projectTimeline)
+              milestones.forEach((milestone) => {
+                if (milestone.dueDate || milestone.endDate) {
+                  const dueDate = new Date(milestone.dueDate || milestone.endDate)
+                  if (
+                    dueDate >= now &&
+                    dueDate <= now &&
+                    milestone.status !== "completed" &&
+                    milestone.status !== "done"
+                  ) {
+                    pendingTasksCount++
+                  }
+                }
+              })
+            }
+          })
+        } else {
+          // Fallback count for static tasks
+          pendingTasksCount = 8 // Static fallback
+        }
+
+        setDashboardStats({
+          activeProjects: activeProjectsCount,
+          teamMembers: totalTeamMembers,
+          upcomingEvents: upcomingEventsCount,
+          pendingTasks: pendingTasksCount,
+        })
+      } catch (error) {
+        console.error("Error calculating dashboard stats:", error)
+        // Fallback to default values on error
+        setDashboardStats({
+          activeProjects: 6,
+          teamMembers: 15,
+          upcomingEvents: 3,
+          pendingTasks: 8,
+        })
+      }
+    }
+
+    calculateStats()
+
+    // Listen for storage changes to update stats
+    const handleStorageChange = (e) => {
+      if (
+        e.key === "projects" ||
+        e.key === "team_founders" ||
+        e.key === "team_advisors" ||
+        e.key === "team_consultants" ||
+        e.key === "calendar_events" ||
+        (e.key?.startsWith("project_") && e.key?.endsWith("_timeline"))
+      ) {
+        calculateStats()
+      }
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+    return () => window.removeEventListener("storage", handleStorageChange)
+  }, [])
+
+  useEffect(() => {
+    const generateNotifications = () => {
+      const notificationsList = []
+      const now = new Date()
+
+      try {
+        // Get recent announcements (last 7 days)
+        const storedAnnouncements = localStorage.getItem("announcements")
+        if (storedAnnouncements) {
+          const announcements = JSON.parse(storedAnnouncements)
+          const recentAnnouncements = announcements.filter((announcement) => {
+            const announcementDate = new Date(announcement.date)
+            const daysDiff = (now - announcementDate) / (1000 * 60 * 60 * 24)
+            return daysDiff <= 7
+          })
+
+          recentAnnouncements.forEach((announcement) => {
+            notificationsList.push({
+              id: `announcement-${announcement.id}`,
+              type: "announcement",
+              title: "New Announcement",
+              message: announcement.title,
+              time: announcement.date,
+              icon: "bell",
+              link: `/announcements?highlight=${announcement.id}`,
+            })
+          })
+        }
+
+        // Get upcoming events (next 7 days)
+        const storedEvents = localStorage.getItem("calendar_events")
+        if (storedEvents) {
+          const events = JSON.parse(storedEvents)
+          const upcomingEvents = events.filter((event) => {
+            const eventDate = new Date(event.date || event.start)
+            const daysDiff = (eventDate - now) / (1000 * 60 * 60 * 24)
+            return daysDiff >= 0 && daysDiff <= 7
+          })
+
+          upcomingEvents.forEach((event) => {
+            notificationsList.push({
+              id: `event-${event.id}`,
+              type: "event",
+              title: "Upcoming Event",
+              message: event.title,
+              time: event.date || event.start,
+              icon: "calendar",
+              link: "/calendar",
+            })
+          })
+        }
+
+        // Get project milestones due soon (next 7 days)
+        const storedProjects = localStorage.getItem("projects")
+        if (storedProjects) {
+          const projects = JSON.parse(storedProjects)
+          projects.forEach((project) => {
+            const projectTimeline = localStorage.getItem(`project_${project.id}_timeline`)
+            if (projectTimeline) {
+              const milestones = JSON.parse(projectTimeline)
+              milestones.forEach((milestone) => {
+                if (milestone.dueDate || milestone.endDate) {
+                  const dueDate = new Date(milestone.dueDate || milestone.endDate)
+                  const daysDiff = (dueDate - now) / (1000 * 60 * 60 * 24)
+                  if (daysDiff >= 0 && daysDiff <= 7 && milestone.status !== "completed") {
+                    notificationsList.push({
+                      id: `milestone-${project.id}-${milestone.name}`,
+                      type: "milestone",
+                      title: "Milestone Due Soon",
+                      message: `${milestone.name} in ${project.title}`,
+                      time: milestone.dueDate || milestone.endDate,
+                      icon: "clock",
+                      link: `/projects/${project.id}`,
+                    })
+                  }
+                }
+              })
+            }
+          })
+        }
+
+        // Sort notifications by time (newest first)
+        notificationsList.sort((a, b) => new Date(b.time) - new Date(a.time))
+
+        // Limit to 10 most recent notifications
+        const limitedNotifications = notificationsList.slice(0, 10)
+
+        setNotifications(limitedNotifications)
+        setUnreadCount(limitedNotifications.length)
+      } catch (error) {
+        console.error("Error generating notifications:", error)
+        setNotifications([])
+        setUnreadCount(0)
+      }
+    }
+
+    generateNotifications()
+
+    // Listen for storage changes to update notifications
+    const handleStorageChange = (e) => {
+      if (
+        e.key === "announcements" ||
+        e.key === "calendar_events" ||
+        e.key === "projects" ||
+        (e.key?.startsWith("project_") && e.key?.endsWith("_timeline"))
+      ) {
+        generateNotifications()
+      }
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+    window.addEventListener("announcementUpdate", generateNotifications)
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+      window.removeEventListener("announcementUpdate", generateNotifications)
+    }
+  }, [])
 
   const handleSaveUser = () => {
     if (editingUser) {
@@ -112,7 +398,7 @@ export default function Dashboard() {
     setNewUser({
       name: userToEdit.name,
       email: userToEdit.email,
-      password: "", // Don't pre-fill password for security
+      password: "",
       role: userToEdit.role,
       department: userToEdit.department,
       position: userToEdit.position,
@@ -139,6 +425,69 @@ export default function Dashboard() {
     })
     setEditingUser(null)
     setShowUserForm(false)
+  }
+
+  const getRelativeTime = (dateString) => {
+    const now = new Date()
+    const date = new Date(dateString)
+    const diffInHours = Math.floor((now - date) / (1000 * 60 * 60))
+
+    if (diffInHours < 1) return "Just now"
+    if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`
+
+    const diffInDays = Math.floor(diffInHours / 24)
+    if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`
+
+    return date.toLocaleDateString()
+  }
+
+  const getNotificationTime = (dateString) => {
+    const now = new Date()
+    const date = new Date(dateString)
+    const diffInMinutes = Math.floor((now - date) / (1000 * 60))
+
+    if (diffInMinutes < 1) return "Just now"
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`
+
+    const diffInHours = Math.floor(diffInMinutes / 60)
+    if (diffInHours < 24) return `${diffInHours}h ago`
+
+    const diffInDays = Math.floor(diffInHours / 24)
+    if (diffInDays < 7) return `${diffInDays}d ago`
+
+    return date.toLocaleDateString()
+  }
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case "announcement":
+        return <Bell className="h-4 w-4 text-blue-500" />
+      case "event":
+        return <Calendar className="h-4 w-4 text-green-500" />
+      case "milestone":
+        return <Clock className="h-4 w-4 text-orange-500" />
+      default:
+        return <Bell className="h-4 w-4 text-gray-500" />
+    }
+  }
+
+  const handleNotificationClick = (notification) => {
+    setShowNotifications(false)
+    router.push(notification.link)
+  }
+
+  const markAllAsRead = () => {
+    setUnreadCount(0)
+    setShowNotifications(false)
+  }
+
+  const handleAnnouncementClick = (announcementId) => {
+    router.push(`/announcements?highlight=${announcementId}`)
+  }
+
+  const handleProjectClick = (projectName) => {
+    // Navigate to projects page and then to specific project
+    router.push(`/projects`)
   }
 
   if (!isAuthenticated()) {
@@ -219,183 +568,6 @@ export default function Dashboard() {
                   Team
                 </Button>
               </Link>
-              <AdminOnly>
-                <Dialog open={showManageUsersModal} onOpenChange={setShowManageUsersModal}>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="gap-2 text-gray-700 hover:bg-gray-50 hover:text-primary h-10 px-4 font-medium"
-                    >
-                      <Settings className="h-4 w-4" />
-                      Manage Users
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-4xl max-h-[80vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle className="text-xl font-semibold">User Management</DialogTitle>
-                    </DialogHeader>
-
-                    {!showUserForm ? (
-                      <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                          <p className="text-gray-600">Manage user accounts and permissions</p>
-                          <Button onClick={() => setShowUserForm(true)} className="gap-2">
-                            <UserPlus className="h-4 w-4" />
-                            Add New User
-                          </Button>
-                        </div>
-
-                        <div className="border rounded-lg">
-                          <div className="grid grid-cols-6 gap-4 p-4 bg-gray-50 font-medium text-sm text-gray-700 border-b">
-                            <div>Name</div>
-                            <div>Email</div>
-                            <div>Role</div>
-                            <div>Department</div>
-                            <div>Status</div>
-                            <div>Actions</div>
-                          </div>
-                          {users.map((userData) => (
-                            <div
-                              key={userData.id}
-                              className="grid grid-cols-6 gap-4 p-4 border-b last:border-b-0 items-center"
-                            >
-                              <div className="font-medium">{userData.name}</div>
-                              <div className="text-gray-600">{userData.email}</div>
-                              <div>
-                                <Badge variant={userData.role === "admin" ? "default" : "secondary"}>
-                                  {userData.role === "admin" ? "Administrator" : "User"}
-                                </Badge>
-                              </div>
-                              <div className="text-gray-600">{userData.department}</div>
-                              <div>
-                                <Badge variant={userData.status === "active" ? "default" : "outline"}>
-                                  {userData.status}
-                                </Badge>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleEditUser(userData)}
-                                  className="h-8 w-8 p-0"
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeleteUser(userData.id)}
-                                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-4 py-4">
-                        <div className="flex justify-between items-center">
-                          <h3 className="text-lg font-medium">{editingUser ? "Edit User" : "Add New User"}</h3>
-                          <Button variant="outline" onClick={resetUserForm}>
-                            Back to List
-                          </Button>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="name">Full Name</Label>
-                            <Input
-                              id="name"
-                              value={newUser.name}
-                              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                              placeholder="Enter full name"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="email">Email Address (Login)</Label>
-                            <Input
-                              id="email"
-                              type="email"
-                              value={newUser.email}
-                              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                              placeholder="Enter email address"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input
-                              id="password"
-                              type="password"
-                              value={newUser.password}
-                              onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                              placeholder={editingUser ? "Leave blank to keep current password" : "Enter password"}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="role">User Role</Label>
-                            <Select
-                              value={newUser.role}
-                              onValueChange={(value) => setNewUser({ ...newUser, role: value })}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select user role" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="user">Regular User</SelectItem>
-                                <SelectItem value="admin">Administrator</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="department">Department</Label>
-                            <Select
-                              value={newUser.department}
-                              onValueChange={(value) => setNewUser({ ...newUser, department: value })}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select department" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="engineering">Engineering</SelectItem>
-                                <SelectItem value="marketing">Marketing</SelectItem>
-                                <SelectItem value="sales">Sales</SelectItem>
-                                <SelectItem value="hr">Human Resources</SelectItem>
-                                <SelectItem value="finance">Finance</SelectItem>
-                                <SelectItem value="operations">Operations</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="position">Position</Label>
-                            <Input
-                              id="position"
-                              value={newUser.position}
-                              onChange={(e) => setNewUser({ ...newUser, position: e.target.value })}
-                              placeholder="Enter job position"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex justify-end gap-3 pt-4">
-                          <Button variant="outline" onClick={resetUserForm}>
-                            Cancel
-                          </Button>
-                          <Button
-                            onClick={handleSaveUser}
-                            disabled={
-                              !newUser.name || !newUser.email || !newUser.role || (!editingUser && !newUser.password)
-                            }
-                          >
-                            {editingUser ? "Update User" : "Add User"}
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </DialogContent>
-                </Dialog>
-              </AdminOnly>
             </nav>
           </div>
 
@@ -403,9 +575,64 @@ export default function Dashboard() {
             <Button variant="ghost" size="sm" className="md:hidden text-gray-600 hover:text-primary">
               <Menu className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary">
-              <Bell className="h-5 w-5" />
-            </Button>
+            <Popover open={showNotifications} onOpenChange={setShowNotifications}>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary relative">
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-red-500 text-white flex items-center justify-center">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-0" align="end">
+                <div className="p-4 border-b">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-gray-900">Notifications</h3>
+                    {unreadCount > 0 && (
+                      <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs text-primary">
+                        Mark all read
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                <div className="max-h-96 overflow-y-auto">
+                  {notifications.length > 0 ? (
+                    notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className="p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                        onClick={() => handleNotificationClick(notification)}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="mt-1">{getNotificationIcon(notification.type)}</div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">{notification.title}</p>
+                            <p className="text-sm text-gray-600 truncate">{notification.message}</p>
+                            <p className="text-xs text-gray-500 mt-1">{getNotificationTime(notification.time)}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center text-gray-500">
+                      <Bell className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                      <p className="text-sm">No notifications</p>
+                    </div>
+                  )}
+                </div>
+                {notifications.length > 0 && (
+                  <div className="p-3 border-t">
+                    <Link href="/announcements">
+                      <Button variant="ghost" size="sm" className="w-full text-xs text-primary">
+                        View all announcements
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </PopoverContent>
+            </Popover>
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={user?.avatar || "/placeholder.svg"} />
@@ -417,7 +644,7 @@ export default function Dashboard() {
                 </AvatarFallback>
               </Avatar>
               <div className="hidden md:block">
-                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                <p className="text-sm font-medium text-gray-900">{user?.name?.split(" ")[0]}!</p>
                 <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
               </div>
               <Button variant="ghost" size="sm" onClick={logout} className="text-gray-600 hover:text-primary">
@@ -450,8 +677,8 @@ export default function Dashboard() {
                 <FolderOpen className="h-5 w-5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900 mb-1">12</div>
-                <p className="text-sm text-gray-500">+2 from last month</p>
+                <div className="text-3xl font-bold text-gray-900 mb-1">{dashboardStats.activeProjects}</div>
+                <p className="text-sm text-gray-500">Not completed</p>
               </CardContent>
             </Card>
             <Card className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
@@ -460,8 +687,8 @@ export default function Dashboard() {
                 <Users className="h-5 w-5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900 mb-1">48</div>
-                <p className="text-sm text-gray-500">Across 6 departments</p>
+                <div className="text-3xl font-bold text-gray-900 mb-1">{dashboardStats.teamMembers}</div>
+                <p className="text-sm text-gray-500">Founders, advisors & consultants</p>
               </CardContent>
             </Card>
             <Card className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
@@ -470,8 +697,8 @@ export default function Dashboard() {
                 <Calendar className="h-5 w-5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900 mb-1">5</div>
-                <p className="text-sm text-gray-500">This week</p>
+                <div className="text-3xl font-bold text-gray-900 mb-1">{dashboardStats.upcomingEvents}</div>
+                <p className="text-sm text-gray-500">From today onwards</p>
               </CardContent>
             </Card>
             <Card className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
@@ -480,7 +707,7 @@ export default function Dashboard() {
                 <Clock className="h-5 w-5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900 mb-1">23</div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">{dashboardStats.pendingTasks}</div>
                 <p className="text-sm text-gray-500">Due this week</p>
               </CardContent>
             </Card>
@@ -521,7 +748,10 @@ export default function Dashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center justify-between p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
+                <div
+                  className="flex items-center justify-between p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors cursor-pointer"
+                  onClick={() => handleProjectClick("Website Redesign")}
+                >
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
                       <FolderOpen className="h-6 w-6 text-primary" />
@@ -531,11 +761,12 @@ export default function Dashboard() {
                       <p className="text-gray-600">Marketing Team</p>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
-                    In Progress
-                  </Badge>
+                  <Badge className="bg-chart-3 text-white">In Progress</Badge>
                 </div>
-                <div className="flex items-center justify-between p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
+                <div
+                  className="flex items-center justify-between p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors cursor-pointer"
+                  onClick={() => handleProjectClick("Mobile App Launch")}
+                >
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-xl bg-secondary/10 flex items-center justify-center">
                       <FolderOpen className="h-6 w-6 text-secondary" />
@@ -547,14 +778,20 @@ export default function Dashboard() {
                   </div>
                   <Badge className="bg-primary text-white">Active</Badge>
                 </div>
-                <div className="flex items-center justify-between p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
+                <div
+                  className="flex items-center justify-between p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors cursor-pointer"
+                  onClick={() => handleProjectClick("Q4 Planning")}
+                >
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-xl bg-chart-4/10 flex items-center justify-center">
                       <FolderOpen className="h-6 w-6 text-chart-4" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900 text-lg">Q4 Planning</h4>
-                      <p className="text-gray-600">Strategy Team</p>
+                      <h4 className="font-semibold text-gray-900 text-lg mb-2">Q4 Planning</h4>
+                      <p className="text-gray-600 mb-3 leading-relaxed">
+                        Important dates and milestones to keep track of
+                      </p>
+                      <p className="text-sm text-gray-500">Strategy Team</p>
                     </div>
                   </div>
                   <Badge variant="outline" className="border-gray-300 text-gray-700">
@@ -571,36 +808,43 @@ export default function Dashboard() {
                 <CardDescription className="text-gray-600 text-base">Latest company news and updates</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
-                  <div className="flex items-start gap-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src="/ceo-headshot.png" />
-                      <AvatarFallback>SM</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 text-lg mb-2">New Office Opening</h4>
-                      <p className="text-gray-600 mb-3 leading-relaxed">
-                        We're excited to announce our new branch office in Austin, Texas...
-                      </p>
-                      <p className="text-sm text-gray-500">Sarah Miller • 2 hours ago</p>
+                {recentAnnouncements.length > 0 ? (
+                  recentAnnouncements.map((announcement) => (
+                    <div
+                      key={announcement.id}
+                      className="p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors cursor-pointer"
+                      onClick={() => handleAnnouncementClick(announcement.id)}
+                    >
+                      <div className="flex items-start gap-4">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={announcement.avatar || "/placeholder.svg"} />
+                          <AvatarFallback>
+                            {announcement.author
+                              ?.split(" ")
+                              .map((n) => n[0])
+                              .join("") || "AN"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 text-lg mb-2">{announcement.title}</h4>
+                          <p className="text-gray-600 mb-3 leading-relaxed">
+                            {announcement.content.length > 80
+                              ? `${announcement.content.substring(0, 80)}...`
+                              : announcement.content}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {announcement.author} • {getRelativeTime(announcement.date)}
+                          </p>
+                        </div>
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="p-6 text-center text-gray-500">
+                    <Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>No recent announcements</p>
                   </div>
-                </div>
-                <div className="p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
-                  <div className="flex items-start gap-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src="/placeholder-wb2g6.png" />
-                      <AvatarFallback>RJ</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 text-lg mb-2">Holiday Schedule Update</h4>
-                      <p className="text-gray-600 mb-3 leading-relaxed">
-                        Please note the updated holiday schedule for the remainder of the year...
-                      </p>
-                      <p className="text-sm text-gray-500">Robert Johnson • 1 day ago</p>
-                    </div>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>

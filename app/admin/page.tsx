@@ -1,43 +1,24 @@
 "use client"
-
-import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Settings,
   Users,
   Shield,
   Activity,
-  UserPlus,
-  Edit,
-  Trash2,
-  Search,
   Calendar,
   FolderOpen,
   Bell,
@@ -46,102 +27,119 @@ import {
   LogOut,
   Crown,
   User,
+  Plus,
+  Edit,
+  Trash2,
 } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
-
-// Mock users data - in a real app, this would come from a database
-const mockUsers = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "admin@company.com",
-    role: "admin",
-    avatar: "/professional-headshot.png",
-    status: "active",
-    lastLogin: "2024-12-10T14:30:00Z",
-    createdAt: "2023-01-15T10:00:00Z",
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    email: "user@company.com",
-    role: "user",
-    avatar: "/ceo-headshot.png",
-    status: "active",
-    lastLogin: "2024-12-09T16:45:00Z",
-    createdAt: "2023-03-20T14:30:00Z",
-  },
-  {
-    id: "3",
-    name: "Mike Johnson",
-    email: "mike.johnson@company.com",
-    role: "user",
-    avatar: "/team-member-1.png",
-    status: "active",
-    lastLogin: "2024-12-08T09:15:00Z",
-    createdAt: "2023-06-10T11:20:00Z",
-  },
-  {
-    id: "4",
-    name: "Sarah Wilson",
-    email: "sarah.wilson@company.com",
-    role: "user",
-    avatar: "/team-member-2.png",
-    status: "inactive",
-    lastLogin: "2024-11-25T13:22:00Z",
-    createdAt: "2023-08-05T16:45:00Z",
-  },
-]
-
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  })
-}
-
-function getRoleColor(role: string) {
-  switch (role) {
-    case "admin":
-      return "bg-primary text-primary-foreground"
-    case "user":
-      return "bg-secondary text-secondary-foreground"
-    default:
-      return "bg-muted text-muted-foreground"
-  }
-}
-
-function getStatusColor(status: string) {
-  switch (status) {
-    case "active":
-      return "bg-chart-4 text-white"
-    case "inactive":
-      return "bg-muted text-muted-foreground"
-    case "suspended":
-      return "bg-destructive text-destructive-foreground"
-    default:
-      return "bg-muted text-muted-foreground"
-  }
-}
+import { useState, useEffect } from "react"
 
 export default function AdminPage() {
-  const [users, setUsers] = useState(mockUsers)
-  const [isCreateUserOpen, setIsCreateUserOpen] = useState(false)
-  const [editingUser, setEditingUser] = useState<any>(null)
+  const { user, logout, isAuthenticated, isAdmin } = useAuth()
+
+  const [users, setUsers] = useState([])
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false)
+  const [isEditUserOpen, setIsEditUserOpen] = useState(false)
+  const [editingUser, setEditingUser] = useState(null)
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
+    password: "",
     role: "user",
-    status: "active",
+  })
+  const [editForm, setEditForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "user",
   })
 
-  const { user, logout, isAuthenticated, isAdmin } = useAuth()
+  useEffect(() => {
+    const loadUsers = () => {
+      try {
+        const storedUsers = localStorage.getItem("admin-users")
+        if (storedUsers) {
+          setUsers(JSON.parse(storedUsers))
+        } else {
+          // Initialize with default users if none exist
+          const defaultUsers = [
+            { id: 1, name: "Admin User", email: "admin@company.com", role: "admin" },
+            { id: 2, name: "Regular User", email: "user@company.com", role: "user" },
+          ]
+          setUsers(defaultUsers)
+          localStorage.setItem("admin-users", JSON.stringify(defaultUsers))
+        }
+      } catch (error) {
+        console.error("Error loading users:", error)
+      }
+    }
+    loadUsers()
+  }, [])
 
-  // Redirect if not authenticated or not admin
+  const handleAddUser = () => {
+    if (!newUser.name || !newUser.email || !newUser.password) return
+
+    const user = {
+      id: Date.now(),
+      name: newUser.name,
+      email: newUser.email,
+      password: newUser.password,
+      role: newUser.role,
+      createdAt: new Date().toISOString(),
+    }
+
+    const updatedUsers = [...users, user]
+    setUsers(updatedUsers)
+    localStorage.setItem("admin-users", JSON.stringify(updatedUsers))
+
+    // Reset form and close modal
+    setNewUser({ name: "", email: "", password: "", role: "user" })
+    setIsAddUserOpen(false)
+
+    console.log("[v0] Added new user:", user)
+  }
+
+  const handleEditUser = (userToEdit) => {
+    setEditingUser(userToEdit)
+    setEditForm({
+      name: userToEdit.name,
+      email: userToEdit.email,
+      password: userToEdit.password || "",
+      role: userToEdit.role,
+    })
+    setIsEditUserOpen(true)
+  }
+
+  const handleUpdateUser = () => {
+    if (!editForm.name || !editForm.email) return
+
+    const updatedUsers = users.map((u) =>
+      u.id === editingUser.id
+        ? { ...u, name: editForm.name, email: editForm.email, password: editForm.password, role: editForm.role }
+        : u,
+    )
+
+    setUsers(updatedUsers)
+    localStorage.setItem("admin-users", JSON.stringify(updatedUsers))
+
+    setIsEditUserOpen(false)
+    setEditingUser(null)
+
+    console.log("[v0] Updated user:", editingUser.id)
+  }
+
+  const handleDeleteUser = (userId) => {
+    const updatedUsers = users.filter((u) => u.id !== userId)
+    setUsers(updatedUsers)
+    localStorage.setItem("admin-users", JSON.stringify(updatedUsers))
+
+    console.log("[v0] Deleted user with ID:", userId)
+  }
+
+  const adminUsers = users.filter((u) => u.role === "admin")
+  const regularUsers = users.filter((u) => u.role === "user")
+
   if (!isAuthenticated() || !isAdmin()) {
     return (
       <div className="min-h-screen bg-green-100 flex items-center justify-center">
@@ -161,32 +159,6 @@ export default function AdminPage() {
       </div>
     )
   }
-
-  const handleCreateUser = () => {
-    const newUserData = {
-      id: String(users.length + 1),
-      ...newUser,
-      avatar: "/placeholder.svg",
-      lastLogin: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-    }
-    setUsers([...users, newUserData])
-    setNewUser({ name: "", email: "", role: "user", status: "active" })
-    setIsCreateUserOpen(false)
-  }
-
-  const handleUpdateUser = (userId: string, updates: any) => {
-    setUsers(users.map((u) => (u.id === userId ? { ...u, ...updates } : u)))
-    setEditingUser(null)
-  }
-
-  const handleDeleteUser = (userId: string) => {
-    setUsers(users.filter((u) => u.id !== userId))
-  }
-
-  const adminUsers = users.filter((u) => u.role === "admin")
-  const regularUsers = users.filter((u) => u.role === "user")
-  const activeUsers = users.filter((u) => u.status === "active")
 
   return (
     <div className="min-h-screen bg-green-100">
@@ -247,10 +219,7 @@ export default function AdminPage() {
                   Team
                 </Button>
               </Link>
-              <Button
-                variant="ghost"
-                className="gap-2 bg-primary/5 text-primary hover:bg-primary/10 h-10 px-4 font-medium"
-              >
+              <Button variant="ghost" className="gap-2 bg-primary text-white hover:bg-primary/90 h-10 px-4 font-medium">
                 <Settings className="h-4 w-4" />
                 Admin
               </Button>
@@ -293,124 +262,8 @@ export default function AdminPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold text-gray-900">Admin Dashboard</h2>
-              <p className="text-gray-600">Manage users, roles, and system settings</p>
+              <p className="text-gray-600">Manage system settings and configurations</p>
             </div>
-            <Dialog open={isCreateUserOpen} onOpenChange={setIsCreateUserOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Add User
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create New User</DialogTitle>
-                  <DialogDescription>
-                    Add a new user to the system with specified role and permissions.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input
-                      id="name"
-                      value={newUser.name}
-                      onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                      placeholder="John Doe"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={newUser.email}
-                      onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                      placeholder="john.doe@company.com"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="role">Role</Label>
-                      <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="user">User</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="status">Status</Label>
-                      <Select
-                        value={newUser.status}
-                        onValueChange={(value) => setNewUser({ ...newUser, status: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="active">Active</SelectItem>
-                          <SelectItem value="inactive">Inactive</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsCreateUserOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleCreateUser}>Create User</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <Users className="h-5 w-5 text-primary" />
-                  <span className="font-semibold text-gray-700">Total Users</span>
-                </div>
-                <p className="text-3xl font-bold text-gray-900 mb-1">{users.length}</p>
-                <p className="text-sm text-gray-500">{activeUsers.length} active</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <Crown className="h-5 w-5 text-primary" />
-                  <span className="font-semibold text-gray-700">Admin Users</span>
-                </div>
-                <p className="text-3xl font-bold text-gray-900 mb-1">{adminUsers.length}</p>
-                <p className="text-sm text-gray-500">System administrators</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <User className="h-5 w-5 text-primary" />
-                  <span className="font-semibold text-gray-700">Regular Users</span>
-                </div>
-                <p className="text-3xl font-bold text-gray-900 mb-1">{regularUsers.length}</p>
-                <p className="text-sm text-gray-500">Standard access</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <Activity className="h-5 w-5 text-primary" />
-                  <span className="font-semibold text-gray-700">Active Sessions</span>
-                </div>
-                <p className="text-3xl font-bold text-gray-900 mb-1">{activeUsers.length}</p>
-                <p className="text-sm text-gray-500">Currently online</p>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Tabs */}
@@ -423,165 +276,261 @@ export default function AdminPage() {
             </TabsList>
 
             <TabsContent value="users" className="space-y-6">
-              {/* Search and Filters */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search users..." className="pl-10" />
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-semibold">User Management</h3>
+                  <p className="text-gray-600">Manage system users and their access levels</p>
                 </div>
-                <Select>
-                  <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder="Filter by role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Roles</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="user">User</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select>
-                  <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="gap-2">
+                      <Plus className="h-4 w-4" />
+                      Add User
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add New User</DialogTitle>
+                      <DialogDescription>Create a new user account with appropriate access level</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="name">Full Name</Label>
+                        <Input
+                          id="name"
+                          value={newUser.name}
+                          onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                          placeholder="Enter full name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="email">Email Address</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={newUser.email}
+                          onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                          placeholder="Enter email address"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="password">Password</Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          value={newUser.password}
+                          onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                          placeholder="Enter password"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="role">Role</Label>
+                        <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="admin">Administrator</SelectItem>
+                            <SelectItem value="user">User</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex gap-2 pt-4">
+                        <Button onClick={handleAddUser} className="flex-1">
+                          Add User
+                        </Button>
+                        <Button variant="outline" onClick={() => setIsAddUserOpen(false)} className="flex-1">
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
 
-              {/* Users Table */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>User Accounts</CardTitle>
-                  <CardDescription>Manage user accounts, roles, and permissions</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {users.map((userData) => (
-                      <div
-                        key={userData.id}
-                        className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors"
-                      >
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage src={userData.avatar || "/placeholder.svg"} />
-                            <AvatarFallback>
-                              {userData.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h4 className="font-semibold text-gray-900">{userData.name}</h4>
-                            <p className="text-sm text-gray-600">{userData.email}</p>
-                            <p className="text-xs text-gray-500">Last login: {formatDate(userData.lastLogin)}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Badge className={getRoleColor(userData.role)}>
-                            {userData.role === "admin" && <Crown className="h-3 w-3 mr-1" />}
-                            {userData.role}
-                          </Badge>
-                          <Badge className={getStatusColor(userData.status)}>{userData.status}</Badge>
-                          <div className="flex gap-2">
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Edit User</DialogTitle>
-                                  <DialogDescription>Update user information and permissions.</DialogDescription>
-                                </DialogHeader>
-                                <div className="space-y-4">
-                                  <div className="space-y-2">
-                                    <Label>Full Name</Label>
-                                    <Input defaultValue={userData.name} />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label>Email Address</Label>
-                                    <Input defaultValue={userData.email} />
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                      <Label>Role</Label>
-                                      <Select
-                                        defaultValue={userData.role}
-                                        onValueChange={(value) => handleUpdateUser(userData.id, { role: value })}
-                                      >
-                                        <SelectTrigger>
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="user">User</SelectItem>
-                                          <SelectItem value="admin">Admin</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label>Status</Label>
-                                      <Select
-                                        defaultValue={userData.status}
-                                        onValueChange={(value) => handleUpdateUser(userData.id, { status: value })}
-                                      >
-                                        <SelectTrigger>
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="active">Active</SelectItem>
-                                          <SelectItem value="inactive">Inactive</SelectItem>
-                                          <SelectItem value="suspended">Suspended</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                  </div>
-                                </div>
-                                <DialogFooter>
-                                  <Button variant="outline">Cancel</Button>
-                                  <Button>Save Changes</Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-destructive hover:text-destructive bg-transparent"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete User</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete {userData.name}? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDeleteUser(userData.id)}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  >
-                                    Delete User
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
-                        </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Administrator Group */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Crown className="h-5 w-5 text-primary" />
+                        Administrator ({adminUsers.length})
                       </div>
-                    ))}
+                    </CardTitle>
+                    <CardDescription>Users with full system access</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {adminUsers.map((user) => (
+                        <div
+                          key={user.id}
+                          className="flex items-center justify-between p-3 border border-gray-100 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="bg-primary/20 text-primary-foreground">
+                                {user.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium text-sm">{user.name}</p>
+                              <p className="text-xs text-gray-600">{user.email}</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditUser(user)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteUser(user.id)}
+                              className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      {adminUsers.length === 0 && (
+                        <p className="text-sm text-gray-500 text-center py-4">No administrators found</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* User Group */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <User className="h-5 w-5 text-secondary" />
+                        User ({regularUsers.length})
+                      </div>
+                    </CardTitle>
+                    <CardDescription>Users with standard access</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {regularUsers.map((user) => (
+                        <div
+                          key={user.id}
+                          className="flex items-center justify-between p-3 border border-gray-100 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="bg-secondary/20 text-secondary-foreground">
+                                {user.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium text-sm">{user.name}</p>
+                              <p className="text-xs text-gray-600">{user.email}</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditUser(user)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteUser(user.id)}
+                              className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      {regularUsers.length === 0 && (
+                        <p className="text-sm text-gray-500 text-center py-4">No users found</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Edit User Dialog */}
+              <Dialog open={isEditUserOpen} onOpenChange={setIsEditUserOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Edit User</DialogTitle>
+                    <DialogDescription>Update user information and access level</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="edit-name">Full Name</Label>
+                      <Input
+                        id="edit-name"
+                        value={editForm.name}
+                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                        placeholder="Enter full name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-email">Email Address</Label>
+                      <Input
+                        id="edit-email"
+                        type="email"
+                        value={editForm.email}
+                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                        placeholder="Enter email address"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-password">Password</Label>
+                      <Input
+                        id="edit-password"
+                        type="password"
+                        value={editForm.password}
+                        onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                        placeholder="Enter new password (leave blank to keep current)"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-role">Role</Label>
+                      <Select
+                        value={editForm.role}
+                        onValueChange={(value) => setEditForm({ ...editForm, role: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="admin">Administrator</SelectItem>
+                          <SelectItem value="user">User</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex gap-2 pt-4">
+                      <Button onClick={handleUpdateUser} className="flex-1">
+                        Update User
+                      </Button>
+                      <Button variant="outline" onClick={() => setIsEditUserOpen(false)} className="flex-1">
+                        Cancel
+                      </Button>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
+                </DialogContent>
+              </Dialog>
             </TabsContent>
 
             <TabsContent value="roles" className="space-y-6">
@@ -590,7 +539,7 @@ export default function AdminPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Crown className="h-5 w-5 text-primary" />
-                      Admin Role
+                      Administrator Role
                     </CardTitle>
                     <CardDescription>Full system access and user management</CardDescription>
                   </CardHeader>
@@ -624,7 +573,7 @@ export default function AdminPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <User className="h-5 w-5 text-secondary" />
-                      User Role
+                      Regular User Role
                     </CardTitle>
                     <CardDescription>Standard access to view and interact with content</CardDescription>
                   </CardHeader>
@@ -665,22 +614,12 @@ export default function AdminPage() {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl">
-                      <div className="h-10 w-10 rounded-full bg-chart-4/10 flex items-center justify-center">
-                        <UserPlus className="h-5 w-5 text-chart-4" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">New user registered</p>
-                        <p className="text-sm text-gray-600">Jane Smith joined the system</p>
-                        <p className="text-xs text-gray-500">2 hours ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl">
                       <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
                         <Settings className="h-5 w-5 text-primary" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium">User role updated</p>
-                        <p className="text-sm text-gray-600">Mike Johnson promoted to admin</p>
+                        <p className="font-medium">System configuration updated</p>
+                        <p className="text-sm text-gray-600">Admin settings modified</p>
                         <p className="text-xs text-gray-500">1 day ago</p>
                       </div>
                     </div>
