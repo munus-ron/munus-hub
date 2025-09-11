@@ -54,6 +54,7 @@ export default function AdminPage() {
     password: "",
     role: "user",
   })
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
 
   useEffect(() => {
     const loadUsers = () => {
@@ -167,10 +168,8 @@ export default function AdminPage() {
         <div className="flex h-20 items-center justify-between px-8">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-                <span className="text-white font-bold text-lg">IH</span>
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900 font-serif">Intranet Hub</h1>
+              <img src="/munus-logo.jpg" alt="Munus Logo" className="h-8 w-auto" />
+              <span className="text-3xl font-bold text-gray-900 font-serif">Munus Hub</span>
             </div>
 
             <nav className="hidden md:flex items-center gap-1">
@@ -219,7 +218,10 @@ export default function AdminPage() {
                   Team
                 </Button>
               </Link>
-              <Button variant="ghost" className="gap-2 bg-primary text-white hover:bg-primary/90 h-10 px-4 font-medium">
+              <Button
+                variant="ghost"
+                className="gap-2 bg-primary/5 text-primary hover:bg-primary/10 h-10 px-4 font-medium"
+              >
                 <Settings className="h-4 w-4" />
                 Admin
               </Button>
@@ -227,7 +229,12 @@ export default function AdminPage() {
           </div>
 
           <div className="flex items-center gap-6">
-            <Button variant="ghost" size="sm" className="md:hidden text-gray-600 hover:text-primary">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden text-gray-600 hover:text-primary"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+            >
               <Menu className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3">
@@ -253,6 +260,65 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
+
+        {showMobileMenu && (
+          <div className="md:hidden border-t border-gray-100 bg-white">
+            <nav className="px-4 py-2 space-y-1">
+              <Link href="/" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <TrendingUp className="h-4 w-4" />
+                  Dashboard
+                </Button>
+              </Link>
+              <Link href="/projects" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <FolderOpen className="h-4 w-4" />
+                  Projects
+                </Button>
+              </Link>
+              <Link href="/calendar" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Calendar
+                </Button>
+              </Link>
+              <Link href="/announcements" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <Bell className="h-4 w-4" />
+                  Announcements
+                </Button>
+              </Link>
+              <Link href="/team" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <Users className="h-4 w-4" />
+                  Team
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 bg-primary/5 text-primary hover:bg-primary/10 h-12 px-4 font-medium"
+              >
+                <Settings className="h-4 w-4" />
+                Admin
+              </Button>
+            </nav>
+          </div>
+        )}
       </header>
 
       {/* Main Content */}

@@ -42,44 +42,56 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-serif">Sign In</DialogTitle>
-          <DialogDescription>Enter your credentials to access the intranet</DialogDescription>
+      <DialogContent className="w-[95vw] max-w-md mx-auto p-6 sm:p-8">
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="text-2xl sm:text-3xl font-serif text-center">Sign In</DialogTitle>
+          <DialogDescription className="text-center text-base">
+            Enter your credentials to access the intranet
+          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+          <div className="space-y-3">
+            <Label htmlFor="email" className="text-base font-medium">
+              Email
+            </Label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
+              className="h-12 text-base px-4"
+              autoComplete="email"
+              autoCapitalize="none"
+              autoCorrect="off"
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+          <div className="space-y-3">
+            <Label htmlFor="password" className="text-base font-medium">
+              Password
+            </Label>
             <Input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
+              className="h-12 text-base px-4"
+              autoComplete="current-password"
               required
             />
           </div>
 
           {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
+            <Alert variant="destructive" className="py-3">
+              <AlertDescription className="text-base">{error}</AlertDescription>
             </Alert>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full h-12 text-base font-medium mt-8" disabled={loading}>
             {loading ? "Signing in..." : "Sign In"}
           </Button>
         </form>

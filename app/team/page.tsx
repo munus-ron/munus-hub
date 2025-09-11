@@ -30,6 +30,7 @@ import {
   Upload,
   MessageCircle,
   Pencil,
+  Settings,
 } from "lucide-react"
 import Link from "next/link"
 import {
@@ -348,7 +349,13 @@ function formatStartDate(dateString: string) {
 }
 
 export default function TeamPage() {
-  const { user, logout } = useAuth()
+  const [activeTab, setActiveTab] = useState("founders")
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
+  const [selectedMember, setSelectedMember] = useState<any>(null)
+  const [messageContent, setMessageContent] = useState("")
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
+
+  const { user, logout, isAuthenticated } = useAuth()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedLocation, setSelectedLocation] = useState("all")
   const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState(false)
@@ -367,7 +374,6 @@ export default function TeamPage() {
   })
   const [isImageEditModalOpen, setIsImageEditModalOpen] = useState(false)
   const [editingPersonImage, setEditingPersonImage] = useState<any>(null)
-  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
   const [selectedPerson, setSelectedPerson] = useState<any>(null)
 
   const [foundersState, setFounders] = useState(() => loadTeamDataFromStorage().founders)
@@ -689,7 +695,12 @@ export default function TeamPage() {
           </div>
 
           <div className="flex items-center gap-6">
-            <Button variant="ghost" size="sm" className="md:hidden text-gray-600 hover:text-primary">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden text-gray-600 hover:text-primary"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+            >
               <Menu className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3">
@@ -712,6 +723,67 @@ export default function TeamPage() {
             </div>
           </div>
         </div>
+
+        {showMobileMenu && (
+          <div className="md:hidden border-t border-gray-100 bg-white">
+            <nav className="px-4 py-2 space-y-1">
+              <Link href="/" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <TrendingUp className="h-4 w-4" />
+                  Dashboard
+                </Button>
+              </Link>
+              <Link href="/projects" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <FolderOpen className="h-4 w-4" />
+                  Projects
+                </Button>
+              </Link>
+              <Link href="/calendar" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Calendar
+                </Button>
+              </Link>
+              <Link href="/announcements" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <Bell className="h-4 w-4" />
+                  Announcements
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 bg-primary/5 text-primary hover:bg-primary/10 h-12 px-4 font-medium"
+              >
+                <Users className="h-4 w-4" />
+                Team
+              </Button>
+              <AdminOnly>
+                <Link href="/admin" onClick={() => setShowMobileMenu(false)}>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Admin
+                  </Button>
+                </Link>
+              </AdminOnly>
+            </nav>
+          </div>
+        )}
       </header>
 
       {/* Main Content */}

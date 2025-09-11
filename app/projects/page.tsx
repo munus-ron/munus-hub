@@ -41,253 +41,252 @@ import {
   LogOut,
   Edit,
   Trash2,
+  Settings,
 } from "lucide-react"
 import { AdminOnly } from "@/components/admin-only"
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
 
-const projectsData = {
-  1: {
-    id: 1,
-    title: "Website Redesign",
-    description: "Complete overhaul of company website with modern design and improved user experience",
-    status: "In Progress",
-    progress: 65,
-    team: [
-      { name: "Sarah Miller", role: "Project Manager", avatar: "/team-sarah.png", email: "sarah.miller@company.com" },
-      { name: "John Doe", role: "UI/UX Designer", avatar: "/team-john.png", email: "john.doe@company.com" },
-      { name: "Mike Chen", role: "Frontend Developer", avatar: "/team-mike.png", email: "mike.chen@company.com" },
-    ],
-    department: "Marketing",
-    startDate: "2024-10-01",
-    endDate: "2024-12-15",
-    priority: "High",
-    budget: "$45,000",
-  },
-  2: {
-    id: 2,
-    title: "Mobile App Launch",
-    description: "Development and launch of customer-facing mobile application for iOS and Android",
-    status: "Active",
-    progress: 80,
-    team: [
-      { name: "Alex Johnson", role: "Lead Developer", avatar: "/team-member-1.png", email: "alex.johnson@company.com" },
-      { name: "Lisa Wang", role: "Mobile Developer", avatar: "/team-member-2.png", email: "lisa.wang@company.com" },
-      { name: "David Brown", role: "QA Engineer", avatar: "/team-member-3.png", email: "david.brown@company.com" },
-      { name: "Emma Wilson", role: "Product Manager", avatar: "/team-member-1.png", email: "emma.wilson@company.com" },
-    ],
-    department: "Development",
-    startDate: "2024-08-15",
-    endDate: "2024-11-30",
-    priority: "Critical",
-    budget: "$120,000",
-  },
-  3: {
-    id: 3,
-    title: "Q4 Planning Initiative",
-    description: "Strategic planning and goal setting for the fourth quarter business objectives",
-    status: "Planning",
-    progress: 25,
-    team: [
-      {
-        name: "Robert Johnson",
-        role: "Strategy Lead",
-        avatar: "/team-member-2.png",
-        email: "robert.johnson@company.com",
-      },
-      {
-        name: "Maria Garcia",
-        role: "Business Analyst",
-        avatar: "/team-member-3.png",
-        email: "maria.garcia@company.com",
-      },
-    ],
-    department: "Strategy",
-    startDate: "2024-11-01",
-    endDate: "2024-12-31",
-    priority: "Medium",
-    budget: "$15,000",
-  },
-  4: {
-    id: 4,
-    title: "Customer Support Portal",
-    description: "New self-service portal for customer support with knowledge base and ticketing system",
-    status: "In Progress",
-    progress: 45,
-    team: [
-      {
-        name: "Jennifer Lee",
-        role: "Product Manager",
-        avatar: "/team-member-1.png",
-        email: "jennifer.lee@company.com",
-      },
-      {
-        name: "Tom Anderson",
-        role: "Backend Developer",
-        avatar: "/team-member-2.png",
-        email: "tom.anderson@company.com",
-      },
-      {
-        name: "Rachel Green",
-        role: "Frontend Developer",
-        avatar: "/team-member-3.png",
-        email: "rachel.green@company.com",
-      },
-    ],
-    department: "Customer Success",
-    startDate: "2024-09-01",
-    endDate: "2025-01-15",
-    priority: "High",
-    budget: "$75,000",
-  },
-  5: {
-    id: 5,
-    title: "Data Analytics Dashboard",
-    description: "Business intelligence dashboard for real-time analytics and reporting",
-    status: "Active",
-    progress: 90,
-    team: [
-      { name: "Kevin Park", role: "Data Scientist", avatar: "/team-member-1.png", email: "kevin.park@company.com" },
-      {
-        name: "Sophie Turner",
-        role: "Frontend Developer",
-        avatar: "/team-member-2.png",
-        email: "sophie.turner@company.com",
-      },
-    ],
-    department: "Data Science",
-    startDate: "2024-07-01",
-    endDate: "2024-11-15",
-    priority: "High",
-    budget: "$85,000",
-  },
-  6: {
-    id: 6,
-    title: "Security Audit & Compliance",
-    description: "Comprehensive security review and implementation of compliance measures",
-    status: "Planning",
-    progress: 10,
-    team: [
-      {
-        name: "Michael Davis",
-        role: "Security Lead",
-        avatar: "/team-member-3.png",
-        email: "michael.davis@company.com",
-      },
-      {
-        name: "Anna Rodriguez",
-        role: "Compliance Officer",
-        avatar: "/team-member-1.png",
-        email: "anna.rodriguez@company.com",
-      },
-    ],
-    department: "IT Security",
-    startDate: "2024-12-01",
-    endDate: "2025-02-28",
-    priority: "Critical",
-    budget: "$95,000",
-  },
-}
-
 const getUpdatedProjects = () => {
   console.log("[v0] Starting getUpdatedProjects...")
+  const staticProjects = [
+    {
+      id: 1,
+      title: "Website Redesign",
+      description: "Complete overhaul of company website with modern design and improved UX",
+      status: "In Progress",
+      progress: 65,
+      team: [
+        { name: "Sarah Miller", role: "Project Manager", avatar: "/team-sarah.png" },
+        { name: "John Davis", role: "UI/UX Designer", avatar: "/team-john.png" },
+        { name: "Mike Johnson", role: "Developer", avatar: "/team-mike.png" },
+      ],
+      department: "Marketing",
+      startDate: "2024-01-15",
+      endDate: "2024-03-30",
+      priority: "High",
+      budget: "$45,000",
+      spent: "$29,250",
+    },
+    {
+      id: 2,
+      title: "Mobile App Launch",
+      description: "Development and launch of iOS and Android mobile applications",
+      status: "Planning",
+      progress: 25,
+      team: [
+        { name: "Emily Chen", role: "Mobile Developer", avatar: "/team-member-1.png" },
+        { name: "David Wilson", role: "QA Engineer", avatar: "/team-member-2.png" },
+        { name: "Lisa Anderson", role: "Product Manager", avatar: "/team-member-3.png" },
+        { name: "Tom Rodriguez", role: "Backend Developer", avatar: "/professional-headshot.png" },
+      ],
+      department: "Technology",
+      startDate: "2024-02-01",
+      endDate: "2024-06-15",
+      priority: "High",
+      budget: "$75,000",
+      spent: "$18,750",
+    },
+    {
+      id: 3,
+      title: "Q4 Planning Initiative",
+      description: "Strategic planning and goal setting for the fourth quarter",
+      status: "Complete",
+      progress: 100,
+      team: [
+        { name: "Robert Johnson", role: "Strategy Lead", avatar: "/ceo-headshot.png" },
+        { name: "Jennifer Smith", role: "Analyst", avatar: "/team-member-1.png" },
+      ],
+      department: "Operations",
+      startDate: "2024-09-01",
+      endDate: "2024-09-30",
+      priority: "Medium",
+      budget: "$25,000",
+      spent: "$25,000",
+    },
+    {
+      id: 4,
+      title: "Customer Support Portal",
+      description: "Implementation of new customer support ticketing system",
+      status: "In Progress",
+      progress: 40,
+      team: [
+        { name: "Alex Thompson", role: "System Admin", avatar: "/team-member-2.png" },
+        { name: "Maria Garcia", role: "Support Lead", avatar: "/team-member-3.png" },
+        { name: "Chris Lee", role: "Developer", avatar: "/team-member-1.png" },
+      ],
+      department: "Customer Service",
+      startDate: "2024-01-20",
+      endDate: "2024-04-10",
+      priority: "Medium",
+      budget: "$35,000",
+      spent: "$14,000",
+    },
+    {
+      id: 5,
+      title: "Data Analytics Dashboard",
+      description: "Business intelligence dashboard for real-time analytics",
+      status: "Planning",
+      progress: 15,
+      team: [
+        { name: "Kevin Park", role: "Data Analyst", avatar: "/professional-headshot.png" },
+        { name: "Rachel Green", role: "BI Developer", avatar: "/team-member-2.png" },
+      ],
+      department: "Analytics",
+      startDate: "2024-03-01",
+      endDate: "2024-07-15",
+      priority: "Low",
+      budget: "$50,000",
+      spent: "$7,500",
+    },
+    {
+      id: 6,
+      title: "Security Audit & Compliance",
+      description: "Comprehensive security review and compliance implementation",
+      status: "In Progress",
+      progress: 30,
+      team: [
+        { name: "Daniel Kim", role: "Security Specialist", avatar: "/team-member-3.png" },
+        { name: "Sophie Turner", role: "Compliance Officer", avatar: "/team-member-1.png" },
+      ],
+      department: "IT Security",
+      startDate: "2024-02-15",
+      endDate: "2024-05-30",
+      priority: "High",
+      budget: "$40,000",
+      spent: "$12,000",
+    },
+  ]
 
-  try {
-    // Start with static projects
-    const staticProjects = Object.values(projectsData)
+  console.log(
+    "[v0] Static projects loaded:",
+    staticProjects.map((p) => ({ id: p.id, title: p.title })),
+  )
+
+  const activeProjects = []
+
+  // Check each static project for deletion and updates
+  for (const project of staticProjects) {
+    // Check if project is deleted
+    const deletionMarker = localStorage.getItem(`project_${project.id}_deleted`)
     console.log(
-      "[v0] Static projects loaded:",
-      staticProjects.map((p) => ({ id: p.id, title: p.title })),
+      `[v0] Project ${project.id} (${project.title}) - Deletion marker: ${deletionMarker}, Is deleted: ${deletionMarker === "true"}`,
     )
 
-    const activeProjects = []
+    if (deletionMarker === "true") {
+      console.log(`[v0] Skipping deleted project: ${project.title}`)
+      continue // Skip deleted projects
+    }
 
-    // Check each static project for deletion and updates
-    for (const project of staticProjects) {
-      // Check if project is deleted
-      const deletionMarker = localStorage.getItem(`project_${project.id}_deleted`)
-      console.log(
-        `[v0] Project ${project.id} (${project.title}) - Deletion marker: ${deletionMarker}, Is deleted: ${deletionMarker === "true"}`,
-      )
+    // Load any updates from localStorage
+    const storedProjectData = localStorage.getItem(`project_${project.id}`)
+    if (storedProjectData) {
+      try {
+        const updatedProject = JSON.parse(storedProjectData)
+        console.log(`[v0] Found updates for project ${project.id}:`, {
+          originalTitle: project.title,
+          updatedTitle: updatedProject.title,
+        })
 
-      if (deletionMarker === "true") {
-        console.log(`[v0] Skipping deleted project: ${project.title}`)
-        continue // Skip deleted projects
-      }
-
-      // Load any updates from localStorage
-      const storedProjectData = localStorage.getItem(`project_${project.id}`)
-      if (storedProjectData) {
-        try {
-          const updatedProject = JSON.parse(storedProjectData)
-          console.log(`[v0] Found updates for project ${project.id}:`, {
-            originalTitle: project.title,
-            updatedTitle: updatedProject.title,
-          })
-
-          // Merge all properties from stored data
-          const mergedProject = {
-            ...project,
-            ...updatedProject,
-            team: updatedProject.team || project.team || [],
-          }
-          activeProjects.push(mergedProject)
-        } catch (error) {
-          console.error(`[v0] Error parsing stored project ${project.id}:`, error)
-          activeProjects.push(project)
+        // Merge all properties from stored data
+        const mergedProject = {
+          ...project,
+          ...updatedProject,
+          team: updatedProject.team || project.team || [],
         }
-      } else {
+        activeProjects.push(mergedProject)
+      } catch (error) {
+        console.error(`[v0] Error parsing stored project ${project.id}:`, error)
         activeProjects.push(project)
       }
+    } else {
+      activeProjects.push(project)
+    }
+  }
+
+  console.log(
+    "[v0] Active projects after deletion filter:",
+    activeProjects.map((p) => ({ id: p.id, title: p.title })),
+  )
+
+  const allKeys = Object.keys(localStorage)
+  console.log("[v0] All localStorage keys:", allKeys)
+
+  const projectKeys = allKeys.filter((key) => key.startsWith("project_"))
+  console.log("[v0] All project keys in localStorage:", projectKeys)
+
+  const staticProjectIds = staticProjects.map((p) => p.id)
+  console.log("[v0] Static project IDs:", staticProjectIds)
+
+  const newProjectKeys = allKeys.filter((key) => {
+    if (!key.startsWith("project_") || key.endsWith("_deleted")) {
+      return false
     }
 
-    console.log(
-      "[v0] Active projects after deletion filter:",
-      activeProjects.map((p) => ({ id: p.id, title: p.title })),
-    )
+    // Extract project ID from key (e.g., "project_7" -> 7)
+    const projectIdMatch = key.match(/^project_(\d+)$/)
+    if (!projectIdMatch) {
+      return false
+    }
 
-    // Add any new projects that exist only in localStorage
-    const allKeys = Object.keys(localStorage)
-    const newProjectKeys = allKeys.filter(
-      (key) =>
-        key.startsWith("project_") &&
-        !key.endsWith("_deleted") &&
-        !staticProjects.some((p) => `project_${p.id}` === key),
-    )
+    const projectId = Number.parseInt(projectIdMatch[1])
+    const isNewProject = !staticProjectIds.includes(projectId)
 
-    console.log("[v0] New project keys found:", newProjectKeys)
+    console.log(`[v0] Checking key ${key}: projectId=${projectId}, isNewProject=${isNewProject}`)
+    return isNewProject
+  })
 
-    for (const key of newProjectKeys) {
-      try {
-        const projectData = JSON.parse(localStorage.getItem(key))
-        if (projectData && projectData.id) {
-          console.log(`[v0] Adding new project from localStorage:`, { id: projectData.id, title: projectData.title })
-          activeProjects.push(projectData)
-        }
-      } catch (error) {
-        console.error(`[v0] Error parsing new project ${key}:`, error)
+  console.log("[v0] New project keys found:", newProjectKeys)
+
+  if (newProjectKeys.length === 0) {
+    console.log("[v0] No new projects found, checking localStorage again...")
+    // Force a fresh read of localStorage
+    const freshKeys = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith("project_") && !key.endsWith("_deleted")) {
+        freshKeys.push(key)
       }
     }
+    console.log("[v0] Fresh localStorage scan found project keys:", freshKeys)
 
-    // Calculate team counts for display
-    const projectsWithCounts = activeProjects.map((project) => ({
-      ...project,
-      teamCount: project.team ? project.team.length : 0,
-    }))
-
-    console.log(
-      "[v0] Final project team counts:",
-      projectsWithCounts.map((p) => ({ id: p.id, title: p.title, teamCount: p.teamCount })),
-    )
-
-    return projectsWithCounts
-  } catch (error) {
-    console.error("[v0] Error in getUpdatedProjects:", error)
-    return Object.values(projectsData).map((project) => ({
-      ...project,
-      teamCount: project.team ? project.team.length : 0,
-    }))
+    // Check for new projects in fresh scan
+    for (const key of freshKeys) {
+      const projectIdMatch = key.match(/^project_(\d+)$/)
+      if (projectIdMatch) {
+        const projectId = Number.parseInt(projectIdMatch[1])
+        if (!staticProjectIds.includes(projectId)) {
+          newProjectKeys.push(key)
+          console.log(`[v0] Found new project in fresh scan: ${key}`)
+        }
+      }
+    }
   }
+
+  for (const key of newProjectKeys) {
+    try {
+      const projectData = JSON.parse(localStorage.getItem(key))
+      if (projectData && projectData.id) {
+        console.log(`[v0] Adding new project from localStorage:`, { id: projectData.id, title: projectData.title })
+        activeProjects.push(projectData)
+      }
+    } catch (error) {
+      console.error(`[v0] Error parsing new project ${key}:`, error)
+    }
+  }
+
+  // Calculate team counts for display
+  const projectsWithCounts = activeProjects.map((project) => ({
+    ...project,
+    teamCount: project.team ? project.team.length : 0,
+  }))
+
+  console.log(
+    "[v0] Final project team counts:",
+    projectsWithCounts.map((p) => ({ id: p.id, title: p.title, teamCount: p.teamCount })),
+  )
+
+  return projectsWithCounts
 }
 
 function getStatusColor(status: string) {
@@ -341,6 +340,7 @@ export default function ProjectsPage() {
     budget: "",
     teamMembers: "",
   })
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
 
   const { user, logout, isAuthenticated } = useAuth()
 
@@ -454,6 +454,7 @@ export default function ProjectsPage() {
 
     // Generate new project ID
     const newId = Math.max(...projects.map((p) => p.id), 0) + 1
+    console.log("[v0] Generated new project ID:", newId)
 
     // Create team array from comma-separated names
     const teamMembers = newProject.teamMembers
@@ -477,11 +478,78 @@ export default function ProjectsPage() {
       endDate: newProject.endDate,
       priority: newProject.priority,
       budget: newProject.budget,
+      functionalities: [
+        "Core functionality implementation",
+        "User interface development",
+        "Testing and quality assurance",
+        "Documentation and deployment",
+      ],
+      milestones: [
+        {
+          name: "Project Kickoff",
+          status: "Completed",
+          startDate: newProject.startDate || new Date().toISOString().split("T")[0],
+          endDate: newProject.startDate || new Date().toISOString().split("T")[0],
+          description: "Initial project setup and planning",
+        },
+        {
+          name: "Development Phase",
+          status: "In Progress",
+          startDate: newProject.startDate || new Date().toISOString().split("T")[0],
+          endDate: newProject.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+          description: "Core development and implementation",
+        },
+        {
+          name: "Testing & Review",
+          status: "Pending",
+          startDate: newProject.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+          endDate: newProject.endDate || new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+          description: "Quality assurance and testing phase",
+        },
+        {
+          name: "Project Completion",
+          status: "Pending",
+          startDate: newProject.endDate || new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+          endDate: newProject.endDate || new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+          description: "Final delivery and project closure",
+        },
+      ],
+      documents: [
+        {
+          id: 1,
+          name: "Project Charter.pdf",
+          size: "2.1 MB",
+          category: "Planning",
+          uploadedBy: "System",
+          uploadedAt: new Date().toISOString(),
+          sharepointUrl:
+            "https://sharepoint.company.com/projects/" +
+            newProject.title.toLowerCase().replace(/\s+/g, "-") +
+            "/charter.pdf",
+        },
+        {
+          id: 2,
+          name: "Requirements Document.docx",
+          size: "1.8 MB",
+          category: "Documentation",
+          uploadedBy: "System",
+          uploadedAt: new Date().toISOString(),
+          sharepointUrl:
+            "https://sharepoint.company.com/projects/" +
+            newProject.title.toLowerCase().replace(/\s+/g, "-") +
+            "/requirements.docx",
+        },
+      ],
+      spent: "$0",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdBy: "Current User",
     }
 
     console.log("[v0] Creating new project:", projectData)
 
     localStorage.setItem(`project_${newId}`, JSON.stringify(projectData))
+    console.log("[v0] Saved project to localStorage with key:", `project_${newId}`)
 
     // Trigger storage event for immediate synchronization
     window.dispatchEvent(
@@ -490,6 +558,13 @@ export default function ProjectsPage() {
         newValue: JSON.stringify(projectData),
       }),
     )
+
+    const updatedProjects = getUpdatedProjects()
+    console.log(
+      "[v0] Updated projects after creation:",
+      updatedProjects.map((p) => ({ id: p.id, title: p.title })),
+    )
+    setProjects(updatedProjects)
 
     // Reset form and close modal
     setNewProject({
@@ -504,8 +579,6 @@ export default function ProjectsPage() {
       teamMembers: "",
     })
     setIsCreateModalOpen(false)
-
-    console.log("[v0] Project created successfully")
   }
 
   const handleEditProject = (project) => {
@@ -594,7 +667,7 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-green-100">
+    <div className="min-h-screen bg-gray-50">
       <header className="border-b border-gray-100 bg-white">
         <div className="flex h-20 items-center justify-between px-8">
           <div className="flex items-center gap-8">
@@ -651,7 +724,12 @@ export default function ProjectsPage() {
           </div>
 
           <div className="flex items-center gap-6">
-            <Button variant="ghost" size="sm" className="md:hidden text-gray-600 hover:text-primary">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden text-gray-600 hover:text-primary"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+            >
               <Menu className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3">
@@ -674,6 +752,67 @@ export default function ProjectsPage() {
             </div>
           </div>
         </div>
+
+        {showMobileMenu && (
+          <div className="md:hidden border-t border-gray-100 bg-white">
+            <nav className="px-4 py-2 space-y-1">
+              <Link href="/" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <TrendingUp className="h-4 w-4" />
+                  Dashboard
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 bg-primary/5 text-primary hover:bg-primary/10 h-12 px-4 font-medium"
+              >
+                <FolderOpen className="h-4 w-4" />
+                Projects
+              </Button>
+              <Link href="/calendar" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Calendar
+                </Button>
+              </Link>
+              <Link href="/announcements" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <Bell className="h-4 w-4" />
+                  Announcements
+                </Button>
+              </Link>
+              <Link href="/team" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <Users className="h-4 w-4" />
+                  Team
+                </Button>
+              </Link>
+              <AdminOnly>
+                <Link href="/admin" onClick={() => setShowMobileMenu(false)}>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Admin
+                  </Button>
+                </Link>
+              </AdminOnly>
+            </nav>
+          </div>
+        )}
       </header>
 
       <main className="p-6">

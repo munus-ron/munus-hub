@@ -74,16 +74,538 @@ const projectData = {
     budget: "$45,000",
     spent: "$29,250",
     milestones: [
-      { name: "Research & Discovery", status: "completed", dueDate: "2024-10-15" },
-      { name: "Design Mockups", status: "completed", dueDate: "2024-11-01" },
-      { name: "Frontend Development", status: "in-progress", dueDate: "2024-11-30" },
-      { name: "Content Migration", status: "pending", dueDate: "2024-12-10" },
-      { name: "Testing & Launch", status: "pending", dueDate: "2024-12-15" },
+      {
+        name: "Research & Discovery",
+        status: "completed",
+        dueDate: "2024-10-15",
+        startDate: "2024-10-01",
+        endDate: "2024-10-14",
+      },
+      {
+        name: "Design Mockups",
+        status: "completed",
+        dueDate: "2024-11-01",
+        startDate: "2024-10-15",
+        endDate: "2024-10-30",
+      },
+      {
+        name: "Frontend Development",
+        status: "in-progress",
+        dueDate: "2024-11-30",
+        startDate: "2024-11-01",
+        endDate: "2024-11-29",
+      },
+      {
+        name: "Content Migration",
+        status: "pending",
+        dueDate: "2024-12-10",
+        startDate: "2024-11-30",
+        endDate: "2024-12-09",
+      },
+      {
+        name: "Testing & Launch",
+        status: "pending",
+        dueDate: "2024-12-15",
+        startDate: "2024-12-10",
+        endDate: "2024-12-15",
+      },
     ],
     recentActivity: [
       { user: "John Doe", action: "uploaded new design mockups", time: "2 hours ago" },
       { user: "Mike Chen", action: "completed homepage component", time: "1 day ago" },
       { user: "Sarah Miller", action: "updated project timeline", time: "2 days ago" },
+    ],
+    functionalities: [
+      "Responsive web design across all devices",
+      "Modern UI/UX with improved navigation",
+      "SEO optimization and performance enhancements",
+      "Content management system integration",
+    ],
+    features: [
+      "Interactive product showcase",
+      "Customer testimonials section",
+      "Advanced search functionality",
+      "Multi-language support",
+    ],
+    documents: [
+      {
+        id: 1,
+        name: "Project Requirements.pdf",
+        type: "PDF",
+        size: "2.4 MB",
+        uploadedBy: "Sarah Miller",
+        uploadedDate: "2024-01-15",
+        category: "Requirements",
+        sharepointUrl:
+          "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Requirements/Project%20Requirements.pdf",
+      },
+      {
+        id: 2,
+        name: "Design Mockups.figma",
+        type: "Figma",
+        size: "15.2 MB",
+        uploadedBy: "John Doe",
+        uploadedDate: "2024-01-18",
+        category: "Design",
+        sharepointUrl:
+          "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Design/Design%20Mockups.figma",
+      },
+    ],
+  },
+  2: {
+    id: 2,
+    title: "Mobile App Launch",
+    description:
+      "Development and launch of our mobile application for iOS and Android platforms. This project focuses on creating a seamless mobile experience for our users with native performance and intuitive design.",
+    status: "In Progress",
+    progress: 45,
+    team: [
+      {
+        name: "Emily Johnson",
+        role: "Mobile App Lead",
+        avatar: "/team-member-1.png",
+        email: "emily.johnson@company.com",
+      },
+      { name: "David Park", role: "iOS Developer", avatar: "/team-member-2.png", email: "david.park@company.com" },
+      { name: "Lisa Wong", role: "Android Developer", avatar: "/team-member-3.png", email: "lisa.wong@company.com" },
+      {
+        name: "Alex Rivera",
+        role: "QA Engineer",
+        avatar: "/professional-headshot.png",
+        email: "alex.rivera@company.com",
+      },
+    ],
+    department: "Technology",
+    startDate: "2024-09-15",
+    endDate: "2025-02-28",
+    priority: "High",
+    budget: "$120,000",
+    spent: "$54,000",
+    milestones: [
+      {
+        name: "App Architecture Design",
+        status: "completed",
+        dueDate: "2024-10-01",
+        startDate: "2024-09-15",
+        endDate: "2024-09-30",
+      },
+      {
+        name: "Core Features Development",
+        status: "in-progress",
+        dueDate: "2024-12-15",
+        startDate: "2024-10-01",
+        endDate: "2024-12-14",
+      },
+      {
+        name: "Testing & Bug Fixes",
+        status: "pending",
+        dueDate: "2025-01-31",
+        startDate: "2024-12-15",
+        endDate: "2025-01-30",
+      },
+      {
+        name: "App Store Submission",
+        status: "pending",
+        dueDate: "2025-02-28",
+        startDate: "2025-02-01",
+        endDate: "2025-02-28",
+      },
+    ],
+    recentActivity: [
+      { user: "David Park", action: "completed user authentication module", time: "3 hours ago" },
+      { user: "Lisa Wong", action: "implemented push notifications", time: "1 day ago" },
+      { user: "Emily Johnson", action: "reviewed app store guidelines", time: "2 days ago" },
+    ],
+    functionalities: [
+      "Cross-platform mobile application",
+      "User authentication and profiles",
+      "Real-time notifications",
+      "Offline data synchronization",
+    ],
+    features: ["Biometric login support", "Dark mode interface", "In-app messaging system", "Social media integration"],
+    documents: [
+      {
+        id: 1,
+        name: "Mobile App Specifications.pdf",
+        type: "PDF",
+        size: "3.2 MB",
+        uploadedBy: "Emily Johnson",
+        uploadedDate: "2024-09-20",
+        category: "Requirements",
+        sharepointUrl:
+          "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Mobile/App%20Specifications.pdf",
+      },
+      {
+        id: 2,
+        name: "UI Design Guidelines.sketch",
+        type: "Sketch",
+        size: "8.7 MB",
+        uploadedBy: "David Park",
+        uploadedDate: "2024-10-05",
+        category: "Design",
+        sharepointUrl:
+          "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Mobile/UI%20Guidelines.sketch",
+      },
+    ],
+  },
+  3: {
+    id: 3,
+    title: "Q4 Planning Initiative",
+    description:
+      "Strategic planning and resource allocation for Q4 business objectives. This initiative focuses on setting clear goals, optimizing team performance, and ensuring successful delivery of key business outcomes.",
+    status: "Planning",
+    progress: 25,
+    team: [
+      {
+        name: "Robert Johnson",
+        role: "Strategy Lead",
+        avatar: "/ceo-headshot.png",
+        email: "robert.johnson@company.com",
+      },
+      {
+        name: "Jennifer Lee",
+        role: "Business Analyst",
+        avatar: "/team-member-1.png",
+        email: "jennifer.lee@company.com",
+      },
+    ],
+    department: "Operations",
+    startDate: "2024-11-01",
+    endDate: "2024-12-31",
+    priority: "Medium",
+    budget: "$25,000",
+    spent: "$6,250",
+    milestones: [
+      {
+        name: "Market Analysis",
+        status: "completed",
+        dueDate: "2024-11-15",
+        startDate: "2024-11-01",
+        endDate: "2024-11-14",
+      },
+      {
+        name: "Resource Planning",
+        status: "in-progress",
+        dueDate: "2024-11-30",
+        startDate: "2024-11-15",
+        endDate: "2024-11-29",
+      },
+      {
+        name: "Budget Allocation",
+        status: "pending",
+        dueDate: "2024-12-15",
+        startDate: "2024-12-01",
+        endDate: "2024-12-14",
+      },
+      {
+        name: "Implementation Plan",
+        status: "pending",
+        dueDate: "2024-12-31",
+        startDate: "2024-12-15",
+        endDate: "2024-12-31",
+      },
+    ],
+    recentActivity: [
+      { user: "Robert Johnson", action: "completed market research analysis", time: "4 hours ago" },
+      { user: "Jennifer Lee", action: "updated resource allocation spreadsheet", time: "2 days ago" },
+    ],
+    functionalities: [
+      "Strategic planning framework",
+      "Resource optimization tools",
+      "Performance tracking system",
+      "Budget management interface",
+    ],
+    features: [
+      "Interactive planning dashboard",
+      "Automated reporting system",
+      "Team collaboration tools",
+      "Goal tracking metrics",
+    ],
+    documents: [
+      {
+        id: 1,
+        name: "Q4 Strategy Document.docx",
+        type: "Word",
+        size: "2.1 MB",
+        uploadedBy: "Robert Johnson",
+        uploadedDate: "2024-11-05",
+        category: "Strategy",
+        sharepointUrl:
+          "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Planning/Q4%20Strategy.docx",
+      },
+    ],
+  },
+  4: {
+    id: 4,
+    title: "Customer Support Portal",
+    description:
+      "Development of a comprehensive customer support portal with ticketing system, knowledge base, and live chat functionality. This project aims to improve customer satisfaction and reduce support response times.",
+    status: "In Progress",
+    progress: 70,
+    team: [
+      {
+        name: "Amanda Davis",
+        role: "Product Manager",
+        avatar: "/team-member-2.png",
+        email: "amanda.davis@company.com",
+      },
+      {
+        name: "Carlos Martinez",
+        role: "Full Stack Developer",
+        avatar: "/team-member-3.png",
+        email: "carlos.martinez@company.com",
+      },
+      { name: "Sophie Chen", role: "UX Designer", avatar: "/team-member-1.png", email: "sophie.chen@company.com" },
+    ],
+    department: "Customer Success",
+    startDate: "2024-08-01",
+    endDate: "2024-12-20",
+    priority: "High",
+    budget: "$75,000",
+    spent: "$52,500",
+    milestones: [
+      {
+        name: "Portal Architecture",
+        status: "completed",
+        dueDate: "2024-08-31",
+        startDate: "2024-08-01",
+        endDate: "2024-08-30",
+      },
+      {
+        name: "Ticketing System",
+        status: "completed",
+        dueDate: "2024-10-15",
+        startDate: "2024-09-01",
+        endDate: "2024-10-14",
+      },
+      {
+        name: "Knowledge Base",
+        status: "in-progress",
+        dueDate: "2024-11-30",
+        startDate: "2024-10-15",
+        endDate: "2024-11-29",
+      },
+      {
+        name: "Live Chat Integration",
+        status: "pending",
+        dueDate: "2024-12-20",
+        startDate: "2024-12-01",
+        endDate: "2024-12-20",
+      },
+    ],
+    recentActivity: [
+      { user: "Carlos Martinez", action: "deployed knowledge base search feature", time: "1 hour ago" },
+      { user: "Sophie Chen", action: "finalized chat widget design", time: "6 hours ago" },
+      { user: "Amanda Davis", action: "reviewed customer feedback", time: "1 day ago" },
+    ],
+    functionalities: [
+      "Ticket management system",
+      "Knowledge base with search",
+      "Live chat support",
+      "Customer feedback collection",
+    ],
+    features: [
+      "Multi-language support",
+      "Automated ticket routing",
+      "Customer satisfaction surveys",
+      "Integration with CRM system",
+    ],
+    documents: [
+      {
+        id: 1,
+        name: "Support Portal Requirements.pdf",
+        type: "PDF",
+        size: "1.9 MB",
+        uploadedBy: "Amanda Davis",
+        uploadedDate: "2024-08-10",
+        category: "Requirements",
+        sharepointUrl:
+          "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Support/Portal%20Requirements.pdf",
+      },
+      {
+        id: 2,
+        name: "Chat Integration Guide.docx",
+        type: "Word",
+        size: "1.3 MB",
+        uploadedBy: "Carlos Martinez",
+        uploadedDate: "2024-10-20",
+        category: "Documentation",
+        sharepointUrl:
+          "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Support/Chat%20Integration.docx",
+      },
+    ],
+  },
+  5: {
+    id: 5,
+    title: "Data Analytics Dashboard",
+    description:
+      "Implementation of a comprehensive data analytics dashboard for business intelligence and reporting. This project will provide real-time insights into key business metrics and performance indicators.",
+    status: "In Progress",
+    progress: 55,
+    team: [
+      {
+        name: "Michael Thompson",
+        role: "Data Engineer",
+        avatar: "/professional-headshot.png",
+        email: "michael.thompson@company.com",
+      },
+      { name: "Rachel Kim", role: "Data Analyst", avatar: "/team-member-2.png", email: "rachel.kim@company.com" },
+    ],
+    department: "Analytics",
+    startDate: "2024-09-01",
+    endDate: "2025-01-15",
+    priority: "Medium",
+    budget: "$60,000",
+    spent: "$33,000",
+    milestones: [
+      {
+        name: "Data Pipeline Setup",
+        status: "completed",
+        dueDate: "2024-09-30",
+        startDate: "2024-09-01",
+        endDate: "2024-09-29",
+      },
+      {
+        name: "Dashboard Development",
+        status: "in-progress",
+        dueDate: "2024-12-15",
+        startDate: "2024-10-01",
+        endDate: "2024-12-14",
+      },
+      {
+        name: "Report Automation",
+        status: "pending",
+        dueDate: "2025-01-15",
+        startDate: "2024-12-15",
+        endDate: "2025-01-15",
+      },
+    ],
+    recentActivity: [
+      { user: "Michael Thompson", action: "optimized data processing pipeline", time: "2 hours ago" },
+      { user: "Rachel Kim", action: "created sales performance charts", time: "1 day ago" },
+    ],
+    functionalities: [
+      "Real-time data visualization",
+      "Custom report generation",
+      "Data export capabilities",
+      "Performance monitoring",
+    ],
+    features: [
+      "Interactive charts and graphs",
+      "Automated alert system",
+      "Mobile-responsive design",
+      "Role-based access control",
+    ],
+    documents: [
+      {
+        id: 1,
+        name: "Analytics Requirements.xlsx",
+        type: "Excel",
+        size: "2.8 MB",
+        uploadedBy: "Rachel Kim",
+        uploadedDate: "2024-09-05",
+        category: "Requirements",
+        sharepointUrl:
+          "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Analytics/Requirements.xlsx",
+      },
+    ],
+  },
+  6: {
+    id: 6,
+    title: "Security Audit & Compliance",
+    description:
+      "Comprehensive security audit and compliance assessment to ensure adherence to industry standards and regulations. This project includes vulnerability assessments, policy updates, and security training.",
+    status: "Planning",
+    progress: 30,
+    team: [
+      {
+        name: "Thomas Wilson",
+        role: "Security Specialist",
+        avatar: "/ceo-headshot.png",
+        email: "thomas.wilson@company.com",
+      },
+      {
+        name: "Maria Garcia",
+        role: "Compliance Officer",
+        avatar: "/team-member-1.png",
+        email: "maria.garcia@company.com",
+      },
+    ],
+    department: "Security",
+    startDate: "2024-10-15",
+    endDate: "2025-03-31",
+    priority: "High",
+    budget: "$85,000",
+    spent: "$25,500",
+    milestones: [
+      {
+        name: "Security Assessment",
+        status: "in-progress",
+        dueDate: "2024-12-01",
+        startDate: "2024-10-15",
+        endDate: "2024-11-30",
+      },
+      {
+        name: "Policy Updates",
+        status: "pending",
+        dueDate: "2025-01-31",
+        startDate: "2024-12-01",
+        endDate: "2025-01-30",
+      },
+      {
+        name: "Staff Training",
+        status: "pending",
+        dueDate: "2025-02-28",
+        startDate: "2025-02-01",
+        endDate: "2025-02-28",
+      },
+      {
+        name: "Compliance Certification",
+        status: "pending",
+        dueDate: "2025-03-31",
+        startDate: "2025-03-01",
+        endDate: "2025-03-31",
+      },
+    ],
+    recentActivity: [
+      { user: "Thomas Wilson", action: "completed network vulnerability scan", time: "3 hours ago" },
+      { user: "Maria Garcia", action: "reviewed compliance documentation", time: "2 days ago" },
+    ],
+    functionalities: [
+      "Security vulnerability scanning",
+      "Compliance monitoring system",
+      "Policy management platform",
+      "Training tracking system",
+    ],
+    features: [
+      "Automated security reports",
+      "Risk assessment tools",
+      "Incident response system",
+      "Compliance dashboard",
+    ],
+    documents: [
+      {
+        id: 1,
+        name: "Security Audit Plan.pdf",
+        type: "PDF",
+        size: "3.5 MB",
+        uploadedBy: "Thomas Wilson",
+        uploadedDate: "2024-10-20",
+        category: "Security",
+        sharepointUrl:
+          "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Security/Audit%20Plan.pdf",
+      },
+      {
+        id: 2,
+        name: "Compliance Checklist.xlsx",
+        type: "Excel",
+        size: "1.7 MB",
+        uploadedBy: "Maria Garcia",
+        uploadedDate: "2024-10-25",
+        category: "Compliance",
+        sharepointUrl:
+          "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Security/Compliance%20Checklist.xlsx",
+      },
     ],
   },
 }
@@ -129,6 +651,7 @@ interface Project {
   recentActivity: any[]
   functionalities: string[]
   features: string[]
+  documents: any[]
 }
 
 export default function ProjectDetailPage({ params }: { params: { id: string } }) {
@@ -234,63 +757,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   const [editingMember, setEditingMember] = useState<any>(null)
   const [deletingMember, setDeletingMember] = useState<any>(null)
 
-  const [documents, setDocuments] = useState([
-    {
-      id: 1,
-      name: "Project Requirements.pdf",
-      type: "PDF",
-      size: "2.4 MB",
-      uploadedBy: "Sarah Miller",
-      uploadedDate: "2024-01-15",
-      category: "Requirements",
-      sharepointUrl:
-        "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Shared%20Documents/Requirements/Project%20Requirements.pdf",
-    },
-    {
-      id: 2,
-      name: "Design Mockups.figma",
-      type: "Figma",
-      size: "15.2 MB",
-      uploadedBy: "John Doe",
-      uploadedDate: "2024-01-18",
-      category: "Design",
-      sharepointUrl:
-        "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Shared%20Documents/Design/Design%20Mockups.figma",
-    },
-    {
-      id: 3,
-      name: "Technical Specifications.docx",
-      type: "Word",
-      size: "1.8 MB",
-      uploadedBy: "Mike Chen",
-      uploadedDate: "2024-01-20",
-      category: "Documentation",
-      sharepointUrl:
-        "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Shared%20Documents/Documentation/Technical%20Specifications.docx",
-    },
-    {
-      id: 4,
-      name: "Meeting Notes - Week 1.docx",
-      type: "Word",
-      size: "0.8 MB",
-      uploadedBy: "Sarah Miller",
-      uploadedDate: "2024-01-22",
-      category: "Documentation",
-      sharepointUrl:
-        "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Shared%20Documents/Documentation/Meeting%20Notes%20Week%201.docx",
-    },
-    {
-      id: 5,
-      name: "Budget Analysis.xlsx",
-      type: "Excel",
-      size: "1.2 MB",
-      uploadedBy: "Mike Chen",
-      uploadedDate: "2024-01-25",
-      category: "Requirements",
-      sharepointUrl:
-        "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Shared%20Documents/Requirements/Budget%20Analysis.xlsx",
-    },
-  ])
+  const [documents, setDocuments] = useState([])
   const [isDocumentsEditOpen, setIsDocumentsEditOpen] = useState(false)
 
   const [uploadingFile, setUploadingFile] = useState(false)
@@ -317,6 +784,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       setTeamMembers(project.team || [])
       setFunctionalities(project.functionalities || [])
       setFeatures(project.features || [])
+      setDocuments(project.documents || [])
     }
   }, [project])
 
@@ -725,10 +1193,10 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
         <div className="flex h-20 items-center justify-between px-8">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-red-500 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">♥</span>
+              <div className="flex items-center gap-2">
+                <img src="/munus-logo.jpg" alt="Munus Logo" className="h-8 w-auto" />
+                <span className="text-2xl font-bold text-gray-900 font-serif">Munus Hub</span>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 font-serif">Munus Hub</h1>
             </div>
             <Link href="/projects" className="flex items-center gap-2 text-gray-600 hover:text-primary cursor-pointer">
               <ArrowLeft className="h-4 w-4" />

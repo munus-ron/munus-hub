@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar, Users, Bell, FolderOpen, Clock, TrendingUp, Menu, LogOut } from "lucide-react"
+import { Calendar, Users, Bell, FolderOpen, Clock, TrendingUp, Menu, LogOut, Settings } from "lucide-react"
 import { LoginModal } from "@/components/login-modal"
+import { AdminOnly } from "@/components/admin-only"
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -18,6 +19,7 @@ export default function Dashboard() {
   const [showManageUsersModal, setShowManageUsersModal] = useState(false)
   const [showUserForm, setShowUserForm] = useState(false)
   const [editingUser, setEditingUser] = useState(null)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
@@ -67,6 +69,7 @@ export default function Dashboard() {
   ])
 
   const [recentAnnouncements, setRecentAnnouncements] = useState([])
+  const [recentProjects, setRecentProjects] = useState([])
   const [dashboardStats, setDashboardStats] = useState({
     activeProjects: 0,
     teamMembers: 0,
@@ -137,9 +140,75 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
+    const loadRecentProjects = () => {
+      try {
+        const staticProjects = [
+          { id: 1, title: "Website Redesign", status: "In Progress", department: "Marketing Team" },
+          { id: 2, title: "Mobile App Launch", status: "Active", department: "Development Team" },
+          { id: 3, title: "Q4 Planning Initiative", status: "Planning", department: "Strategy Team" },
+          { id: 4, title: "Customer Support Portal", status: "In Progress", department: "Support Team" },
+          { id: 5, title: "Data Analytics Dashboard", status: "Active", department: "Analytics Team" },
+          { id: 6, title: "Security Audit & Compliance", status: "Planning", department: "Security Team" },
+        ]
+
+        let projects = [...staticProjects]
+
+        staticProjects.forEach((project) => {
+          const storedProject = localStorage.getItem(`project_${project.id}`)
+          if (storedProject) {
+            try {
+              const updatedProject = JSON.parse(storedProject)
+              const projectIndex = projects.findIndex((p) => p.id === project.id)
+              if (projectIndex !== -1) {
+                projects[projectIndex] = {
+                  ...projects[projectIndex],
+                  title: updatedProject.title || project.title,
+                  status: updatedProject.status || project.status,
+                  progress: updatedProject.progress,
+                  description: updatedProject.description,
+                }
+              }
+            } catch (error) {
+              console.error(`Error parsing project ${project.id}:`, error)
+            }
+          }
+        })
+
+        projects = projects.filter((project) => {
+          const deletionMarker = localStorage.getItem(`project_${project.id}_deleted`)
+          return !deletionMarker
+        })
+
+        const sortedProjects = projects.slice(0, 3)
+        setRecentProjects(sortedProjects)
+      } catch (error) {
+        console.error("Error loading recent projects:", error)
+        setRecentProjects([
+          { id: 1, title: "Website Redesign", status: "In Progress", department: "Marketing Team" },
+          { id: 2, title: "Mobile App Launch", status: "Active", department: "Development Team" },
+          { id: 3, title: "Q4 Planning Initiative", status: "Planning", department: "Strategy Team" },
+        ])
+      }
+    }
+
+    loadRecentProjects()
+
+    const handleStorageChange = (e) => {
+      if (e.key?.startsWith("project_") && !e.key?.endsWith("_timeline") && !e.key?.endsWith("_team")) {
+        loadRecentProjects()
+      }
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+    }
+  }, [])
+
+  useEffect(() => {
     const calculateStats = () => {
       try {
-        // Calculate active projects (status not "Complete")
         const storedProjects = localStorage.getItem("projects")
         let activeProjectsCount = 0
         if (storedProjects) {
@@ -148,7 +217,6 @@ export default function Dashboard() {
             (project) => project.status && project.status !== "Complete" && project.status !== "Completed",
           ).length
         } else {
-          // Fallback to static projects if no localStorage data
           const staticProjects = [
             { id: 1, title: "Website Redesign", status: "In Progress" },
             { id: 2, title: "Mobile App Launch", status: "Active" },
@@ -162,13 +230,11 @@ export default function Dashboard() {
           ).length
         }
 
-        // Calculate team members from founders, advisors, consultants
         const teamData = loadTeamDataFromStorage()
         const totalTeamMembers = teamData.founders.length + teamData.advisors.length + teamData.consultants.length
 
-        // Calculate upcoming events from today onwards
         const now = new Date()
-        now.setHours(0, 0, 0, 0) // Start from beginning of today
+        now.setHours(0, 0, 0, 0)
 
         const storedEvents = localStorage.getItem("calendar_events")
         let upcomingEventsCount = 0
@@ -176,15 +242,13 @@ export default function Dashboard() {
           const events = JSON.parse(storedEvents)
           upcomingEventsCount = events.filter((event) => {
             const eventDate = new Date(event.date || event.start)
-            eventDate.setHours(0, 0, 0, 0) // Normalize to start of day for comparison
-            return eventDate >= now // Events from today onwards
+            eventDate.setHours(0, 0, 0, 0)
+            return eventDate >= now
           }).length
         } else {
-          // Fallback count for static events from today onwards
-          upcomingEventsCount = 3 // Static fallback
+          upcomingEventsCount = 3
         }
 
-        // Calculate pending tasks/milestones due this week
         let pendingTasksCount = 0
         if (storedProjects) {
           const projects = JSON.parse(storedProjects)
@@ -208,8 +272,7 @@ export default function Dashboard() {
             }
           })
         } else {
-          // Fallback count for static tasks
-          pendingTasksCount = 8 // Static fallback
+          pendingTasksCount = 8
         }
 
         setDashboardStats({
@@ -220,7 +283,6 @@ export default function Dashboard() {
         })
       } catch (error) {
         console.error("Error calculating dashboard stats:", error)
-        // Fallback to default values on error
         setDashboardStats({
           activeProjects: 6,
           teamMembers: 15,
@@ -232,7 +294,6 @@ export default function Dashboard() {
 
     calculateStats()
 
-    // Listen for storage changes to update stats
     const handleStorageChange = (e) => {
       if (
         e.key === "projects" ||
@@ -256,7 +317,6 @@ export default function Dashboard() {
       const now = new Date()
 
       try {
-        // Get recent announcements (last 7 days)
         const storedAnnouncements = localStorage.getItem("announcements")
         if (storedAnnouncements) {
           const announcements = JSON.parse(storedAnnouncements)
@@ -279,7 +339,6 @@ export default function Dashboard() {
           })
         }
 
-        // Get upcoming events (next 7 days)
         const storedEvents = localStorage.getItem("calendar_events")
         if (storedEvents) {
           const events = JSON.parse(storedEvents)
@@ -302,7 +361,6 @@ export default function Dashboard() {
           })
         }
 
-        // Get project milestones due soon (next 7 days)
         const storedProjects = localStorage.getItem("projects")
         if (storedProjects) {
           const projects = JSON.parse(storedProjects)
@@ -331,10 +389,8 @@ export default function Dashboard() {
           })
         }
 
-        // Sort notifications by time (newest first)
         notificationsList.sort((a, b) => new Date(b.time) - new Date(a.time))
 
-        // Limit to 10 most recent notifications
         const limitedNotifications = notificationsList.slice(0, 10)
 
         setNotifications(limitedNotifications)
@@ -348,7 +404,6 @@ export default function Dashboard() {
 
     generateNotifications()
 
-    // Listen for storage changes to update notifications
     const handleStorageChange = (e) => {
       if (
         e.key === "announcements" ||
@@ -485,9 +540,24 @@ export default function Dashboard() {
     router.push(`/announcements?highlight=${announcementId}`)
   }
 
-  const handleProjectClick = (projectName) => {
-    // Navigate to projects page and then to specific project
-    router.push(`/projects`)
+  const handleProjectClickById = (projectId) => {
+    router.push(`/projects/${projectId}`)
+  }
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "In Progress":
+        return "bg-chart-3 text-white"
+      case "Active":
+        return "bg-primary text-white"
+      case "Planning":
+        return "border-gray-300 text-gray-700"
+      case "Complete":
+      case "Completed":
+        return "bg-green-500 text-white"
+      default:
+        return "border-gray-300 text-gray-700"
+    }
   }
 
   if (!isAuthenticated()) {
@@ -518,12 +588,12 @@ export default function Dashboard() {
     <div className="min-h-screen bg-green-100">
       {/* Header */}
       <header className="border-b border-gray-100 bg-white">
-        <div className="flex h-20 items-center justify-between px-8">
+        <div className="flex h-20 items-center justify-between px-4 md:px-8">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <img src="/munus-logo.jpg" alt="Munus Logo" className="h-8 w-auto" />
-                <span className="text-3xl font-bold text-gray-900 font-serif">Munus Hub</span>
+                <span className="text-2xl md:text-3xl font-bold text-gray-900 font-serif">Munus Hub</span>
               </div>
             </div>
 
@@ -568,13 +638,30 @@ export default function Dashboard() {
                   Team
                 </Button>
               </Link>
+              <AdminOnly>
+                <Link href="/admin">
+                  <Button
+                    variant="ghost"
+                    className="gap-2 text-gray-700 hover:bg-gray-50 hover:text-primary h-10 px-4 font-medium"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Admin
+                  </Button>
+                </Link>
+              </AdminOnly>
             </nav>
           </div>
 
-          <div className="flex items-center gap-6">
-            <Button variant="ghost" size="sm" className="md:hidden text-gray-600 hover:text-primary">
+          <div className="flex items-center gap-3 md:gap-6">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden text-gray-600 hover:text-primary"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+            >
               <Menu className="h-5 w-5" />
             </Button>
+
             <Popover open={showNotifications} onOpenChange={setShowNotifications}>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="sm" className="text-gray-600 hover:text-primary relative">
@@ -634,7 +721,7 @@ export default function Dashboard() {
               </PopoverContent>
             </Popover>
             <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10">
+              <Avatar className="h-8 w-8 md:h-10 md:w-10">
                 <AvatarImage src={user?.avatar || "/placeholder.svg"} />
                 <AvatarFallback>
                   {user?.name
@@ -653,83 +740,147 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {showMobileMenu && (
+          <div className="md:hidden border-t border-gray-100 bg-white">
+            <nav className="px-4 py-4 space-y-2">
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 bg-primary text-white hover:bg-primary/90 h-12 px-4 font-medium"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                <TrendingUp className="h-5 w-5" />
+                Dashboard
+              </Button>
+              <Link href="/projects" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <FolderOpen className="h-5 w-5" />
+                  Projects
+                </Button>
+              </Link>
+              <Link href="/calendar" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <Calendar className="h-5 w-5" />
+                  Calendar
+                </Button>
+              </Link>
+              <Link href="/announcements" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <Bell className="h-5 w-5" />
+                  Announcements
+                </Button>
+              </Link>
+              <Link href="/team" onClick={() => setShowMobileMenu(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                >
+                  <Users className="h-5 w-5" />
+                  Team
+                </Button>
+              </Link>
+              <AdminOnly>
+                <Link href="/admin" onClick={() => setShowMobileMenu(false)}>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
+                  >
+                    <Settings className="h-5 w-5" />
+                    Admin
+                  </Button>
+                </Link>
+              </AdminOnly>
+            </nav>
+          </div>
+        )}
       </header>
 
       {/* Main Content */}
-      <main className="p-8">
-        <div className="max-w-7xl mx-auto space-y-12">
+      <main className="p-4 md:p-8">
+        <div className="max-w-7xl mx-auto space-y-8 md:space-y-12">
           {/* Welcome Section */}
-          <div className="mb-12">
-            <h2 className="text-5xl font-bold text-gray-900 mb-4 font-serif">
+          <div className="mb-8 md:mb-12">
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 font-serif">
               Welcome back, {user?.name?.split(" ")[0]}!
             </h2>
-            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+            <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6 md:mb-8">
               Our Munus Hub brings together all your essential tools and information in one centralized location, making
               collaboration seamless and productivity effortless.
             </p>
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mb-12 md:mb-16">
             <Card className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <CardTitle className="text-base font-semibold text-gray-700">Active Projects</CardTitle>
+                <CardTitle className="text-base sm:text-sm font-semibold text-gray-700">Active Projects</CardTitle>
                 <FolderOpen className="h-5 w-5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900 mb-1">{dashboardStats.activeProjects}</div>
-                <p className="text-sm text-gray-500">Not completed</p>
+                <div className="text-3xl sm:text-2xl font-bold text-gray-900 mb-1">{dashboardStats.activeProjects}</div>
+                <p className="text-sm sm:text-xs text-gray-500">Not completed</p>
               </CardContent>
             </Card>
             <Card className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <CardTitle className="text-base font-semibold text-gray-700">Team Members</CardTitle>
+                <CardTitle className="text-base sm:text-sm font-semibold text-gray-700">Team Members</CardTitle>
                 <Users className="h-5 w-5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900 mb-1">{dashboardStats.teamMembers}</div>
-                <p className="text-sm text-gray-500">Founders, advisors & consultants</p>
+                <div className="text-3xl sm:text-2xl font-bold text-gray-900 mb-1">{dashboardStats.teamMembers}</div>
+                <p className="text-sm sm:text-xs text-gray-500">Founders, advisors & consultants</p>
               </CardContent>
             </Card>
             <Card className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <CardTitle className="text-base font-semibold text-gray-700">Upcoming Events</CardTitle>
+                <CardTitle className="text-base sm:text-sm font-semibold text-gray-700">Upcoming Events</CardTitle>
                 <Calendar className="h-5 w-5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900 mb-1">{dashboardStats.upcomingEvents}</div>
-                <p className="text-sm text-gray-500">From today onwards</p>
+                <div className="text-3xl sm:text-2xl font-bold text-gray-900 mb-1">{dashboardStats.upcomingEvents}</div>
+                <p className="text-sm sm:text-xs text-gray-500">From today onwards</p>
               </CardContent>
             </Card>
             <Card className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <CardTitle className="text-base font-semibold text-gray-700">Pending Tasks</CardTitle>
+                <CardTitle className="text-base sm:text-sm font-semibold text-gray-700">Pending Tasks</CardTitle>
                 <Clock className="h-5 w-5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900 mb-1">{dashboardStats.pendingTasks}</div>
-                <p className="text-sm text-gray-500">Due this week</p>
+                <div className="text-3xl sm:text-2xl font-bold text-gray-900 mb-1">{dashboardStats.pendingTasks}</div>
+                <p className="text-sm sm:text-xs text-gray-500">Due this week</p>
               </CardContent>
             </Card>
           </div>
 
-          <div className="bg-green-100 rounded-3xl p-12 mb-16">
+          <div className="bg-green-100 rounded-3xl p-6 md:p-12 mb-12 md:mb-16">
             <div className="max-w-4xl mx-auto text-center">
-              <h3 className="text-4xl font-bold text-gray-900 mb-6 font-serif">Streamline Your Workflow</h3>
-              <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              <h3 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4 md:mb-6 font-serif">
+                Streamline Your Workflow
+              </h3>
+              <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6 md:mb-8">
                 Our Munus Hub brings together all your essential tools and information in one centralized location,
                 making collaboration seamless and productivity effortless.
               </p>
-              <div className="flex flex-wrap justify-center gap-4">
+              <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-4">
                 <Link href="/projects">
-                  <Button className="bg-primary hover:bg-primary/90 text-white px-8 py-3 text-lg">
+                  <Button className="bg-primary hover:bg-primary/90 text-white px-6 md:px-8 py-3 text-base md:text-lg w-full sm:w-auto">
                     Explore Projects
                   </Button>
                 </Link>
                 <Link href="/calendar">
                   <Button
                     variant="outline"
-                    className="border-gray-300 text-gray-700 hover:bg-white px-8 py-3 text-lg bg-transparent"
+                    className="border-gray-300 text-gray-700 hover:bg-white px-6 md:px-8 py-3 text-base md:text-lg bg-transparent w-full sm:w-auto"
                   >
                     View Calendar
                   </Button>
@@ -738,74 +889,75 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
             {/* Recent Projects */}
             <Card className="border-gray-100 shadow-sm">
               <CardHeader className="pb-6">
-                <CardTitle className="text-2xl font-semibold text-gray-900 font-serif">Recent Projects</CardTitle>
-                <CardDescription className="text-gray-600 text-base">
+                <CardTitle className="text-2xl lg:text-3xl font-semibold text-gray-900 font-serif">
+                  Recent Projects
+                </CardTitle>
+                <CardDescription className="text-gray-600 text-base lg:text-sm">
                   Latest project updates and milestones
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div
-                  className="flex items-center justify-between p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors cursor-pointer"
-                  onClick={() => handleProjectClick("Website Redesign")}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <FolderOpen className="h-6 w-6 text-primary" />
+                {recentProjects.length > 0 ? (
+                  recentProjects.map((project, index) => (
+                    <div
+                      key={project.id}
+                      className="flex items-center justify-between p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors cursor-pointer"
+                      onClick={() => handleProjectClickById(project.id)}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div
+                          className={`h-12 w-12 rounded-xl flex items-center justify-center ${
+                            index === 0 ? "bg-primary/10" : index === 1 ? "bg-secondary/10" : "bg-chart-4/10"
+                          }`}
+                        >
+                          <FolderOpen
+                            className={`h-6 w-6 ${
+                              index === 0 ? "text-primary" : index === 1 ? "text-secondary" : "text-chart-4"
+                            }`}
+                          />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900 text-lg lg:text-xl">{project.title}</h4>
+                          <p className="text-gray-600">{project.department}</p>
+                          {project.description && (
+                            <p className="text-sm lg:text-xs text-gray-500 mt-1">
+                              {project.description.length > 60
+                                ? `${project.description.substring(0, 60)}...`
+                                : project.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <Badge
+                        className={getStatusColor(project.status)}
+                        variant={project.status === "Planning" ? "outline" : "default"}
+                      >
+                        {project.status}
+                      </Badge>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900 text-lg">Website Redesign</h4>
-                      <p className="text-gray-600">Marketing Team</p>
-                    </div>
+                  ))
+                ) : (
+                  <div className="p-6 text-center text-gray-500">
+                    <FolderOpen className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>No recent projects</p>
                   </div>
-                  <Badge className="bg-chart-3 text-white">In Progress</Badge>
-                </div>
-                <div
-                  className="flex items-center justify-between p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors cursor-pointer"
-                  onClick={() => handleProjectClick("Mobile App Launch")}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-secondary/10 flex items-center justify-center">
-                      <FolderOpen className="h-6 w-6 text-secondary" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900 text-lg">Mobile App Launch</h4>
-                      <p className="text-gray-600">Development Team</p>
-                    </div>
-                  </div>
-                  <Badge className="bg-primary text-white">Active</Badge>
-                </div>
-                <div
-                  className="flex items-center justify-between p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors cursor-pointer"
-                  onClick={() => handleProjectClick("Q4 Planning")}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-chart-4/10 flex items-center justify-center">
-                      <FolderOpen className="h-6 w-6 text-chart-4" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900 text-lg mb-2">Q4 Planning</h4>
-                      <p className="text-gray-600 mb-3 leading-relaxed">
-                        Important dates and milestones to keep track of
-                      </p>
-                      <p className="text-sm text-gray-500">Strategy Team</p>
-                    </div>
-                  </div>
-                  <Badge variant="outline" className="border-gray-300 text-gray-700">
-                    Planning
-                  </Badge>
-                </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Recent Announcements */}
             <Card className="border-gray-100 shadow-sm">
               <CardHeader className="pb-6">
-                <CardTitle className="text-2xl font-semibold text-gray-900 font-serif">Recent Announcements</CardTitle>
-                <CardDescription className="text-gray-600 text-base">Latest company news and updates</CardDescription>
+                <CardTitle className="text-2xl lg:text-3xl font-semibold text-gray-900 font-serif">
+                  Recent Announcements
+                </CardTitle>
+                <CardDescription className="text-gray-600 text-base lg:text-sm">
+                  Latest company news and updates
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {recentAnnouncements.length > 0 ? (
@@ -826,13 +978,13 @@ export default function Dashboard() {
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 text-lg mb-2">{announcement.title}</h4>
+                          <h4 className="font-semibold text-gray-900 text-lg lg:text-xl mb-2">{announcement.title}</h4>
                           <p className="text-gray-600 mb-3 leading-relaxed">
                             {announcement.content.length > 80
                               ? `${announcement.content.substring(0, 80)}...`
                               : announcement.content}
                           </p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm lg:text-xs text-gray-500">
                             {announcement.author} • {getRelativeTime(announcement.date)}
                           </p>
                         </div>
@@ -851,38 +1003,38 @@ export default function Dashboard() {
 
           {/* Upcoming Events */}
           <Card className="border-gray-100 shadow-sm">
-            <CardHeader className="pb-8">
-              <CardTitle className="text-2xl font-semibold text-gray-900 font-serif">
+            <CardHeader className="pb-6 md:pb-8">
+              <CardTitle className="text-xl lg:text-2xl font-semibold text-gray-900 font-serif">
                 Upcoming Events & Deadlines
               </CardTitle>
-              <CardDescription className="text-gray-600 text-base">
+              <CardDescription className="text-gray-600 text-sm md:text-base">
                 Important dates and milestones to keep track of
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 <div className="p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
                   <div className="flex items-center gap-3 mb-4">
                     <Calendar className="h-5 w-5 text-primary" />
-                    <span className="text-sm font-semibold text-gray-700">Dec 15, 2024</span>
+                    <span className="text-sm md:text-base font-semibold text-gray-700">Dec 15, 2024</span>
                   </div>
-                  <h4 className="font-semibold text-gray-900 text-lg mb-2">All Hands Meeting</h4>
+                  <h4 className="font-semibold text-gray-900 text-lg lg:text-xl mb-2">All Hands Meeting</h4>
                   <p className="text-gray-600 leading-relaxed">Quarterly review and planning session</p>
                 </div>
                 <div className="p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
                   <div className="flex items-center gap-3 mb-4">
                     <Clock className="h-5 w-5 text-primary" />
-                    <span className="text-sm font-semibold text-gray-700">Dec 18, 2024</span>
+                    <span className="text-sm md:text-base font-semibold text-gray-700">Dec 18, 2024</span>
                   </div>
-                  <h4 className="font-semibold text-gray-900 text-lg mb-2">Project Deadline</h4>
+                  <h4 className="font-semibold text-gray-900 text-lg lg:text-xl mb-2">Project Deadline</h4>
                   <p className="text-gray-600 leading-relaxed">Website redesign final delivery</p>
                 </div>
                 <div className="p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
                   <div className="flex items-center gap-3 mb-4">
                     <Users className="h-5 w-5 text-primary" />
-                    <span className="text-sm font-semibold text-gray-700">Dec 20, 2024</span>
+                    <span className="text-sm md:text-base font-semibold text-gray-700">Dec 20, 2024</span>
                   </div>
-                  <h4 className="font-semibold text-gray-900 text-lg mb-2">Team Building Event</h4>
+                  <h4 className="font-semibold text-gray-900 text-lg lg:text-xl mb-2">Team Building Event</h4>
                   <p className="text-gray-600 leading-relaxed">Annual holiday celebration</p>
                 </div>
               </div>
