@@ -654,12 +654,16 @@ interface Project {
   documents: any[]
 }
 
-export default function ProjectDetailPage({ params }: { params: { id: string } }) {
+type ProjectPageClientProps = {
+  id: string;
+};
+
+export default function ProjectPageClient({ id }: ProjectPageClientProps) {
   const router = useRouter()
   const { isAuthenticated } = useAuth()
 
   const getProjectData = () => {
-    const projectId = Number.parseInt(params.id)
+    const projectId = Number.parseInt(id)
     const storedProject = localStorage.getItem(`project_${projectId}`)
 
     if (storedProject) {

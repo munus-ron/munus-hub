@@ -1,13 +1,7 @@
-import ProjectDetailPage from "./ProjectClientPage";
+import ProjectPageClient from "./ProjectClientPage";
 
-export async function generateStaticParams() {
-  return [{ id: "1" }, { id: "2" }];
-}
+export const dynamic = "force-dynamic";
 
-interface ProjectClientPageProps {
-  id: string;
-}
-
-export default function ProjectClientPage({ id }: ProjectClientPageProps) {
-  return <div>Project page for {id}</div>;
+export default function Page({ params }: { params: { id: string } }) {
+  return <ProjectPageClient id={params.id} />;
 }
