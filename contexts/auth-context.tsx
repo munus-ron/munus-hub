@@ -98,28 +98,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (foundUser) {
       if (foundUser.password) {
-        console.log("[v0] Comparing passwords - entered:", password, "stored:", foundUser.password)
+        // console.log("[v0] Comparing passwords - entered:", password, "stored:", foundUser.password)
         if (password === foundUser.password) {
-          console.log("[v0] Password match - login successful")
+          // console.log("[v0] Password match - login successful")
           setUser(foundUser)
           localStorage.setItem("intranet-user", JSON.stringify(foundUser))
           return true
         } else {
-          console.log("[v0] Password mismatch - login failed")
+          // console.log("[v0] Password mismatch - login failed")
         }
       } else {
-        console.log("[v0] No stored password, checking fallback passwords")
+        // console.log("[v0] No stored password, checking fallback passwords")
         if (password === "password" || password === "password123!") {
-          console.log("[v0] Fallback password match - login successful")
+          // console.log("[v0] Fallback password match - login successful")
           setUser(foundUser)
           localStorage.setItem("intranet-user", JSON.stringify(foundUser))
           return true
         } else {
-          console.log("[v0] Fallback password mismatch - login failed")
+          // console.log("[v0] Fallback password mismatch - login failed")
         }
       }
     } else {
-      console.log("[v0] User not found - login failed")
+      // console.log("[v0] User not found - login failed")
     }
 
     return false
