@@ -57,6 +57,22 @@ import { AdminOnly } from "@/components/admin-only"
 import { useAuth } from "@/contexts/auth-context"
 import { loadTeamDataFromStorage, saveTeamDataToStorage } from "@/lib/utils"
 
+interface TeamMember {
+  id: number
+  name: string
+  role: string
+  department: string
+  email: string
+  phone: string
+  location: string
+  avatar: string
+  equity?: string
+  foundedDate?: string
+  joinDate?: string
+  contractStart?: string
+  contractEnd?: string
+}
+
 const departments = [
   {
     name: "Executive",
@@ -376,22 +392,31 @@ export default function TeamPage() {
   const [editingPersonImage, setEditingPersonImage] = useState<any>(null)
   const [selectedPerson, setSelectedPerson] = useState<any>(null)
 
-  const [foundersState, setFounders] = useState(() => loadTeamDataFromStorage().founders)
-  const [advisorsState, setAdvisors] = useState(() => loadTeamDataFromStorage().advisors)
-  const [consultantsState, setConsultants] = useState(() => loadTeamDataFromStorage().consultants)
+  const [foundersState, setFounders] = useState(() => {
+    const data = loadTeamDataFromStorage()
+    return data.founders?.founders || []
+  })
+  const [advisorsState, setAdvisors] = useState(() => {
+    const data = loadTeamDataFromStorage()
+    return data.founders?.advisors || []
+  })
+  const [consultantsState, setConsultants] = useState(() => {
+    const data = loadTeamDataFromStorage()
+    return data.founders?.consultants || []
+  })
 
   const getDistinctLocationsCount = () => {
     const allLocations = [
-      ...foundersState.map((person) => person.location),
-      ...advisorsState.map((person) => person.location),
-      ...consultantsState.map((person) => person.location),
+      ...foundersState.map((person: TeamMember) => person.location),
+      ...advisorsState.map((person: TeamMember) => person.location),
+      ...consultantsState.map((person: TeamMember) => person.location),
     ]
 
     const uniqueLocations = new Set(allLocations)
     return uniqueLocations.size
   }
 
-  const filteredFounders = foundersState.filter((person) => {
+  const filteredFounders = foundersState.filter((person: TeamMember) => {
     const matchesSearch =
       person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       person.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -403,7 +428,7 @@ export default function TeamPage() {
     return matchesSearch && matchesLocation
   })
 
-  const filteredAdvisors = advisorsState.filter((person) => {
+  const filteredAdvisors = advisorsState.filter((person: TeamMember) => {
     const matchesSearch =
       person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       person.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -415,7 +440,7 @@ export default function TeamPage() {
     return matchesSearch && matchesLocation
   })
 
-  const filteredConsultants = consultantsState.filter((person) => {
+  const filteredConsultants = consultantsState.filter((person: TeamMember) => {
     const matchesSearch =
       person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       person.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -452,13 +477,10 @@ export default function TeamPage() {
       }
 
       // Save to localStorage for persistence
-      const updatedTeamData = {
-        founders:
-          newEmployee.category === "founder" ? [...foundersState, { ...newMember, equity: "0%" }] : foundersState,
-        advisors: newEmployee.category === "advisor" ? [...advisorsState, newMember] : advisorsState,
-        consultants: newEmployee.category === "consultant" ? [...consultantsState, newMember] : consultantsState,
-      }
-      saveTeamDataToStorage(updatedTeamData)
+      const updatedFounders = newEmployee.category === "founder" ? [...foundersState, { ...newMember, equity: "0%" }] : foundersState
+      const updatedAdvisors = newEmployee.category === "advisor" ? [...advisorsState, newMember] : advisorsState
+      const updatedConsultants = newEmployee.category === "consultant" ? [...consultantsState, newMember] : consultantsState
+      saveTeamDataToStorage(updatedFounders, updatedAdvisors, updatedConsultants)
 
       console.log(`[v0] Added new ${newEmployee.category}:`, newMember)
     }
@@ -510,19 +532,19 @@ export default function TeamPage() {
     console.log("Saving edited person:", editingPerson)
 
     if (editingPerson.category === "founder") {
-      const updatedFounders = foundersState.map((founder) =>
+      const updatedFounders = foundersState.map((founder: TeamMember) =>
         founder.id === editingPerson.id ? { ...founder, ...editingPerson } : founder,
       )
       setFounders(updatedFounders)
       saveTeamDataToStorage(updatedFounders, advisorsState, consultantsState)
     } else if (editingPerson.category === "advisor") {
-      const updatedAdvisors = advisorsState.map((advisor) =>
+      const updatedAdvisors = advisorsState.map((advisor: TeamMember) =>
         advisor.id === editingPerson.id ? { ...advisor, ...editingPerson } : advisor,
       )
       setAdvisors(updatedAdvisors)
       saveTeamDataToStorage(foundersState, updatedAdvisors, consultantsState)
     } else if (editingPerson.category === "consultant") {
-      const updatedConsultants = consultantsState.map((consultant) =>
+      const updatedConsultants = consultantsState.map((consultant: TeamMember) =>
         consultant.id === editingPerson.id ? { ...consultant, ...editingPerson } : consultant,
       )
       setConsultants(updatedConsultants)
@@ -540,15 +562,15 @@ export default function TeamPage() {
 
     // Remove from the appropriate array based on category
     if (deletingPerson.category === "founder") {
-      const updatedFounders = foundersState.filter((founder) => founder.id !== deletingPerson.id)
+      const updatedFounders = foundersState.filter((founder: TeamMember) => founder.id !== deletingPerson.id)
       setFounders(updatedFounders)
       saveTeamDataToStorage(updatedFounders, advisorsState, consultantsState)
     } else if (deletingPerson.category === "advisor") {
-      const updatedAdvisors = advisorsState.filter((advisor) => advisor.id !== deletingPerson.id)
+      const updatedAdvisors = advisorsState.filter((advisor: TeamMember) => advisor.id !== deletingPerson.id)
       setAdvisors(updatedAdvisors)
       saveTeamDataToStorage(foundersState, updatedAdvisors, consultantsState)
     } else if (deletingPerson.category === "consultant") {
-      const updatedConsultants = consultantsState.filter((consultant) => consultant.id !== deletingPerson.id)
+      const updatedConsultants = consultantsState.filter((consultant: TeamMember) => consultant.id !== deletingPerson.id)
       setConsultants(updatedConsultants)
       saveTeamDataToStorage(foundersState, advisorsState, updatedConsultants)
     }
@@ -564,19 +586,19 @@ export default function TeamPage() {
 
     // Update the avatar in the appropriate array based on category
     if (editingPersonImage.category === "founder") {
-      const updatedFounders = foundersState.map((founder) =>
+      const updatedFounders = foundersState.map((founder: TeamMember) =>
         founder.id === editingPersonImage.id ? { ...founder, avatar: editingPersonImage.avatar } : founder,
       )
       setFounders(updatedFounders)
       saveTeamDataToStorage(updatedFounders, advisorsState, consultantsState)
     } else if (editingPersonImage.category === "advisor") {
-      const updatedAdvisors = advisorsState.map((advisor) =>
+      const updatedAdvisors = advisorsState.map((advisor: TeamMember) =>
         advisor.id === editingPersonImage.id ? { ...advisor, avatar: editingPersonImage.avatar } : advisor,
       )
       setAdvisors(updatedAdvisors)
       saveTeamDataToStorage(foundersState, updatedAdvisors, consultantsState)
     } else if (editingPersonImage.category === "consultant") {
-      const updatedConsultants = consultantsState.map((consultant) =>
+      const updatedConsultants = consultantsState.map((consultant: TeamMember) =>
         consultant.id === editingPersonImage.id ? { ...consultant, avatar: editingPersonImage.avatar } : consultant,
       )
       setConsultants(updatedConsultants)
@@ -890,7 +912,7 @@ export default function TeamPage() {
 
             <TabsContent value="founders" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredFounders.map((founder) => (
+                {filteredFounders.map((founder: TeamMember) => (
                   <Card key={founder.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader>
                       <div className="flex items-start gap-4">
@@ -899,7 +921,7 @@ export default function TeamPage() {
                           <AvatarFallback className="text-lg">
                             {founder.name
                               .split(" ")
-                              .map((n) => n[0])
+                              .map((n: string) => n[0])
                               .join("")}
                           </AvatarFallback>
                         </Avatar>
@@ -947,7 +969,7 @@ export default function TeamPage() {
 
             <TabsContent value="advisors" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredAdvisors.map((advisor) => (
+                {filteredAdvisors.map((advisor: TeamMember) => (
                   <Card key={advisor.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader>
                       <div className="flex items-start gap-4">
@@ -956,7 +978,7 @@ export default function TeamPage() {
                           <AvatarFallback className="text-lg">
                             {advisor.name
                               .split(" ")
-                              .map((n) => n[0])
+                              .map((n: string) => n[0])
                               .join("")}
                           </AvatarFallback>
                         </Avatar>
@@ -1018,7 +1040,7 @@ export default function TeamPage() {
 
             <TabsContent value="consultants" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredConsultants.map((consultant) => (
+                {filteredConsultants.map((consultant: TeamMember) => (
                   <Card key={consultant.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader>
                       <div className="flex items-start gap-4">
