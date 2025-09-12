@@ -711,18 +711,9 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
   const router = useRouter()
   const { isAuthenticated } = useAuth()
 
-  const [view, setView] = useState<any>(null);
-
-  useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/projects/${id}`)
-      .then(res => res.json())
-      .then(data => setView(data));
-  }, [id]);
-
-  if (!view) return <p>Loading...</p>;
-
   const getProjectData = () => {
     const projectId = Number.parseInt(id)
+    useEffect(() => {
     const storedProject = localStorage.getItem(`project_${projectId}`)
 
     if (storedProject) {
@@ -739,6 +730,7 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
         // console.log("[v0] Error parsing stored project data:", error)
       }
     }
+    }, [id]);
 
     // Return static project data if available, otherwise return a default structure
     const staticProject = projectData[projectId as keyof typeof projectData]
