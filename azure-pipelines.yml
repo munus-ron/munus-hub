@@ -27,7 +27,8 @@ steps:
   - script: |
       npm ci --cache $(Pipeline.Workspace)/.npm --prefer-offline
       npm run build
-    displayName: 'Build React app'
+      npx next export
+    displayName: 'Build Next.js app'
 
   # Install AWS CLI
   - task: UsePythonVersion@0

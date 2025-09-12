@@ -711,6 +711,16 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
   const router = useRouter()
   const { isAuthenticated } = useAuth()
 
+  const [view, setView] = useState<any>(null);
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/projects/${id}`)
+      .then(res => res.json())
+      .then(data => setView(data));
+  }, [id]);
+
+  if (!view) return <p>Loading...</p>;
+
   const getProjectData = () => {
     const projectId = Number.parseInt(id)
     const storedProject = localStorage.getItem(`project_${projectId}`)
