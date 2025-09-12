@@ -52,21 +52,173 @@ const getUpdatedProjects = () => {
   const staticProjects = [
     {
       id: 1,
-      title: "Website Redesign",
-      description: "Complete overhaul of company website with modern design and improved UX",
+      title: "Ligala",
+      description: "Functions as a virtual law office, providing lawyers with comprehensive tools to onboard and connect with clients, generate attorney-client​ work products, conduct legal research, and manage client billings, all through an online platform.​ The product also allows individuals to connect with and engage lawyers for their legal needs, selecting them based on preferred location or practice area, as well as offering options for pro-bono or paid services.",
       status: "In Progress",
-      progress: 65,
-      team: [
-        { name: "Sarah Miller", role: "Project Manager", avatar: "/team-sarah.png" },
-        { name: "John Davis", role: "UI/UX Designer", avatar: "/team-john.png" },
-        { name: "Mike Johnson", role: "Developer", avatar: "/team-mike.png" },
+      progress: 95,
+      "team": [
+          {
+              "name": "Lani Billena",
+              "role": "Team Member",
+              "avatar": "/team-member-1.png",
+              "email": "lani.billena@company.com"
+          },
+          {
+              "name": "Nessa Dumo",
+              "role": "Team Member",
+              "avatar": "/team-member-2.png",
+              "email": "nessa.dumo@company.com"
+          },
+          {
+              "name": "Bryan Kwan",
+              "role": "Team Member",
+              "avatar": "/team-member-3.png",
+              "email": "bryan.kwan@company.com"
+          },
+          {
+              "name": "Malike Bouaoud",
+              "role": "Team Member",
+              "avatar": "/team-member-1.png",
+              "email": "malike.bouaoud@company.com"
+          },
+          {
+              "name": "Ernie Guevara",
+              "role": "Team Member",
+              "avatar": "/team-member-2.png",
+              "email": "ernie.guevara@company.com"
+          },
+          {
+              "name": "Mary Joy Mamalateo-Jusay",
+              "role": "Team Member",
+              "avatar": "/team-member-3.png",
+              "email": "mary.joy.mamalateo-jusay@company.com"
+          },
+          {
+              "name": "Michelle Mendez-Palmares",
+              "role": "Team Member",
+              "avatar": "/team-member-1.png",
+              "email": "michelle.mendez-palmares@company.com"
+          },
+          {
+              "name": "Studio After Six",
+              "role": "Team Member",
+              "avatar": "/team-member-2.png",
+              "email": "studio.after.six@company.com"
+          },
+          {
+              "name": "John Carlo Velasquez",
+              "role": "Team Member",
+              "avatar": "/team-member-3.png",
+              "email": "john.carlo.velasquez@company.com"
+          },
+          {
+              "name": "Roland Rei Espeleta",
+              "role": "Team Member",
+              "avatar": "/team-member-1.png",
+              "email": "roland.rei.espeleta@company.com"
+          },
+          {
+              "name": "Jelony Sobremisana",
+              "role": "Team Member",
+              "avatar": "/team-member-2.png",
+              "email": "jelony.sobremisana@company.com"
+          },
+          {
+              "name": "Juan David Aristizabal",
+              "role": "Team Member",
+              "avatar": "/team-member-3.png",
+              "email": "juan.david.aristizabal@company.com"
+          }
       ],
-      department: "Marketing",
-      startDate: "2024-01-15",
-      endDate: "2024-03-30",
-      priority: "High",
-      budget: "$45,000",
-      spent: "$29,250",
+        "department": "Technology",
+      "startDate": "2024-05-01",
+      "endDate": "2025-10-01",
+      "priority": "High",
+      "budget": "$120,000",
+      "spent": "$54,000",
+      "milestones": [
+        {
+            "name": "Architecture Design",
+            "status": "completed",
+            "dueDate": "2024-10-01",
+            "startDate": "2024-09-15",
+            "endDate": "2024-09-30"
+        },
+        {
+            "name": "Core Features Development",
+            "status": "in-progress",
+            "dueDate": "2024-12-15",
+            "startDate": "2024-10-01",
+            "endDate": "2024-12-14"
+        },
+        {
+            "name": "Testing & Bug Fixes",
+            "status": "pending",
+            "dueDate": "2025-01-31",
+            "startDate": "2024-12-15",
+            "endDate": "2025-01-30"
+        },
+        {
+            "name": "App Store Submission",
+            "status": "pending",
+            "dueDate": "2025-02-28",
+            "startDate": "2025-02-01",
+            "endDate": "2025-02-28"
+        }
+    ],
+    "recentActivity": [
+        {
+            "user": "David Park",
+            "action": "completed user authentication module",
+            "time": "3 hours ago"
+        },
+        {
+            "user": "Lisa Wong",
+            "action": "implemented push notifications",
+            "time": "1 day ago"
+        },
+        {
+            "user": "Emily Johnson",
+            "action": "reviewed app store guidelines",
+            "time": "2 days ago"
+        }
+    ],
+    "functionalities": [
+        "Cross-platform mobile application",
+        "User authentication and profiles",
+        "Real-time notifications",
+        "Offline data synchronization"
+    ],
+    "features": [
+        "Biometric login support",
+        "Dark mode interface",
+        "In-app messaging system",
+        "Social media integration"
+    ],
+    "documents": [
+        {
+            "id": 1,
+            "name": "Mobile App Specifications.pdf",
+            "type": "PDF",
+            "size": "3.2 MB",
+            "uploadedBy": "Emily Johnson",
+            "uploadedDate": "2024-09-20",
+            "category": "Requirements",
+            "sharepointUrl": "https: //munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Mobile/App%20Specifications.pdf"
+        },
+        {
+            "id": 2,
+            "name": "UI Design Guidelines.sketch",
+            "type": "Sketch",
+            "size": "8.7 MB",
+            "uploadedBy": "David Park",
+            "uploadedDate": "2024-10-05",
+            "category": "Design",
+            "sharepointUrl": "https: //munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Mobile/UI%20Guidelines.sketch"
+        }
+    ],
+    "teamCount": 12,
+    "teamMembers": "Lani Billena, Nessa Dumo, Bryan Kwan, Malike Bouaoud, Ernie Guevara, Mary Joy Mamalateo-Jusay, Michelle Mendez-Palmares, Studio After Six, John Carlo Velasquez, Roland Rei Espeleta, Jelony Sobremisana, Juan David Aristizabal"
     },
     {
       id: 2,
@@ -428,7 +580,7 @@ export default function ProjectsPage() {
 
   if (!isAuthenticated()) {
     return (
-      <div className="min-h-screen bg-green-100 flex items-center justify-center">
+      <div className="min-h-screen bg-green-50 flex items-center justify-center">
         <div className="max-w-md w-full mx-4">
           <Card className="border-gray-100 shadow-lg">
             <CardHeader className="text-center pb-6">
@@ -667,7 +819,7 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-green-50">
       <header className="border-b border-gray-100 bg-white">
         <div className="flex h-20 items-center justify-between px-8">
           <div className="flex items-center gap-8">

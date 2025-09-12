@@ -57,100 +57,173 @@ import { loadTeamDataFromStorage } from "@/lib/utils"
 const projectData = {
   1: {
     id: 1,
-    title: "Website Redesign",
-    description:
-      "Complete overhaul of company website with modern design and improved user experience. This project aims to enhance our online presence, improve conversion rates, and provide a better user experience for our customers.",
-    status: "In Progress",
-    progress: 65,
-    team: [
-      { name: "Sarah Miller", role: "Project Manager", avatar: "/team-sarah.png", email: "sarah.miller@company.com" },
-      { name: "John Doe", role: "UI/UX Designer", avatar: "/team-john.png", email: "john.doe@company.com" },
-      { name: "Mike Chen", role: "Frontend Developer", avatar: "/team-mike.png", email: "mike.chen@company.com" },
+    "title": "Ligala",
+    "description": "Functions as a virtual law office, providing lawyers with comprehensive tools to onboard and connect with clients, generate attorney-client​ work products, conduct legal research, and manage client billings, all through an online platform.​ The product also allows individuals to connect with and engage lawyers for their legal needs, selecting them based on preferred location or practice area, as well as offering options for pro-bono or paid services.",
+    "status": "In Progress",
+    "progress": 95,
+    "team": [
+        {
+            "name": "Lani Billena",
+            "role": "Team Member",
+            "avatar": "/team-member-1.png",
+            "email": "lani.billena@company.com"
+        },
+        {
+            "name": "Nessa Dumo",
+            "role": "Team Member",
+            "avatar": "/team-member-2.png",
+            "email": "nessa.dumo@company.com"
+        },
+        {
+            "name": "Bryan Kwan",
+            "role": "Team Member",
+            "avatar": "/team-member-3.png",
+            "email": "bryan.kwan@company.com"
+        },
+        {
+            "name": "Malike Bouaoud",
+            "role": "Team Member",
+            "avatar": "/team-member-1.png",
+            "email": "malike.bouaoud@company.com"
+        },
+        {
+            "name": "Ernie Guevara",
+            "role": "Team Member",
+            "avatar": "/team-member-2.png",
+            "email": "ernie.guevara@company.com"
+        },
+        {
+            "name": "Mary Joy Mamalateo-Jusay",
+            "role": "Team Member",
+            "avatar": "/team-member-3.png",
+            "email": "mary.joy.mamalateo-jusay@company.com"
+        },
+        {
+            "name": "Michelle Mendez-Palmares",
+            "role": "Team Member",
+            "avatar": "/team-member-1.png",
+            "email": "michelle.mendez-palmares@company.com"
+        },
+        {
+            "name": "Studio After Six",
+            "role": "Team Member",
+            "avatar": "/team-member-2.png",
+            "email": "studio.after.six@company.com"
+        },
+        {
+            "name": "John Carlo Velasquez",
+            "role": "Team Member",
+            "avatar": "/team-member-3.png",
+            "email": "john.carlo.velasquez@company.com"
+        },
+        {
+            "name": "Roland Rei Espeleta",
+            "role": "Team Member",
+            "avatar": "/team-member-1.png",
+            "email": "roland.rei.espeleta@company.com"
+        },
+        {
+            "name": "Jelony Sobremisana",
+            "role": "Team Member",
+            "avatar": "/team-member-2.png",
+            "email": "jelony.sobremisana@company.com"
+        },
+        {
+            "name": "Juan David Aristizabal",
+            "role": "Team Member",
+            "avatar": "/team-member-3.png",
+            "email": "juan.david.aristizabal@company.com"
+        }
     ],
-    department: "Marketing",
-    startDate: "2024-10-01",
-    endDate: "2024-12-15",
-    priority: "High",
-    budget: "$45,000",
-    spent: "$29,250",
-    milestones: [
-      {
-        name: "Research & Discovery",
-        status: "completed",
-        dueDate: "2024-10-15",
-        startDate: "2024-10-01",
-        endDate: "2024-10-14",
-      },
-      {
-        name: "Design Mockups",
-        status: "completed",
-        dueDate: "2024-11-01",
-        startDate: "2024-10-15",
-        endDate: "2024-10-30",
-      },
-      {
-        name: "Frontend Development",
-        status: "in-progress",
-        dueDate: "2024-11-30",
-        startDate: "2024-11-01",
-        endDate: "2024-11-29",
-      },
-      {
-        name: "Content Migration",
-        status: "pending",
-        dueDate: "2024-12-10",
-        startDate: "2024-11-30",
-        endDate: "2024-12-09",
-      },
-      {
-        name: "Testing & Launch",
-        status: "pending",
-        dueDate: "2024-12-15",
-        startDate: "2024-12-10",
-        endDate: "2024-12-15",
-      },
+    "department": "Technology",
+    "startDate": "2024-05-01",
+    "endDate": "2025-10-01",
+    "priority": "High",
+    "budget": "$120,000",
+    "spent": "$54,000",
+    "milestones": [
+        {
+            "name": "Architecture Design",
+            "status": "completed",
+            "dueDate": "2024-10-01",
+            "startDate": "2024-09-15",
+            "endDate": "2024-09-30"
+        },
+        {
+            "name": "Core Features Development",
+            "status": "in-progress",
+            "dueDate": "2024-12-15",
+            "startDate": "2024-10-01",
+            "endDate": "2024-12-14"
+        },
+        {
+            "name": "Testing & Bug Fixes",
+            "status": "pending",
+            "dueDate": "2025-01-31",
+            "startDate": "2024-12-15",
+            "endDate": "2025-01-30"
+        },
+        {
+            "name": "App Store Submission",
+            "status": "pending",
+            "dueDate": "2025-02-28",
+            "startDate": "2025-02-01",
+            "endDate": "2025-02-28"
+        }
     ],
-    recentActivity: [
-      { user: "John Doe", action: "uploaded new design mockups", time: "2 hours ago" },
-      { user: "Mike Chen", action: "completed homepage component", time: "1 day ago" },
-      { user: "Sarah Miller", action: "updated project timeline", time: "2 days ago" },
+    "recentActivity": [
+        {
+            "user": "David Park",
+            "action": "completed user authentication module",
+            "time": "3 hours ago"
+        },
+        {
+            "user": "Lisa Wong",
+            "action": "implemented push notifications",
+            "time": "1 day ago"
+        },
+        {
+            "user": "Emily Johnson",
+            "action": "reviewed app store guidelines",
+            "time": "2 days ago"
+        }
     ],
-    functionalities: [
-      "Responsive web design across all devices",
-      "Modern UI/UX with improved navigation",
-      "SEO optimization and performance enhancements",
-      "Content management system integration",
+    "functionalities": [
+        "Cross-platform mobile application",
+        "User authentication and profiles",
+        "Real-time notifications",
+        "Offline data synchronization"
     ],
-    features: [
-      "Interactive product showcase",
-      "Customer testimonials section",
-      "Advanced search functionality",
-      "Multi-language support",
+    "features": [
+        "Biometric login support",
+        "Dark mode interface",
+        "In-app messaging system",
+        "Social media integration"
     ],
-    documents: [
-      {
-        id: 1,
-        name: "Project Requirements.pdf",
-        type: "PDF",
-        size: "2.4 MB",
-        uploadedBy: "Sarah Miller",
-        uploadedDate: "2024-01-15",
-        category: "Requirements",
-        sharepointUrl:
-          "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Requirements/Project%20Requirements.pdf",
-      },
-      {
-        id: 2,
-        name: "Design Mockups.figma",
-        type: "Figma",
-        size: "15.2 MB",
-        uploadedBy: "John Doe",
-        uploadedDate: "2024-01-18",
-        category: "Design",
-        sharepointUrl:
-          "https://munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Design/Design%20Mockups.figma",
-      },
+    "documents": [
+        {
+            "id": 1,
+            "name": "Mobile App Specifications.pdf",
+            "type": "PDF",
+            "size": "3.2 MB",
+            "uploadedBy": "Emily Johnson",
+            "uploadedDate": "2024-09-20",
+            "category": "Requirements",
+            "sharepointUrl": "https: //munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Mobile/App%20Specifications.pdf"
+        },
+        {
+            "id": 2,
+            "name": "UI Design Guidelines.sketch",
+            "type": "Sketch",
+            "size": "8.7 MB",
+            "uploadedBy": "David Park",
+            "uploadedDate": "2024-10-05",
+            "category": "Design",
+            "sharepointUrl": "https: //munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Mobile/UI%20Guidelines.sketch"
+        }
     ],
+    "teamCount": 12,
+    "teamMembers": "Lani Billena, Nessa Dumo, Bryan Kwan, Malike Bouaoud, Ernie Guevara, Mary Joy Mamalateo-Jusay, Michelle Mendez-Palmares, Studio After Six, John Carlo Velasquez, Roland Rei Espeleta, Jelony Sobremisana, Juan David Aristizabal"
   },
   2: {
     id: 2,
@@ -609,30 +682,6 @@ const projectData = {
     ],
   },
 }
-
-// const founders = [
-//   { id: 1, name: "David Chen", role: "Co-Founder & Chairman" },
-//   { id: 2, name: "Maria Rodriguez", role: "Co-Founder & CTO" },
-//   { id: 3, name: "James Wilson", role: "Co-Founder & COO" },
-// ]
-
-// const advisors = [
-//   { id: 1, name: "Dr. Patricia Kim", role: "Strategic Advisor - Go-to-Market Strategy" },
-//   { id: 2, name: "Robert Thompson", role: "Technology Advisor - AI & Machine Learning" },
-//   { id: 3, name: "Lisa Chang", role: "Financial Advisor - Finance & Investment" },
-// ]
-
-// const consultants = [
-//   { id: 1, name: "Michael Foster", role: "Management Consultant - Organizational Development" },
-//   { id: 2, name: "Jennifer Park", role: "Marketing Consultant - Digital Marketing Strategy" },
-//   { id: 3, name: "Alex Kumar", role: "Technology Consultant - Cloud Migration & DevOps" },
-// ]
-
-// const allOrganizationMembers = [
-//   ...founders.map((f) => ({ ...f, uniqueId: `founder-${f.id}`, category: "Founder" })),
-//   ...advisors.map((a) => ({ ...a, uniqueId: `advisor-${a.id}`, category: "Advisor" })),
-//   ...consultants.map((c) => ({ ...c, uniqueId: `consultant-${c.id}`, category: "Consultant" })),
-// ]
 
 interface Project {
   id: number
@@ -1191,7 +1240,7 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
   }
 
   return (
-    <div className="min-h-screen bg-green-100">
+    <div className="min-h-screen bg-green-50">
       {/* Header */}
       <header className="border-b border-gray-100 bg-white">
         <div className="flex h-20 items-center justify-between px-8">

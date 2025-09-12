@@ -124,234 +124,6 @@ const departments = [
   },
 ]
 
-const employees = [
-  {
-    id: 1,
-    name: "Sarah Miller",
-    role: "Chief Executive Officer",
-    department: "Executive",
-    email: "sarah.miller@company.com",
-    phone: "+1 (555) 123-4567",
-    location: "New York, NY",
-    avatar: "/ceo-headshot.png",
-    startDate: "2019-01-15",
-    status: "active",
-    skills: ["Leadership", "Strategy", "Business Development"],
-    reportsTo: null,
-    directReports: 8,
-  },
-  {
-    id: 2,
-    name: "John Doe",
-    role: "Senior UI/UX Designer",
-    department: "Design",
-    email: "john.doe@company.com",
-    phone: "+1 (555) 234-5678",
-    location: "San Francisco, CA",
-    avatar: "/team-john.png",
-    startDate: "2021-03-10",
-    status: "active",
-    skills: ["UI Design", "UX Research", "Prototyping", "Figma"],
-    reportsTo: "Jennifer Lee",
-    directReports: 2,
-  },
-  {
-    id: 3,
-    name: "Mike Chen",
-    role: "Frontend Developer",
-    department: "Development",
-    email: "mike.chen@company.com",
-    phone: "+1 (555) 345-6789",
-    location: "Austin, TX",
-    avatar: "/team-mike.png",
-    startDate: "2020-07-22",
-    status: "active",
-    skills: ["React", "TypeScript", "Next.js", "Tailwind CSS"],
-    reportsTo: "Alex Johnson",
-    directReports: 0,
-  },
-  {
-    id: 4,
-    name: "Jennifer Lee",
-    role: "Marketing Director",
-    department: "Marketing",
-    email: "jennifer.lee@company.com",
-    phone: "+1 (555) 456-7890",
-    location: "Los Angeles, CA",
-    avatar: "/team-member-1.png",
-    startDate: "2020-02-14",
-    status: "active",
-    skills: ["Digital Marketing", "Content Strategy", "SEO", "Analytics"],
-    reportsTo: "Sarah Miller",
-    directReports: 7,
-  },
-  {
-    id: 5,
-    name: "Alex Johnson",
-    role: "Head of Engineering",
-    department: "Development",
-    email: "alex.johnson@company.com",
-    phone: "+1 (555) 567-8901",
-    location: "Seattle, WA",
-    avatar: "/team-member-2.png",
-    startDate: "2019-08-05",
-    status: "active",
-    skills: ["Full Stack Development", "System Architecture", "Team Leadership"],
-    reportsTo: "Sarah Miller",
-    directReports: 11,
-  },
-  {
-    id: 6,
-    name: "Lisa Wang",
-    role: "Customer Success Manager",
-    department: "Customer Success",
-    email: "lisa.wang@company.com",
-    phone: "+1 (555) 678-9012",
-    location: "Chicago, IL",
-    avatar: "/team-member-3.png",
-    startDate: "2021-11-08",
-    status: "active",
-    skills: ["Customer Relations", "Account Management", "Data Analysis"],
-    reportsTo: "Sarah Miller",
-    directReports: 8,
-  },
-  {
-    id: 7,
-    name: "Robert Johnson",
-    role: "HR Director",
-    department: "HR & Operations",
-    email: "robert.johnson@company.com",
-    phone: "+1 (555) 789-0123",
-    location: "New York, NY",
-    avatar: "/placeholder-wb2g6.png",
-    startDate: "2018-05-20",
-    status: "active",
-    skills: ["Human Resources", "Recruitment", "Employee Relations"],
-    reportsTo: "Sarah Miller",
-    directReports: 4,
-  },
-  {
-    id: 8,
-    name: "Kevin Park",
-    role: "Data Science Lead",
-    department: "Data Science",
-    email: "kevin.park@company.com",
-    phone: "+1 (555) 890-1234",
-    location: "Boston, MA",
-    avatar: "/professional-headshot.png",
-    startDate: "2020-09-12",
-    status: "active",
-    skills: ["Machine Learning", "Python", "SQL", "Data Visualization"],
-    reportsTo: "Sarah Miller",
-    directReports: 3,
-  },
-]
-
-const founders = [
-  {
-    id: 1,
-    name: "David Chen",
-    role: "Co-Founder & Chairman",
-    department: "Executive",
-    email: "david.chen@company.com",
-    phone: "+1 (555) 111-2222",
-    location: "San Francisco, CA",
-    avatar: "/professional-headshot.png",
-    equity: "35%",
-    skills: ["Entrepreneurship", "Product Vision", "Fundraising", "Strategic Planning"],
-  },
-  {
-    id: 2,
-    name: "Maria Rodriguez",
-    role: "Co-Founder & CTO",
-    department: "Technology",
-    email: "maria.rodriguez@company.com",
-    phone: "+1 (555) 333-4444",
-    location: "Austin, TX",
-    avatar: "/team-member-1.png",
-    equity: "30%",
-    skills: ["Software Architecture", "AI/ML", "Team Building", "Innovation"],
-  },
-  {
-    id: 3,
-    name: "James Wilson",
-    role: "Co-Founder & COO",
-    department: "Operations",
-    email: "james.wilson@company.com",
-    phone: "+1 (555) 555-6666",
-    location: "New York, NY",
-    avatar: "/team-member-2.png",
-    equity: "25%",
-    skills: ["Operations", "Business Development", "Finance", "Scaling"],
-  },
-]
-
-const advisors = [
-  {
-    id: 1,
-    name: "Dr. Patricia Kim",
-    role: "Strategic Advisor - Go-to-Market Strategy",
-    department: "Advisory Board",
-    email: "patricia.kim@advisor.com",
-    phone: "+1 (555) 777-8888",
-    location: "Boston, MA",
-    avatar: "/team-member-3.png",
-  },
-  {
-    id: 2,
-    name: "Robert Thompson",
-    role: "Technology Advisor - AI & Machine Learning",
-    department: "Advisory Board",
-    email: "robert.thompson@advisor.com",
-    phone: "+1 (555) 999-0000",
-    location: "Seattle, WA",
-    avatar: "/team-john.png",
-  },
-  {
-    id: 3,
-    name: "Lisa Chang",
-    role: "Financial Advisor - Finance & Investment",
-    department: "Advisory Board",
-    email: "lisa.chang@advisor.com",
-    phone: "+1 (555) 222-3333",
-    location: "San Francisco, CA",
-    avatar: "/placeholder-wb2g6.png",
-  },
-]
-
-const consultants = [
-  {
-    id: 1,
-    name: "Michael Foster",
-    role: "Management Consultant - Organizational Development",
-    department: "External Consulting",
-    email: "michael.foster@consulting.com",
-    phone: "+1 (555) 444-5555",
-    location: "Chicago, IL",
-    avatar: "/team-mike.png",
-  },
-  {
-    id: 2,
-    name: "Jennifer Park",
-    role: "Marketing Consultant - Digital Marketing Strategy",
-    department: "External Consulting",
-    email: "jennifer.park@consulting.com",
-    phone: "+1 (555) 666-7777",
-    location: "Los Angeles, CA",
-    avatar: "/ceo-headshot.png",
-  },
-  {
-    id: 3,
-    name: "Alex Kumar",
-    role: "Technology Consultant - Cloud Migration & DevOps",
-    department: "External Consulting",
-    email: "alex.kumar@consulting.com",
-    phone: "+1 (555) 888-9999",
-    location: "Austin, TX",
-    avatar: "/professional-headshot.png",
-  },
-]
-
 function getDepartmentColor(department: string) {
   const dept = departments.find((d) => d.name === department)
   return dept?.color || "bg-muted text-muted-foreground"
@@ -394,15 +166,15 @@ export default function TeamPage() {
 
   const [foundersState, setFounders] = useState(() => {
     const data = loadTeamDataFromStorage()
-    return data.founders?.founders || []
+    return data.founders || []
   })
   const [advisorsState, setAdvisors] = useState(() => {
     const data = loadTeamDataFromStorage()
-    return data.founders?.advisors || []
+    return data.advisors || []
   })
   const [consultantsState, setConsultants] = useState(() => {
     const data = loadTeamDataFromStorage()
-    return data.founders?.consultants || []
+    return data.consultants || []
   })
 
   const getDistinctLocationsCount = () => {
@@ -659,7 +431,7 @@ export default function TeamPage() {
   }
 
   return (
-    <div className="min-h-screen bg-green-100">
+    <div className="min-h-screen bg-green-50">
       {/* Header */}
       <header className="border-b border-gray-100 bg-white">
         <div className="flex h-20 items-center justify-between px-8">
