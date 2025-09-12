@@ -238,7 +238,8 @@ export function loadTeamDataFromStorage() {
         "location": "BGC, Taguig, Philippines",
         "foundedDate": "2018-01-01",
         "equity": "35%",
-        "category": "founder"
+        "category": "founder",
+        "avatar": "/minette.png"
     },
     {
         "id": 2,
@@ -250,7 +251,8 @@ export function loadTeamDataFromStorage() {
         "location": "Edmonton, AB. Canada",
         "foundedDate": "2018-01-01",
         "equity": "30%",
-        "category": "founder"
+        "category": "founder",
+        "avatar": "/reda.png"
     },
     {
         "id": 3,
@@ -262,7 +264,8 @@ export function loadTeamDataFromStorage() {
         "location": "Quezon City, Philippines",
         "foundedDate": "2018-01-01",
         "equity": "25%",
-        "category": "founder"
+        "category": "founder",
+        "avatar": "/gil.png"
     }
     ],
     advisors: [
@@ -275,7 +278,8 @@ export function loadTeamDataFromStorage() {
         "phone": "+63 (917) 886-1661",
         "location": "Makati City, Philippines",
         "joinDate": "2019-06-15",
-        "category": "advisor"
+        "category": "advisor",
+        "avatar": "/ernie.png"
     },
     {
         "id": 2,
@@ -286,7 +290,8 @@ export function loadTeamDataFromStorage() {
         "phone": "+63 (917) 577-1414",
         "location": "Quezon City, Philippines",
         "joinDate": "2020-02-10",
-        "category": "advisor"
+        "category": "advisor",
+        "avatar": "/joy.png"
     },
     {
         "id": 3,
@@ -297,7 +302,8 @@ export function loadTeamDataFromStorage() {
         "phone": "+63 (917) 626-2231",
         "location": "Cebu City, Philippines",
         "joinDate": "2019-11-20",
-        "category": "advisor"
+        "category": "advisor",
+        "avatar": "/mic.png"
     },
     {
         "id": 1757475791874,
@@ -307,6 +313,7 @@ export function loadTeamDataFromStorage() {
         "email": "lani.billena@mymunus.com",
         "phone": "+65 (818) 04628",
         "location": "Singapore City, Singapore",
+        "avatar": "/lani.png"
     },
     {
         "id": 1757475881098,
@@ -316,6 +323,7 @@ export function loadTeamDataFromStorage() {
         "email": "malike.bouaoud@mymunus.com",
         "phone": "",
         "location": "Toronto, ON, Canada",
+        "avatar": "/malike.png"
     },
     {
         "id": 1757475949355,
@@ -325,6 +333,7 @@ export function loadTeamDataFromStorage() {
         "email": "bryan.kwan@mymunus.com",
         "phone": "+1 (780) 953-6464",
         "location": "Edmonton, AB, Canada",
+        "avatar": "/bryan.png"
     },
     {
         "id": 1757476026377,
@@ -334,6 +343,7 @@ export function loadTeamDataFromStorage() {
         "email": "lydia.zheng@mymunus.com",
         "phone": "+1 (587) 433-5767",
         "location": "Edmonton, AB, Canada",
+        "avatar": "/lydia.png"
     },
     {
         "id": 1757476101975,
@@ -343,6 +353,7 @@ export function loadTeamDataFromStorage() {
         "email": "nessa.dumo@mymunus.com",
         "phone": "+1 (780) 238-0916",
         "location": "Vancouver, BC, Canada",
+        "avatar": "/nessa.png"
     },
     {
         "id": 1757476170807,
@@ -352,6 +363,7 @@ export function loadTeamDataFromStorage() {
         "email": "goldie.ricamara@mymunus.com",
         "phone": "+1 (780) 298-1707",
         "location": "Vancouver, BC, Canada",
+        "avatar": "/goldie.png"
     },
     {
         "id": 1757476265551,
@@ -361,6 +373,7 @@ export function loadTeamDataFromStorage() {
         "email": "nick.gorse@mymunus.com",
         "phone": "+1 (778) 772-4806",
         "location": "Vancouver, BC, Canada",
+        "avatar": "/nick.png"
     },
     {
         "id": 1757476360766,
@@ -370,6 +383,7 @@ export function loadTeamDataFromStorage() {
         "email": "sa6@mymunus.com",
         "phone": "+63 (908) 879-0518",
         "location": "Quezon City, Philippines",
+        "avatar": "/sas.png"
     },
     {
         "id": 1757476482728,
@@ -379,21 +393,23 @@ export function loadTeamDataFromStorage() {
         "email": "energyte@bpla.law",
         "phone": "",
         "location": "Makati City, Philippines",
-        "category": "advisor"
+        "category": "advisor",
+        "avatar": "/blpa.png"
     }
     ],
     consultants: [
       {
         "id": 1,
         "name": "John Carlo Velasquez",
-        "role": "Developer",
+        "role": "Full-stack Developer / Cloud Engineer / DevOps Engineer",
         "department": "Consultant",
         "email": "johncarlo.velasquez@mymunus.com",
         "phone": "+63 (977) 440-5218",
         "location": "Calamba, Laguna, Philippines",
         "contractStart": "2023-01-15",
         "contractEnd": "2024-01-15",
-        "category": "consultant"
+        "category": "consultant",
+        "avatar": "/jc.png"
       },
       {
           "id": 2,
@@ -405,7 +421,8 @@ export function loadTeamDataFromStorage() {
           "location": "Antipolo City, Philippines",
           "contractStart": "2023-06-01",
           "contractEnd": "2024-06-01",
-          "category": "consultant"
+          "category": "consultant",
+          "avatar": "/roland.png"
       },
       {
           "id": 3,
@@ -417,7 +434,8 @@ export function loadTeamDataFromStorage() {
           "location": "Taguig City, Philippines",
           "contractStart": "2023-03-10",
           "contractEnd": "2024-03-10",
-          "category": "consultant"
+          "category": "consultant",
+        "avatar": "/jelo.png"
       },
       {
           "id": 1757476920188,
@@ -429,7 +447,8 @@ export function loadTeamDataFromStorage() {
           "location": "Edmonton, AB, Canada",
           "contractStart": "2023-01-15",
           "contractEnd": "2024-01-15",
-          "category": "consultant"
+          "category": "consultant",
+        "avatar": "/juan.png"
       },
     ],
   }

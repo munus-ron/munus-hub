@@ -762,7 +762,7 @@ export default function TeamPage() {
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      <div className="bg-green-200 rounded-lg p-3 mb-3">
+                      <div className="bg-green-100 rounded-lg p-3 mb-3">
                         <h4 className="font-semibold text-sm text-gray-800 mb-1">Advisory Role</h4>
                         <p className="text-sm font-medium text-gray-700">{advisor.role}</p>
                       </div>
@@ -833,7 +833,7 @@ export default function TeamPage() {
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      <div className="bg-green-200 rounded-lg p-3 mb-3">
+                      <div className="bg-green-100 rounded-lg p-3 mb-3">
                         <h4 className="font-semibold text-sm text-gray-800 mb-1">Consulting Role</h4>
                         <p className="text-sm font-medium text-gray-700">{consultant.role}</p>
                       </div>
