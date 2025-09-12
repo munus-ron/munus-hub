@@ -677,7 +677,7 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
         // If no static data exists, return the stored project data
         return parsedProject
       } catch (error) {
-        console.log("[v0] Error parsing stored project data:", error)
+        // console.log("[v0] Error parsing stored project data:", error)
       }
     }
 
@@ -830,7 +830,7 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
       const fileInput = document.getElementById("file-upload") as HTMLInputElement
       if (fileInput) fileInput.value = ""
 
-      console.log("[v0] Documents uploaded successfully")
+      // console.log("[v0] Documents uploaded successfully")
     } catch (error) {
       console.error("[v0] Error uploading documents:", error)
     } finally {
@@ -840,7 +840,7 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
 
   const handleDeleteDocument = (documentId: number) => {
     setDocuments((prev) => prev.filter((doc) => doc.id !== documentId))
-    console.log("[v0] Document deleted:", documentId)
+    // console.log("[v0] Document deleted:", documentId)
   }
 
   useEffect(() => {
@@ -878,7 +878,7 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
         }),
       )
 
-      console.log("[v0] Project changes saved successfully:", editForm)
+      // console.log("[v0] Project changes saved successfully:", editForm)
 
       setIsEditOpen(false)
     }
@@ -947,14 +947,14 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
   }
 
   const handleSaveTeam = () => {
-    console.log("[v0] Saving team changes:", teamMembers)
+    // console.log("[v0] Saving team changes:", teamMembers)
     if (project) {
       const updatedProject = {
         ...project,
         team: [...teamMembers],
       }
       localStorage.setItem(`project_${project.id}`, JSON.stringify(updatedProject))
-      console.log("[v0] Team changes saved to localStorage for project", project.id)
+      // console.log("[v0] Team changes saved to localStorage for project", project.id)
     }
     setIsTeamEditOpen(false)
   }
@@ -976,7 +976,7 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
   }
 
   const handleSaveTimeline = () => {
-    console.log("[v0] Saving timeline changes:", milestones)
+    // console.log("[v0] Saving timeline changes:", milestones)
     const updatedProject = {
       ...project,
       milestones: milestones,
@@ -1012,7 +1012,7 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
   }
 
   const handleSaveActivity = () => {
-    console.log("[v0] Saving activity changes:", activities)
+    // console.log("[v0] Saving activity changes:", activities)
     setIsActivityEditOpen(false)
   }
 
@@ -1060,14 +1060,14 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
   }
 
   const handleMessage = (person: { name: string; email: string }) => {
-    console.log("[v0] Message button clicked for:", person.name, "Email:", person.email)
+    // console.log("[v0] Message button clicked for:", person.name, "Email:", person.email)
     setSelectedPersonForMessage(person)
     setIsMessageModalOpen(true)
   }
 
   const handleOutlookMessage = () => {
     if (selectedPersonForMessage) {
-      console.log("[v0] Opening Outlook for:", selectedPersonForMessage.email)
+      // console.log("[v0] Opening Outlook for:", selectedPersonForMessage.email)
       const outlookUrl = `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(selectedPersonForMessage.email)}`
       window.open(outlookUrl, "_blank")
       setIsMessageModalOpen(false)
@@ -1076,7 +1076,7 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
 
   const handleTeamsMessage = () => {
     if (selectedPersonForMessage) {
-      console.log("[v0] Opening Teams for:", selectedPersonForMessage.email)
+      // console.log("[v0] Opening Teams for:", selectedPersonForMessage.email)
       const teamsUrl = `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(selectedPersonForMessage.email)}`
       window.open(teamsUrl, "_blank")
       setIsMessageModalOpen(false)
@@ -1084,13 +1084,13 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
   }
 
   const handleEditMember = (member: any, index: number) => {
-    console.log("[v0] Editing team member:", member)
+    // console.log("[v0] Editing team member:", member)
     setEditingMember({ ...member, index })
     setIsEditMemberModalOpen(true)
   }
 
   const handleDeleteMember = (member: any, index: number) => {
-    console.log("[v0] Deleting team member:", member)
+    // console.log("[v0] Deleting team member:", member)
     setDeletingMember({ ...member, index })
     setIsDeleteMemberModalOpen(true)
   }
@@ -1114,7 +1114,7 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
           team: updatedTeamMembers,
         }
         localStorage.setItem(`project_${project.id}`, JSON.stringify(updatedProject))
-        console.log("[v0] Saved edited team member to localStorage")
+        // console.log("[v0] Saved edited team member to localStorage")
       }
 
       setIsEditMemberModalOpen(false)
@@ -1135,7 +1135,7 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
           team: updatedTeamMembers,
         }
         localStorage.setItem(`project_${project.id}`, JSON.stringify(updatedProject))
-        console.log("[v0] Saved team after deletion to localStorage")
+        // console.log("[v0] Saved team after deletion to localStorage")
       }
 
       setIsDeleteMemberModalOpen(false)
@@ -1144,7 +1144,7 @@ export default function ProjectPageClient({ id }: ProjectPageClientProps) {
   }
 
   const handleBackToProjects = () => {
-    console.log("[v0] Navigating back to projects")
+    // console.log("[v0] Navigating back to projects")
     window.location.href = "/projects"
   }
 

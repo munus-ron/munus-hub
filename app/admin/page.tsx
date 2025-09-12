@@ -98,7 +98,7 @@ export default function AdminPage() {
     setNewUser({ name: "", email: "", password: "", role: "user" })
     setIsAddUserOpen(false)
 
-    console.log("[v0] Added new user:", user)
+    // console.log("[v0] Added new user:", user)
   }
 
   const handleEditUser = (userToEdit) => {
@@ -127,7 +127,7 @@ export default function AdminPage() {
     setIsEditUserOpen(false)
     setEditingUser(null)
 
-    console.log("[v0] Updated user:", editingUser.id)
+    // console.log("[v0] Updated user:", editingUser.id)
   }
 
   const handleDeleteUser = (userId) => {
@@ -135,7 +135,7 @@ export default function AdminPage() {
     setUsers(updatedUsers)
     localStorage.setItem("admin-users", JSON.stringify(updatedUsers))
 
-    console.log("[v0] Deleted user with ID:", userId)
+    // console.log("[v0] Deleted user with ID:", userId)
   }
 
   const adminUsers = users.filter((u) => u.role === "admin")

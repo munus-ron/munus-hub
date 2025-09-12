@@ -48,7 +48,7 @@ import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
 
 const getUpdatedProjects = () => {
-  console.log("[v0] Starting getUpdatedProjects...")
+  // console.log("[v0] Starting getUpdatedProjects...")
   const staticProjects = [
     {
       id: 1,
@@ -158,10 +158,10 @@ const getUpdatedProjects = () => {
     },
   ]
 
-  console.log(
-    "[v0] Static projects loaded:",
-    staticProjects.map((p) => ({ id: p.id, title: p.title })),
-  )
+  // console.log(
+  //   "[v0] Static projects loaded:",
+  //   staticProjects.map((p) => ({ id: p.id, title: p.title })),
+  // )
 
   const activeProjects = []
 
@@ -169,12 +169,12 @@ const getUpdatedProjects = () => {
   for (const project of staticProjects) {
     // Check if project is deleted
     const deletionMarker = localStorage.getItem(`project_${project.id}_deleted`)
-    console.log(
-      `[v0] Project ${project.id} (${project.title}) - Deletion marker: ${deletionMarker}, Is deleted: ${deletionMarker === "true"}`,
-    )
+    // console.log(
+    //   `[v0] Project ${project.id} (${project.title}) - Deletion marker: ${deletionMarker}, Is deleted: ${deletionMarker === "true"}`,
+    // )
 
     if (deletionMarker === "true") {
-      console.log(`[v0] Skipping deleted project: ${project.title}`)
+      // console.log(`[v0] Skipping deleted project: ${project.title}`)
       continue // Skip deleted projects
     }
 
@@ -183,10 +183,10 @@ const getUpdatedProjects = () => {
     if (storedProjectData) {
       try {
         const updatedProject = JSON.parse(storedProjectData)
-        console.log(`[v0] Found updates for project ${project.id}:`, {
-          originalTitle: project.title,
-          updatedTitle: updatedProject.title,
-        })
+        // console.log(`[v0] Found updates for project ${project.id}:`, {
+        //   originalTitle: project.title,
+        //   updatedTitle: updatedProject.title,
+        // })
 
         // Merge all properties from stored data
         const mergedProject = {
@@ -204,19 +204,19 @@ const getUpdatedProjects = () => {
     }
   }
 
-  console.log(
-    "[v0] Active projects after deletion filter:",
-    activeProjects.map((p) => ({ id: p.id, title: p.title })),
-  )
+  // console.log(
+  //   "[v0] Active projects after deletion filter:",
+  //   activeProjects.map((p) => ({ id: p.id, title: p.title })),
+  // )
 
   const allKeys = Object.keys(localStorage)
-  console.log("[v0] All localStorage keys:", allKeys)
+  // console.log("[v0] All localStorage keys:", allKeys)
 
   const projectKeys = allKeys.filter((key) => key.startsWith("project_"))
-  console.log("[v0] All project keys in localStorage:", projectKeys)
+  // console.log("[v0] All project keys in localStorage:", projectKeys)
 
   const staticProjectIds = staticProjects.map((p) => p.id)
-  console.log("[v0] Static project IDs:", staticProjectIds)
+  // console.log("[v0] Static project IDs:", staticProjectIds)
 
   const newProjectKeys = allKeys.filter((key) => {
     if (!key.startsWith("project_") || key.endsWith("_deleted")) {
@@ -232,14 +232,14 @@ const getUpdatedProjects = () => {
     const projectId = Number.parseInt(projectIdMatch[1])
     const isNewProject = !staticProjectIds.includes(projectId)
 
-    console.log(`[v0] Checking key ${key}: projectId=${projectId}, isNewProject=${isNewProject}`)
+    // console.log(`[v0] Checking key ${key}: projectId=${projectId}, isNewProject=${isNewProject}`)
     return isNewProject
   })
 
-  console.log("[v0] New project keys found:", newProjectKeys)
+  // console.log("[v0] New project keys found:", newProjectKeys)
 
   if (newProjectKeys.length === 0) {
-    console.log("[v0] No new projects found, checking localStorage again...")
+    // console.log("[v0] No new projects found, checking localStorage again...")
     // Force a fresh read of localStorage
     const freshKeys = []
     for (let i = 0; i < localStorage.length; i++) {
@@ -248,7 +248,7 @@ const getUpdatedProjects = () => {
         freshKeys.push(key)
       }
     }
-    console.log("[v0] Fresh localStorage scan found project keys:", freshKeys)
+    // console.log("[v0] Fresh localStorage scan found project keys:", freshKeys)
 
     // Check for new projects in fresh scan
     for (const key of freshKeys) {
@@ -257,7 +257,7 @@ const getUpdatedProjects = () => {
         const projectId = Number.parseInt(projectIdMatch[1])
         if (!staticProjectIds.includes(projectId)) {
           newProjectKeys.push(key)
-          console.log(`[v0] Found new project in fresh scan: ${key}`)
+          // console.log(`[v0] Found new project in fresh scan: ${key}`)
         }
       }
     }
@@ -267,7 +267,7 @@ const getUpdatedProjects = () => {
     try {
       const projectData = JSON.parse(localStorage.getItem(key))
       if (projectData && projectData.id) {
-        console.log(`[v0] Adding new project from localStorage:`, { id: projectData.id, title: projectData.title })
+        // console.log(`[v0] Adding new project from localStorage:`, { id: projectData.id, title: projectData.title })
         activeProjects.push(projectData)
       }
     } catch (error) {
@@ -281,10 +281,10 @@ const getUpdatedProjects = () => {
     teamCount: project.team ? project.team.length : 0,
   }))
 
-  console.log(
-    "[v0] Final project team counts:",
-    projectsWithCounts.map((p) => ({ id: p.id, title: p.title, teamCount: p.teamCount })),
-  )
+  // console.log(
+  //   "[v0] Final project team counts:",
+  //   projectsWithCounts.map((p) => ({ id: p.id, title: p.title, teamCount: p.teamCount })),
+  // )
 
   return projectsWithCounts
 }
@@ -346,10 +346,10 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     const updatedProjects = getUpdatedProjects()
-    console.log(
-      "[v0] Projects loaded on mount:",
-      updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
-    )
+    // console.log(
+    //   "[v0] Projects loaded on mount:",
+    //   updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
+    // )
     setProjects(updatedProjects)
   }, [])
 
@@ -357,32 +357,32 @@ export default function ProjectsPage() {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         const updatedProjects = getUpdatedProjects()
-        console.log(
-          "[v0] Projects updated on visibility change:",
-          updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
-        )
+        // console.log(
+        //   "[v0] Projects updated on visibility change:",
+        //   updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
+        // )
         setProjects(updatedProjects)
       }
     }
 
     const handleFocus = () => {
       const updatedProjects = getUpdatedProjects()
-      console.log(
-        "[v0] Projects updated on focus:",
-        updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
-      )
+      // console.log(
+      //   "[v0] Projects updated on focus:",
+      //   updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
+      // )
       setProjects(updatedProjects)
     }
 
     const handleStorageChange = (e) => {
       if (e.key && e.key.startsWith("project_")) {
-        console.log("[v0] Storage change detected:", e.key)
+        // console.log("[v0] Storage change detected:", e.key)
         setTimeout(() => {
           const updatedProjects = getUpdatedProjects()
-          console.log(
-            "[v0] Projects updated on storage change:",
-            updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
-          )
+          // console.log(
+          //   "[v0] Projects updated on storage change:",
+          //   updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
+          // )
           setProjects(updatedProjects)
         }, 100)
       }
@@ -454,7 +454,7 @@ export default function ProjectsPage() {
 
     // Generate new project ID
     const newId = Math.max(...projects.map((p) => p.id), 0) + 1
-    console.log("[v0] Generated new project ID:", newId)
+    // console.log("[v0] Generated new project ID:", newId)
 
     // Create team array from comma-separated names
     const teamMembers = newProject.teamMembers
@@ -546,10 +546,10 @@ export default function ProjectsPage() {
       createdBy: "Current User",
     }
 
-    console.log("[v0] Creating new project:", projectData)
+    // console.log("[v0] Creating new project:", projectData)
 
     localStorage.setItem(`project_${newId}`, JSON.stringify(projectData))
-    console.log("[v0] Saved project to localStorage with key:", `project_${newId}`)
+    // console.log("[v0] Saved project to localStorage with key:", `project_${newId}`)
 
     // Trigger storage event for immediate synchronization
     window.dispatchEvent(
@@ -560,10 +560,10 @@ export default function ProjectsPage() {
     )
 
     const updatedProjects = getUpdatedProjects()
-    console.log(
-      "[v0] Updated projects after creation:",
-      updatedProjects.map((p) => ({ id: p.id, title: p.title })),
-    )
+    // console.log(
+    //   "[v0] Updated projects after creation:",
+    //   updatedProjects.map((p) => ({ id: p.id, title: p.title })),
+    // )
     setProjects(updatedProjects)
 
     // Reset form and close modal
@@ -610,7 +610,7 @@ export default function ProjectsPage() {
       team: teamMembers,
     }
 
-    console.log("[v0] Updating project:", updatedProject)
+    // console.log("[v0] Updating project:", updatedProject)
 
     localStorage.setItem(`project_${editingProject.id}`, JSON.stringify(updatedProject))
 
@@ -625,12 +625,12 @@ export default function ProjectsPage() {
     setIsEditModalOpen(false)
     setEditingProject(null)
 
-    console.log("[v0] Project updated successfully")
+    // console.log("[v0] Project updated successfully")
   }
 
   const handleConfirmDelete = () => {
     if (deletingProject) {
-      console.log("[v0] Deleting project:", deletingProject)
+      // console.log("[v0] Deleting project:", deletingProject)
 
       // Set deletion marker in localStorage
       localStorage.setItem(`project_${deletingProject.id}_deleted`, "true")
@@ -650,7 +650,7 @@ export default function ProjectsPage() {
         }),
       )
 
-      console.log("[v0] Project deleted successfully")
+      // console.log("[v0] Project deleted successfully")
       setDeletingProject(null)
       setIsDeleteModalOpen(false)
 
@@ -658,10 +658,10 @@ export default function ProjectsPage() {
       setTimeout(() => {
         const refreshedProjects = getUpdatedProjects()
         setProjects(refreshedProjects)
-        console.log(
-          "[v0] Projects refreshed after deletion:",
-          refreshedProjects.map((p) => ({ id: p.id, title: p.title })),
-        )
+        // console.log(
+        //   "[v0] Projects refreshed after deletion:",
+        //   refreshedProjects.map((p) => ({ id: p.id, title: p.title })),
+        // )
       }, 100)
     }
   }

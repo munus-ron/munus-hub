@@ -327,7 +327,7 @@ export default function AnnouncementsPage() {
   }
 
   const handleCreateAnnouncement = () => {
-    console.log("Creating announcement:", newAnnouncement)
+    // console.log("Creating announcement:", newAnnouncement)
 
     const newId = Math.max(...announcements.map((a) => a.id), 0) + 1
     const announcement = {
@@ -373,7 +373,7 @@ export default function AnnouncementsPage() {
   }
 
   const handleUpdateAnnouncement = () => {
-    console.log("Updating announcement:", editingAnnouncement)
+    // console.log("Updating announcement:", editingAnnouncement)
 
     const updatedAnnouncements = announcements.map((announcement) =>
       announcement.id === editingAnnouncement.id
@@ -405,7 +405,7 @@ export default function AnnouncementsPage() {
   }
 
   const confirmDeleteAnnouncement = () => {
-    console.log("Deleting announcement:", deletingAnnouncement)
+    // console.log("Deleting announcement:", deletingAnnouncement)
 
     const updatedAnnouncements = announcements.filter((announcement) => announcement.id !== deletingAnnouncement.id)
 
@@ -492,7 +492,7 @@ export default function AnnouncementsPage() {
         alert("Announcement copied to clipboard!")
       }
     } catch (error) {
-      console.log("Error sharing:", error)
+      // console.log("Error sharing:", error)
       alert("Unable to share. Please try copying the content manually.")
     }
   }

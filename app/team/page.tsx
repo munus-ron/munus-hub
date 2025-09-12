@@ -453,7 +453,7 @@ export default function TeamPage() {
   })
 
   const handleAddEmployee = () => {
-    console.log("Adding new team member:", newEmployee)
+    // console.log("Adding new team member:", newEmployee)
 
     if (newEmployee.name && newEmployee.category && newEmployee.email) {
       const newMember = {
@@ -482,7 +482,7 @@ export default function TeamPage() {
       const updatedConsultants = newEmployee.category === "consultant" ? [...consultantsState, newMember] : consultantsState
       saveTeamDataToStorage(updatedFounders, updatedAdvisors, updatedConsultants)
 
-      console.log(`[v0] Added new ${newEmployee.category}:`, newMember)
+      // console.log(`[v0] Added new ${newEmployee.category}:`, newMember)
     }
 
     setIsAddEmployeeModalOpen(false)
@@ -529,7 +529,7 @@ export default function TeamPage() {
   const handleSaveEdit = () => {
     if (!editingPerson) return
 
-    console.log("Saving edited person:", editingPerson)
+    // console.log("Saving edited person:", editingPerson)
 
     if (editingPerson.category === "founder") {
       const updatedFounders = foundersState.map((founder: TeamMember) =>
@@ -558,7 +558,7 @@ export default function TeamPage() {
   const handleConfirmDelete = () => {
     if (!deletingPerson) return
 
-    console.log("Deleting person:", deletingPerson)
+    // console.log("Deleting person:", deletingPerson)
 
     // Remove from the appropriate array based on category
     if (deletingPerson.category === "founder") {
@@ -582,7 +582,7 @@ export default function TeamPage() {
   const handleSaveImage = () => {
     if (!editingPersonImage) return
 
-    console.log("Saving new image for:", editingPersonImage)
+    // console.log("Saving new image for:", editingPersonImage)
 
     // Update the avatar in the appropriate array based on category
     if (editingPersonImage.category === "founder") {
@@ -610,7 +610,7 @@ export default function TeamPage() {
   }
 
   const handleMessage = (person: any, category: string) => {
-    console.log("[v0] Message button clicked for:", person.name, "Email:", person.email, "Category:", category)
+    // console.log("[v0] Message button clicked for:", person.name, "Email:", person.email, "Category:", category)
 
     if (!person.email) {
       alert(`No email address found for ${person.name}`)
@@ -626,7 +626,7 @@ export default function TeamPage() {
 
     try {
       const outlookUrl = `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(selectedPerson.email)}`
-      console.log("[v0] Opening Outlook URL:", outlookUrl)
+      // console.log("[v0] Opening Outlook URL:", outlookUrl)
       window.open(outlookUrl, "_blank")
     } catch (error) {
       console.error("[v0] Error opening Outlook:", error)
@@ -647,7 +647,7 @@ export default function TeamPage() {
 
     try {
       const teamsUrl = `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(selectedPerson.email)}`
-      console.log("[v0] Opening Teams URL:", teamsUrl)
+      // console.log("[v0] Opening Teams URL:", teamsUrl)
       window.open(teamsUrl, "_blank")
     } catch (error) {
       console.error("[v0] Error opening Teams:", error)

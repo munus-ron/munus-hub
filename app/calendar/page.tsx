@@ -243,7 +243,7 @@ export default function CalendarPage() {
   }
 
   const handleCreateEvent = () => {
-    console.log("Creating event:", newEvent)
+    // console.log("Creating event:", newEvent)
     const eventWithId = {
       ...newEvent,
       id: String(Date.now()),
@@ -295,7 +295,7 @@ export default function CalendarPage() {
   }
 
   const handleCreateVacation = () => {
-    console.log("Creating vacation:", newVacation)
+    // console.log("Creating vacation:", newVacation)
     setVacations([...vacations, { ...newVacation, id: String(Date.now()) }])
     setNewVacation({
       employee: "",
@@ -325,7 +325,7 @@ export default function CalendarPage() {
 
   const handleDeleteVacation = (vacationId: number) => {
     if (confirm("Are you sure you want to delete this vacation request?")) {
-      console.log("Deleting vacation:", vacationId)
+      // console.log("Deleting vacation:", vacationId)
       setVacations(vacations.filter((vacation) => vacation.id !== vacationId))
     }
   }

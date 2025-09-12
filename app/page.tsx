@@ -427,12 +427,12 @@ export default function Dashboard() {
   const handleSaveUser = () => {
     if (editingUser) {
       setUsers(users.map((u) => (u.id === editingUser.id ? { ...newUser, id: editingUser.id } : u)))
-      console.log("[v0] Updated user:", newUser)
+      // console.log("[v0] Updated user:", newUser)
       alert(`User ${newUser.name} has been updated successfully!`)
     } else {
       const newId = Math.max(...users.map((u) => u.id)) + 1
       setUsers([...users, { ...newUser, id: newId, status: "active" }])
-      console.log("[v0] Added new user:", newUser)
+      // console.log("[v0] Added new user:", newUser)
       alert(`User ${newUser.name} has been added successfully!`)
     }
 
@@ -464,7 +464,7 @@ export default function Dashboard() {
   const handleDeleteUser = (userId) => {
     if (confirm("Are you sure you want to delete this user?")) {
       setUsers(users.filter((u) => u.id !== userId))
-      console.log("[v0] Deleted user with ID:", userId)
+      // console.log("[v0] Deleted user with ID:", userId)
       alert("User has been deleted successfully!")
     }
   }

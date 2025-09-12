@@ -83,18 +83,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     const allUsers = loadUsersFromStorage()
 
-    console.log("[v0] Login attempt for email:", email)
-    console.log(
-      "[v0] All available users:",
-      allUsers.map((u) => ({ email: u.email, hasPassword: !!u.password })),
-    )
+    // console.log("[v0] Login attempt for email:", email)
+    // console.log(
+    //   "[v0] All available users:",
+    //   allUsers.map((u) => ({ email: u.email, hasPassword: !!u.password })),
+    // )
 
     const foundUser = allUsers.find((u) => u.email === email)
 
-    console.log(
-      "[v0] Found user:",
-      foundUser ? { email: foundUser.email, hasPassword: !!foundUser.password } : "Not found",
-    )
+    // console.log(
+    //   "[v0] Found user:",
+    //   foundUser ? { email: foundUser.email, hasPassword: !!foundUser.password } : "Not found",
+    // )
 
     if (foundUser) {
       if (foundUser.password) {
