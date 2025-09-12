@@ -1,0 +1,67 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  S3_BUCKET: munus-intranet
+  CLOUDFRONT_DISTRIBUTION_ID: E2ZSVCW95D8Y5I
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '20.x'
+    displayName: 'Use Node.js 20'
+
+  # Cache npm modules
+  - task: Cache@2
+    inputs:
+      key: 'npm | "$(Agent.OS)" | package-lock.json'
+      path: $(Pipeline.Workspace)/.npm
+    displayName: 'Cache npm packages'
+
+  # Install dependencies & build
+  - script: |
+      npm ci --cache $(Pipeline.Workspace)/.npm --prefer-offline
+      npm run build
+    displayName: 'Build React app'
+
+  # Install AWS CLI
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.x'
+    displayName: 'Use Python 3 (for AWS CLI install)'
+
+  - script: |
+      pip install awscli --upgrade --user
+      export PATH=$PATH:$HOME/.local/bin
+      aws --version
+    displayName: 'Install AWS CLI'
+
+  # Remove all files & upload new /out
+  - script: |
+      export PATH=$PATH:$HOME/.local/bin
+      echo "Clearing bucket $(S3_BUCKET)..."
+      aws s3 rm s3://$(S3_BUCKET) --recursive || true
+      echo "Uploading new build from /out..."
+      aws s3 cp out/ s3://$(S3_BUCKET)/ --recursive
+    env:
+      AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+      AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+      AWS_DEFAULT_REGION: ap-southeast-1
+    displayName: 'Deploy to S3'
+
+  # Invalidate CloudFront cache
+  - script: |
+      export PATH=$PATH:$HOME/.local/bin
+      aws cloudfront create-invalidation \
+        --distribution-id $(CLOUDFRONT_DISTRIBUTION_ID) \
+        --paths "/*"
+    env:
+      AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+      AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+      AWS_DEFAULT_REGION: ap-southeast-1
+    displayName: 'Invalidate CloudFront'
