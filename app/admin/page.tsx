@@ -143,7 +143,7 @@ export default function AdminPage() {
 
   if (!isAuthenticated() || !isAdmin()) {
     return (
-      <div className="min-h-screen bg-green-100 flex items-center justify-center">
+      <div className="min-h-screen bg-green-50 flex items-center justify-center">
         <div className="max-w-md w-full mx-4">
           <Card className="border-gray-100 shadow-lg">
             <CardHeader className="text-center pb-6">
@@ -162,7 +162,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-green-100">
+    <div className="min-h-screen bg-green-50">
       {/* Header */}
       <header className="border-b border-gray-100 bg-white">
         <div className="flex h-20 items-center justify-between px-8">

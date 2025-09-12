@@ -562,7 +562,7 @@ export default function Dashboard() {
 
   if (!isAuthenticated()) {
     return (
-      <div className="min-h-screen bg-green-100 flex items-center justify-center">
+      <div className="min-h-screen bg-green-50 flex items-center justify-center">
         <div className="max-w-md w-full mx-4">
           <Card className="border-gray-100 shadow-lg">
             <CardHeader className="text-center pb-6">
@@ -585,7 +585,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-green-100">
+    <div className="min-h-screen bg-green-50">
       {/* Header */}
       <header className="border-b border-gray-100 bg-white">
         <div className="flex h-20 items-center justify-between px-4 md:px-8">
@@ -862,7 +862,7 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          <div className="bg-green-100 rounded-3xl p-6 md:p-12 mb-12 md:mb-16">
+          <div className="bg-green-50 rounded-3xl p-6 md:p-12 mb-12 md:mb-16">
             <div className="max-w-4xl mx-auto text-center">
               <h3 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4 md:mb-6 font-serif">
                 Streamline Your Workflow
