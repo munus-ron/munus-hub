@@ -401,7 +401,7 @@ export function loadTeamDataFromStorage() {
       {
         "id": 1,
         "name": "John Carlo Velasquez",
-        "role": "Full-stack Developer / Cloud Engineer / DevOps Engineer",
+        "role": "Developer",
         "department": "Consultant",
         "email": "johncarlo.velasquez@mymunus.com",
         "phone": "+63 (977) 440-5218",
