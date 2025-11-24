@@ -12,7 +12,10 @@ import { AdminOnly } from "@/components/admin-only"
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { loadTeamDataFromStorage } from "@/lib/utils"
+import { getProjects } from "@/app/actions/projects"
+import { getTeamMembers } from "@/app/actions/team"
+import { getAnnouncements } from "@/app/actions/announcements"
+import { getCalendarEvents } from "@/app/actions/calendar"
 
 export default function Dashboard() {
   const [showLoginModal, setShowLoginModal] = useState(false)
@@ -29,47 +32,11 @@ export default function Dashboard() {
     position: "",
   })
 
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: "John Admin",
-      email: "admin@company.com",
-      role: "admin",
-      department: "IT",
-      position: "System Administrator",
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane@company.com",
-      role: "user",
-      department: "Marketing",
-      position: "Marketing Manager",
-      status: "active",
-    },
-    {
-      id: 3,
-      name: "Bob Johnson",
-      email: "bob@company.com",
-      role: "user",
-      department: "Sales",
-      position: "Sales Representative",
-      status: "active",
-    },
-    {
-      id: 4,
-      name: "Alice Brown",
-      email: "alice@company.com",
-      role: "user",
-      department: "HR",
-      position: "HR Specialist",
-      status: "inactive",
-    },
-  ])
+  const [users, setUsers] = useState([])
 
   const [recentAnnouncements, setRecentAnnouncements] = useState([])
   const [recentProjects, setRecentProjects] = useState([])
+  const [upcomingEvents, setUpcomingEvents] = useState([])
   const [dashboardStats, setDashboardStats] = useState({
     activeProjects: 0,
     teamMembers: 0,
@@ -85,195 +52,67 @@ export default function Dashboard() {
   const router = useRouter()
 
   useEffect(() => {
-    const loadAnnouncements = () => {
+    const loadAnnouncements = async () => {
       try {
-        const stored = localStorage.getItem("announcements")
-        if (stored) {
-          const announcements = JSON.parse(stored)
-          const sortedAnnouncements = announcements.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 2)
-          setRecentAnnouncements(sortedAnnouncements)
-        } else {
-          setRecentAnnouncements([
-            {
-              id: 1,
-              title: "New Office Opening",
-              content: "We're excited to announce our new branch office in Austin, Texas...",
-              author: "Sarah Miller",
-              date: new Date().toISOString(),
-              avatar: "/ceo-headshot.png",
-            },
-            {
-              id: 2,
-              title: "Holiday Schedule Update",
-              content: "Please note the updated holiday schedule for the remainder of the year...",
-              author: "Robert Johnson",
-              date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-              avatar: "/placeholder-wb2g6.png",
-            },
-          ])
-        }
+        const announcements = await getAnnouncements()
+        const sortedAnnouncements = announcements.slice(0, 2)
+        setRecentAnnouncements(sortedAnnouncements)
       } catch (error) {
         console.error("Error loading announcements:", error)
+        setRecentAnnouncements([])
       }
     }
 
     loadAnnouncements()
-
-    const handleStorageChange = (e) => {
-      if (e.key === "announcements") {
-        loadAnnouncements()
-      }
-    }
-
-    window.addEventListener("storage", handleStorageChange)
-
-    const handleAnnouncementUpdate = () => {
-      loadAnnouncements()
-    }
-
-    window.addEventListener("announcementUpdate", handleAnnouncementUpdate)
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange)
-      window.removeEventListener("announcementUpdate", handleAnnouncementUpdate)
-    }
   }, [])
 
   useEffect(() => {
-    const loadRecentProjects = () => {
+    const loadRecentProjects = async () => {
       try {
-        const staticProjects = [
-          { id: 1, title: "Website Redesign", status: "In Progress", department: "Marketing Team" },
-          { id: 2, title: "Mobile App Launch", status: "Active", department: "Development Team" },
-          { id: 3, title: "Q4 Planning Initiative", status: "Planning", department: "Strategy Team" },
-          { id: 4, title: "Customer Support Portal", status: "In Progress", department: "Support Team" },
-          { id: 5, title: "Data Analytics Dashboard", status: "Active", department: "Analytics Team" },
-          { id: 6, title: "Security Audit & Compliance", status: "Planning", department: "Security Team" },
-        ]
-
-        let projects = [...staticProjects]
-
-        staticProjects.forEach((project) => {
-          const storedProject = localStorage.getItem(`project_${project.id}`)
-          if (storedProject) {
-            try {
-              const updatedProject = JSON.parse(storedProject)
-              const projectIndex = projects.findIndex((p) => p.id === project.id)
-              if (projectIndex !== -1) {
-                projects[projectIndex] = {
-                  ...projects[projectIndex],
-                  title: updatedProject.title || project.title,
-                  status: updatedProject.status || project.status,
-                  progress: updatedProject.progress,
-                  description: updatedProject.description,
-                }
-              }
-            } catch (error) {
-              console.error(`Error parsing project ${project.id}:`, error)
-            }
-          }
-        })
-
-        projects = projects.filter((project) => {
-          const deletionMarker = localStorage.getItem(`project_${project.id}_deleted`)
-          return !deletionMarker
-        })
-
+        const projects = await getProjects()
         const sortedProjects = projects.slice(0, 3)
         setRecentProjects(sortedProjects)
       } catch (error) {
         console.error("Error loading recent projects:", error)
-        setRecentProjects([
-          { id: 1, title: "Website Redesign", status: "In Progress", department: "Marketing Team" },
-          { id: 2, title: "Mobile App Launch", status: "Active", department: "Development Team" },
-          { id: 3, title: "Q4 Planning Initiative", status: "Planning", department: "Strategy Team" },
-        ])
+        setRecentProjects([])
       }
     }
 
     loadRecentProjects()
-
-    const handleStorageChange = (e) => {
-      if (e.key?.startsWith("project_") && !e.key?.endsWith("_timeline") && !e.key?.endsWith("_team")) {
-        loadRecentProjects()
-      }
-    }
-
-    window.addEventListener("storage", handleStorageChange)
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange)
-    }
   }, [])
 
   useEffect(() => {
-    const calculateStats = () => {
+    const calculateStats = async () => {
       try {
-        const storedProjects = localStorage.getItem("projects")
-        let activeProjectsCount = 0
-        if (storedProjects) {
-          const projects = JSON.parse(storedProjects)
-          activeProjectsCount = projects.filter(
-            (project) => project.status && project.status !== "Complete" && project.status !== "Completed",
-          ).length
-        } else {
-          const staticProjects = [
-            { id: 1, title: "Website Redesign", status: "In Progress" },
-            { id: 2, title: "Mobile App Launch", status: "Active" },
-            { id: 3, title: "Q4 Planning Initiative", status: "Planning" },
-            { id: 4, title: "Customer Support Portal", status: "In Progress" },
-            { id: 5, title: "Data Analytics Dashboard", status: "Active" },
-            { id: 6, title: "Security Audit & Compliance", status: "Planning" },
-          ]
-          activeProjectsCount = staticProjects.filter(
-            (project) => project.status !== "Complete" && project.status !== "Completed",
-          ).length
-        }
+        const [projects, teamData, events] = await Promise.all([getProjects(), getTeamMembers(), getCalendarEvents()])
 
-        const teamData = loadTeamDataFromStorage()
-        const totalTeamMembers = teamData.founders.length + teamData.advisors.length + teamData.consultants.length
+        const activeProjectsCount = projects.filter(
+          (project) => project.status && project.status !== "Complete" && project.status !== "Completed",
+        ).length
+
+        const totalTeamMembers =
+          (teamData.founders?.length || 0) + (teamData.advisors?.length || 0) + (teamData.consultants?.length || 0)
 
         const now = new Date()
-        now.setHours(0, 0, 0, 0)
-
-        const storedEvents = localStorage.getItem("calendar_events")
-        let upcomingEventsCount = 0
-        if (storedEvents) {
-          const events = JSON.parse(storedEvents)
-          upcomingEventsCount = events.filter((event) => {
-            const eventDate = new Date(event.date || event.start)
-            eventDate.setHours(0, 0, 0, 0)
-            return eventDate >= now
-          }).length
-        } else {
-          upcomingEventsCount = 3
-        }
+        const upcomingEventsCount = events.filter((event) => {
+          const eventDate = new Date(event.start_time)
+          return eventDate > now
+        }).length
 
         let pendingTasksCount = 0
-        if (storedProjects) {
-          const projects = JSON.parse(storedProjects)
-          projects.forEach((project) => {
-            const projectTimeline = localStorage.getItem(`project_${project.id}_timeline`)
-            if (projectTimeline) {
-              const milestones = JSON.parse(projectTimeline)
-              milestones.forEach((milestone) => {
-                if (milestone.dueDate || milestone.endDate) {
-                  const dueDate = new Date(milestone.dueDate || milestone.endDate)
-                  if (
-                    dueDate >= now &&
-                    dueDate <= now &&
-                    milestone.status !== "completed" &&
-                    milestone.status !== "done"
-                  ) {
-                    pendingTasksCount++
-                  }
+        projects.forEach((project) => {
+          if (project.milestones) {
+            project.milestones.forEach((milestone) => {
+              if (milestone.endDate || milestone.end_date) {
+                const dueDate = new Date(milestone.endDate || milestone.end_date)
+                const daysDiff = (dueDate - now) / (1000 * 60 * 60 * 24)
+                if (daysDiff >= 0 && daysDiff <= 7 && milestone.status !== "completed" && milestone.status !== "done") {
+                  pendingTasksCount++
                 }
-              })
-            }
-          })
-        } else {
-          pendingTasksCount = 8
-        }
+              }
+            })
+          }
+        })
 
         setDashboardStats({
           activeProjects: activeProjectsCount,
@@ -284,110 +123,86 @@ export default function Dashboard() {
       } catch (error) {
         console.error("Error calculating dashboard stats:", error)
         setDashboardStats({
-          activeProjects: 6,
-          teamMembers: 15,
-          upcomingEvents: 3,
-          pendingTasks: 8,
+          activeProjects: 0,
+          teamMembers: 0,
+          upcomingEvents: 0,
+          pendingTasks: 0,
         })
       }
     }
 
     calculateStats()
-
-    const handleStorageChange = (e) => {
-      if (
-        e.key === "projects" ||
-        e.key === "team_founders" ||
-        e.key === "team_advisors" ||
-        e.key === "team_consultants" ||
-        e.key === "calendar_events" ||
-        (e.key?.startsWith("project_") && e.key?.endsWith("_timeline"))
-      ) {
-        calculateStats()
-      }
-    }
-
-    window.addEventListener("storage", handleStorageChange)
-    return () => window.removeEventListener("storage", handleStorageChange)
   }, [])
 
   useEffect(() => {
-    const generateNotifications = () => {
+    const generateNotifications = async () => {
       const notificationsList = []
       const now = new Date()
 
       try {
-        const storedAnnouncements = localStorage.getItem("announcements")
-        if (storedAnnouncements) {
-          const announcements = JSON.parse(storedAnnouncements)
-          const recentAnnouncements = announcements.filter((announcement) => {
-            const announcementDate = new Date(announcement.date)
-            const daysDiff = (now - announcementDate) / (1000 * 60 * 60 * 24)
-            return daysDiff <= 7
-          })
+        const [announcements, events, projects] = await Promise.all([
+          getAnnouncements(),
+          getCalendarEvents(),
+          getProjects(),
+        ])
 
-          recentAnnouncements.forEach((announcement) => {
-            notificationsList.push({
-              id: `announcement-${announcement.id}`,
-              type: "announcement",
-              title: "New Announcement",
-              message: announcement.title,
-              time: announcement.date,
-              icon: "bell",
-              link: `/announcements?highlight=${announcement.id}`,
-            })
-          })
-        }
+        const recentAnnouncements = announcements.filter((announcement) => {
+          const announcementDate = new Date(announcement.date)
+          const daysDiff = (now - announcementDate) / (1000 * 60 * 60 * 24)
+          return daysDiff <= 7
+        })
 
-        const storedEvents = localStorage.getItem("calendar_events")
-        if (storedEvents) {
-          const events = JSON.parse(storedEvents)
-          const upcomingEvents = events.filter((event) => {
-            const eventDate = new Date(event.date || event.start)
-            const daysDiff = (eventDate - now) / (1000 * 60 * 60 * 24)
-            return daysDiff >= 0 && daysDiff <= 7
+        recentAnnouncements.forEach((announcement) => {
+          notificationsList.push({
+            id: `announcement-${announcement.id}`,
+            type: "announcement",
+            title: "New Announcement",
+            message: announcement.title,
+            time: announcement.date,
+            icon: "bell",
+            link: `/announcements?highlight=${announcement.id}`,
           })
+        })
 
-          upcomingEvents.forEach((event) => {
-            notificationsList.push({
-              id: `event-${event.id}`,
-              type: "event",
-              title: "Upcoming Event",
-              message: event.title,
-              time: event.date || event.start,
-              icon: "calendar",
-              link: "/calendar",
-            })
+        const upcomingEventsList = events.filter((event) => {
+          const eventDate = new Date(event.start_time)
+          const daysDiff = (eventDate - now) / (1000 * 60 * 60 * 24)
+          return daysDiff >= 0 && daysDiff <= 7
+        })
+
+        upcomingEventsList.forEach((event) => {
+          notificationsList.push({
+            id: `event-${event.id}`,
+            type: "event",
+            title: "Upcoming Event",
+            message: event.title,
+            time: event.start_time,
+            icon: "calendar",
+            link: "/calendar",
           })
-        }
+        })
 
-        const storedProjects = localStorage.getItem("projects")
-        if (storedProjects) {
-          const projects = JSON.parse(storedProjects)
-          projects.forEach((project) => {
-            const projectTimeline = localStorage.getItem(`project_${project.id}_timeline`)
-            if (projectTimeline) {
-              const milestones = JSON.parse(projectTimeline)
-              milestones.forEach((milestone) => {
-                if (milestone.dueDate || milestone.endDate) {
-                  const dueDate = new Date(milestone.dueDate || milestone.endDate)
-                  const daysDiff = (dueDate - now) / (1000 * 60 * 60 * 24)
-                  if (daysDiff >= 0 && daysDiff <= 7 && milestone.status !== "completed") {
-                    notificationsList.push({
-                      id: `milestone-${project.id}-${milestone.name}`,
-                      type: "milestone",
-                      title: "Milestone Due Soon",
-                      message: `${milestone.name} in ${project.title}`,
-                      time: milestone.dueDate || milestone.endDate,
-                      icon: "clock",
-                      link: `/projects/${project.id}`,
-                    })
-                  }
+        projects.forEach((project) => {
+          if (project.milestones) {
+            project.milestones.forEach((milestone) => {
+              if (milestone.endDate || milestone.end_date) {
+                const dueDate = new Date(milestone.endDate || milestone.end_date)
+                const daysDiff = (dueDate - now) / (1000 * 60 * 60 * 24)
+                if (daysDiff >= 0 && daysDiff <= 7 && milestone.status !== "completed") {
+                  notificationsList.push({
+                    id: `milestone-${project.id}-${milestone.name || milestone.title}`,
+                    type: "milestone",
+                    title: "Milestone Due Soon",
+                    message: `${milestone.name || milestone.title} in ${project.title}`,
+                    time: milestone.endDate || milestone.end_date,
+                    icon: "clock",
+                    link: `/projects/${project.id}`,
+                  })
                 }
-              })
-            }
-          })
-        }
+              }
+            })
+          }
+        })
 
         notificationsList.sort((a, b) => new Date(b.time) - new Date(a.time))
 
@@ -403,36 +218,42 @@ export default function Dashboard() {
     }
 
     generateNotifications()
+  }, [])
 
-    const handleStorageChange = (e) => {
-      if (
-        e.key === "announcements" ||
-        e.key === "calendar_events" ||
-        e.key === "projects" ||
-        (e.key?.startsWith("project_") && e.key?.endsWith("_timeline"))
-      ) {
-        generateNotifications()
+  useEffect(() => {
+    const loadUpcomingEvents = async () => {
+      try {
+        const events = await getCalendarEvents()
+        const now = new Date()
+
+        // Filter to show only future events
+        const futureEvents = events.filter((event) => {
+          const eventDate = new Date(event.start_time)
+          return eventDate > now
+        })
+
+        // Sort by date (earliest first) and take first 6
+        const sortedEvents = futureEvents.sort((a, b) => new Date(a.start_time) - new Date(b.start_time)).slice(0, 6)
+
+        setUpcomingEvents(sortedEvents)
+      } catch (error) {
+        console.error("Error loading upcoming events:", error)
+        setUpcomingEvents([])
       }
     }
 
-    window.addEventListener("storage", handleStorageChange)
-    window.addEventListener("announcementUpdate", generateNotifications)
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange)
-      window.removeEventListener("announcementUpdate", generateNotifications)
-    }
+    loadUpcomingEvents()
   }, [])
 
   const handleSaveUser = () => {
     if (editingUser) {
       setUsers(users.map((u) => (u.id === editingUser.id ? { ...newUser, id: editingUser.id } : u)))
-      // console.log("[v0] Updated user:", newUser)
+      console.log("[v0] Updated user:", newUser)
       alert(`User ${newUser.name} has been updated successfully!`)
     } else {
-      const newId = Math.max(...users.map((u) => u.id)) + 1
+      const newId = users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1
       setUsers([...users, { ...newUser, id: newId, status: "active" }])
-      // console.log("[v0] Added new user:", newUser)
+      console.log("[v0] Added new user:", newUser)
       alert(`User ${newUser.name} has been added successfully!`)
     }
 
@@ -464,7 +285,7 @@ export default function Dashboard() {
   const handleDeleteUser = (userId) => {
     if (confirm("Are you sure you want to delete this user?")) {
       setUsers(users.filter((u) => u.id !== userId))
-      // console.log("[v0] Deleted user with ID:", userId)
+      console.log("[v0] Deleted user with ID:", userId)
       alert("User has been deleted successfully!")
     }
   }
@@ -558,6 +379,28 @@ export default function Dashboard() {
       default:
         return "border-gray-300 text-gray-700"
     }
+  }
+
+  const getEventTypeIcon = (type) => {
+    switch (type) {
+      case "meeting":
+        return <Calendar className="h-5 w-5 text-primary" />
+      case "deadline":
+        return <Clock className="h-5 w-5 text-red-500" />
+      case "training":
+        return <Users className="h-5 w-5 text-blue-500" />
+      default:
+        return <Calendar className="h-5 w-5 text-primary" />
+    }
+  }
+
+  const formatEventDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
   }
 
   if (!isAuthenticated()) {
@@ -704,7 +547,7 @@ export default function Dashboard() {
                     ))
                   ) : (
                     <div className="p-8 text-center text-gray-500">
-                      <Bell className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                      <Bell className="h-8 w-8 mx-auto mb-4 text-gray-300" />
                       <p className="text-sm">No notifications</p>
                     </div>
                   )}
@@ -868,8 +711,8 @@ export default function Dashboard() {
                 Streamline Your Workflow
               </h3>
               <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6 md:mb-8">
-                Our Munus Hub brings together all your essential tools and information in one centralized location,
-                making collaboration seamless and productivity effortless.
+                Access your projects, calendar, team information, and announcements all in one place. Stay organized and
+                keep your team aligned with real-time updates.
               </p>
               <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-4">
                 <Link href="/projects">
@@ -922,7 +765,7 @@ export default function Dashboard() {
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-900 text-lg lg:text-xl">{project.title}</h4>
-                          <p className="text-gray-600">{project.department}</p>
+                          <p className="text-gray-600">{project.team?.length || 0} team members</p>
                           {project.description && (
                             <p className="text-sm lg:text-xs text-gray-500 mt-1">
                               {project.description.length > 60
@@ -992,7 +835,7 @@ export default function Dashboard() {
                     </div>
                   ))
                 ) : (
-                  <div className="p-6 text-center text-gray-500">
+                  <div className="p-8 text-center text-gray-500">
                     <Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                     <p>No recent announcements</p>
                   </div>
@@ -1012,32 +855,37 @@ export default function Dashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                <div className="p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Calendar className="h-5 w-5 text-primary" />
-                    <span className="text-sm md:text-base font-semibold text-gray-700">Dec 15, 2024</span>
-                  </div>
-                  <h4 className="font-semibold text-gray-900 text-lg lg:text-xl mb-2">All Hands Meeting</h4>
-                  <p className="text-gray-600 leading-relaxed">Quarterly review and planning session</p>
+              {upcomingEvents.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                  {upcomingEvents.map((event) => (
+                    <div
+                      key={event.id}
+                      className="p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors cursor-pointer"
+                      onClick={() => router.push("/calendar")}
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        {getEventTypeIcon(event.type)}
+                        <span className="text-sm md:text-base font-semibold text-gray-700">
+                          {formatEventDate(event.start_time)}
+                        </span>
+                      </div>
+                      <h4 className="font-semibold text-gray-900 text-lg lg:text-xl mb-2">{event.title}</h4>
+                      <p className="text-gray-600 leading-relaxed">
+                        {event.description
+                          ? event.description.length > 80
+                            ? `${event.description.substring(0, 80)}...`
+                            : event.description
+                          : "No description"}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-                <div className="p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Clock className="h-5 w-5 text-primary" />
-                    <span className="text-sm md:text-base font-semibold text-gray-700">Dec 18, 2024</span>
-                  </div>
-                  <h4 className="font-semibold text-gray-900 text-lg lg:text-xl mb-2">Project Deadline</h4>
-                  <p className="text-gray-600 leading-relaxed">Website redesign final delivery</p>
+              ) : (
+                <div className="p-8 text-center text-gray-500">
+                  <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p>No upcoming events</p>
                 </div>
-                <div className="p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Users className="h-5 w-5 text-primary" />
-                    <span className="text-sm md:text-base font-semibold text-gray-700">Dec 20, 2024</span>
-                  </div>
-                  <h4 className="font-semibold text-gray-900 text-lg lg:text-xl mb-2">Team Building Event</h4>
-                  <p className="text-gray-600 leading-relaxed">Annual holiday celebration</p>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>

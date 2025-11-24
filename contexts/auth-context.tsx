@@ -2,14 +2,14 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
+import { authenticateUser } from "@/app/actions/auth"
 
 interface User {
   id: string
   name: string
   email: string
-  role: "admin" | "user"
+  role: "administrator" | "lead" | "user"
   avatar?: string
-  password?: string
 }
 
 interface AuthContextType {
@@ -22,53 +22,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Mock users for demo purposes
-const mockUsers: User[] = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "admin@company.com",
-    role: "admin",
-    avatar: "/professional-headshot.png",
-    password: "password",
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    email: "user@company.com",
-    role: "user",
-    avatar: "/ceo-headshot.png",
-    password: "password",
-  },
-]
-
-function loadUsersFromStorage(): User[] {
-  try {
-    const storedUsers = localStorage.getItem("admin-users")
-    if (storedUsers) {
-      const parsedUsers = JSON.parse(storedUsers)
-      // Combine static users with stored users, avoiding duplicates
-      const allUsers = [...mockUsers]
-      parsedUsers.forEach((storedUser: any) => {
-        if (!allUsers.find((u) => u.email === storedUser.email)) {
-          allUsers.push({
-            id: storedUser.id,
-            name: storedUser.name,
-            email: storedUser.email,
-            role: storedUser.role as "admin" | "user",
-            avatar: storedUser.avatar || "/placeholder.svg",
-            password: storedUser.password,
-          })
-        }
-      })
-      return allUsers
-    }
-  } catch (error) {
-    console.error("Error loading users from storage:", error)
-  }
-  return mockUsers
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
 
@@ -76,53 +29,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check for stored user on mount
     const storedUser = localStorage.getItem("intranet-user")
     if (storedUser) {
-      setUser(JSON.parse(storedUser))
+      try {
+        const parsedUser = JSON.parse(storedUser)
+        setUser(parsedUser)
+      } catch (error) {
+        console.error("[v0] Error parsing stored user:", error)
+        localStorage.removeItem("intranet-user")
+      }
     }
   }, [])
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    const allUsers = loadUsersFromStorage()
+    console.log("[v0] Login attempt for email:", email)
 
-    // console.log("[v0] Login attempt for email:", email)
-    // console.log(
-    //   "[v0] All available users:",
-    //   allUsers.map((u) => ({ email: u.email, hasPassword: !!u.password })),
-    // )
+    try {
+      // Authenticate user against database
+      const result = await authenticateUser(email, password)
 
-    const foundUser = allUsers.find((u) => u.email === email)
+      if (result.success && result.user) {
+        console.log("[v0] Authentication successful for:", email)
 
-    // console.log(
-    //   "[v0] Found user:",
-    //   foundUser ? { email: foundUser.email, hasPassword: !!foundUser.password } : "Not found",
-    // )
-
-    if (foundUser) {
-      if (foundUser.password) {
-        // console.log("[v0] Comparing passwords - entered:", password, "stored:", foundUser.password)
-        if (password === foundUser.password) {
-          // console.log("[v0] Password match - login successful")
-          setUser(foundUser)
-          localStorage.setItem("intranet-user", JSON.stringify(foundUser))
-          return true
-        } else {
-          // console.log("[v0] Password mismatch - login failed")
+        // Create user object
+        const authenticatedUser: User = {
+          id: result.user.email, // Use email as ID
+          name: result.user.name || result.user.email,
+          email: result.user.email,
+          role: result.user.role,
+          avatar: "/placeholder.svg",
         }
+
+        // Store user in state and localStorage
+        setUser(authenticatedUser)
+        localStorage.setItem("intranet-user", JSON.stringify(authenticatedUser))
+
+        return true
       } else {
-        // console.log("[v0] No stored password, checking fallback passwords")
-        if (password === "password" || password === "password123!") {
-          // console.log("[v0] Fallback password match - login successful")
-          setUser(foundUser)
-          localStorage.setItem("intranet-user", JSON.stringify(foundUser))
-          return true
-        } else {
-          // console.log("[v0] Fallback password mismatch - login failed")
-        }
+        console.log("[v0] Authentication failed:", result.error)
+        return false
       }
-    } else {
-      // console.log("[v0] User not found - login failed")
+    } catch (error) {
+      console.error("[v0] Login error:", error)
+      return false
     }
-
-    return false
   }
 
   const logout = () => {
@@ -131,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const isAdmin = () => {
-    return user?.role === "admin"
+    return user?.role === "administrator"
   }
 
   const isAuthenticated = () => {

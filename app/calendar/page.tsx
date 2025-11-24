@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   CalendarIcon,
   Users,
@@ -36,110 +36,20 @@ import {
   Edit,
   Trash2,
   Pencil,
-  Calendar,
   Settings,
 } from "lucide-react"
 import { AdminOnly } from "@/components/admin-only"
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
-
-const eventsData = [
-  {
-    id: 1,
-    title: "All Hands Meeting",
-    type: "meeting",
-    date: "2024-12-15",
-    time: "10:00 AM",
-    duration: "2 hours",
-    location: "Conference Room A",
-    attendees: 48,
-    description: "Quarterly review and planning session for all departments",
-    onlineMeeting: "https://meet.google.com/abc-defg-hij",
-  },
-  {
-    id: 2,
-    title: "Project Deadline: Website Redesign",
-    type: "deadline",
-    date: "2024-12-18",
-    time: "5:00 PM",
-    duration: "All day",
-    location: "Remote",
-    attendees: 3,
-    description: "Final delivery of the website redesign project",
-    onlineMeeting: "",
-  },
-  {
-    id: 3,
-    title: "Team Building Event",
-    type: "event",
-    date: "2024-12-20",
-    time: "2:00 PM",
-    duration: "4 hours",
-    location: "Downtown Event Center",
-    attendees: 48,
-    description: "Annual holiday celebration and team building activities",
-    onlineMeeting: "",
-  },
-  {
-    id: 4,
-    title: "Client Presentation",
-    type: "meeting",
-    date: "2024-12-22",
-    time: "9:00 AM",
-    duration: "1 hour",
-    location: "Client Office",
-    attendees: 5,
-    description: "Quarterly business review with key client",
-    onlineMeeting: "https://zoom.us/j/123456789",
-  },
-]
-
-const vacationsData = [
-  {
-    id: 1,
-    employee: "Sarah Miller",
-    department: "Marketing",
-    startDate: "2024-12-23",
-    endDate: "2024-12-30",
-    days: 6,
-    type: "Holiday Leave",
-    status: "approved",
-    avatar: "/team-sarah.png",
-  },
-  {
-    id: 2,
-    employee: "John Doe",
-    department: "Design",
-    startDate: "2024-12-16",
-    endDate: "2024-12-20",
-    days: 5,
-    type: "Personal Leave",
-    status: "approved",
-    avatar: "/team-john.png",
-  },
-  {
-    id: 3,
-    employee: "Mike Chen",
-    department: "Development",
-    startDate: "2024-12-27",
-    endDate: "2025-01-03",
-    days: 8,
-    type: "Holiday Leave",
-    status: "pending",
-    avatar: "/team-mike.png",
-  },
-  {
-    id: 4,
-    employee: "Lisa Wang",
-    department: "Development",
-    startDate: "2024-12-19",
-    endDate: "2024-12-19",
-    days: 1,
-    type: "Sick Leave",
-    status: "approved",
-    avatar: "/team-member-1.png",
-  },
-]
+import {
+  getCalendarEvents,
+  createCalendarEvent,
+  updateCalendarEvent,
+  deleteCalendarEvent,
+} from "@/app/actions/calendar"
+import { getVacations, addVacation, updateVacation, deleteVacation } from "@/app/actions/vacations"
+import { getTeamMembers } from "@/app/actions/team"
+import { usePermissions } from "@/hooks/use-permissions"
 
 function getEventTypeColor(type: string) {
   switch (type) {
@@ -215,12 +125,51 @@ export default function CalendarPage() {
 
   const [editingEvent, setEditingEvent] = useState<any>(null)
   const [isEditEventModalOpen, setIsEditEventModalOpen] = useState(false)
-  const [events, setEvents] = useState(eventsData)
-  const [vacations, setVacations] = useState(vacationsData)
+  const [events, setEvents] = useState([])
+  const [vacations, setVacations] = useState([])
+  const [teamMembers, setTeamMembers] = useState<any[]>([])
 
   const { user, logout, isAuthenticated } = useAuth()
+  const { canEditCalendar, canEditEvent, canEditVacation, isAdministrator } = usePermissions()
 
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+
+  useEffect(() => {
+    async function loadData() {
+      const eventsData = await getCalendarEvents()
+      console.log("[v0] Calendar events loaded from database:", eventsData)
+
+      const parsedEvents = eventsData.map((event: any) => {
+        const startDate = new Date(event.start_time)
+        const endDate = new Date(event.end_time)
+
+        return {
+          ...event,
+          date: startDate.toISOString().split("T")[0], // YYYY-MM-DD format
+          time: startDate.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          duration: `${Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60))} minutes`,
+          onlineMeeting: event.online_meeting_link || null,
+        }
+      })
+
+      setEvents(parsedEvents)
+
+      const vacationsData = await getVacations()
+      console.log("[v0] Vacations loaded from database:", vacationsData)
+      setVacations(vacationsData)
+
+      const teamData = await getTeamMembers()
+      const allMembers = [...teamData.founders, ...teamData.advisors, ...teamData.consultants]
+      console.log("[v0] Team members loaded for vacation dropdown:", allMembers)
+      setTeamMembers(allMembers)
+    }
+    loadData()
+  }, [])
 
   if (!isAuthenticated()) {
     return (
@@ -242,26 +191,73 @@ export default function CalendarPage() {
     )
   }
 
-  const handleCreateEvent = () => {
-    // console.log("Creating event:", newEvent)
-    const eventWithId = {
-      ...newEvent,
-      id: String(Date.now()),
-      attendees: Number.parseInt(newEvent.attendees) || 0,
+  const handleCreateEvent = async () => {
+    console.log("Creating event:", newEvent)
+
+    if (!newEvent.date || !newEvent.time) {
+      alert("Please enter both date and time for the event")
+      return
     }
-    const updatedEvents = [...events, eventWithId]
-    setEvents(updatedEvents)
 
-    // Save to localStorage for persistence
-    localStorage.setItem("calendar_events", JSON.stringify(updatedEvents))
+    const startDateTime = new Date(`${newEvent.date}T${newEvent.time}:00`)
 
-    // Dispatch storage event for cross-tab synchronization
-    window.dispatchEvent(
-      new StorageEvent("storage", {
-        key: "calendar_events",
-        newValue: JSON.stringify(updatedEvents),
-      }),
+    if (isNaN(startDateTime.getTime())) {
+      alert("Invalid date or time. Please check your input.")
+      return
+    }
+
+    const endDateTime = new Date(startDateTime)
+
+    // Add duration to end time (default to 1 hour if not specified)
+    const durationMatch = newEvent.duration.match(/(\d+)\s*(hour|hr|h|minute|min|m)/i)
+    if (durationMatch) {
+      const value = Number.parseInt(durationMatch[1])
+      const unit = durationMatch[2].toLowerCase()
+      if (unit.startsWith("h")) {
+        endDateTime.setHours(endDateTime.getHours() + value)
+      } else if (unit.startsWith("m")) {
+        endDateTime.setMinutes(endDateTime.getMinutes() + value)
+      }
+    } else {
+      // Default to 1 hour if duration not specified
+      endDateTime.setHours(endDateTime.getHours() + 1)
+    }
+
+    await createCalendarEvent(
+      {
+        title: newEvent.title,
+        description: newEvent.description,
+        startTime: startDateTime.toISOString(),
+        endTime: endDateTime.toISOString(),
+        location: newEvent.location,
+        onlineMeetingLink: newEvent.onlineMeeting,
+        attendees: newEvent.attendees ? [newEvent.attendees] : [],
+        color: newEvent.type === "meeting" ? "#3b82f6" : newEvent.type === "deadline" ? "#ef4444" : "#10b981",
+        type: newEvent.type,
+      },
+      user?.email || "",
     )
+
+    // Reload events from database
+    const updatedEvents = await getCalendarEvents()
+    const parsedEvents = updatedEvents.map((event: any) => {
+      const startDate = new Date(event.start_time)
+      const endDate = new Date(event.end_time)
+
+      return {
+        ...event,
+        date: startDate.toISOString().split("T")[0],
+        time: startDate.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        }),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        duration: `${Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60))} minutes`,
+        onlineMeeting: event.online_meeting_link || null,
+      }
+    })
+    setEvents(parsedEvents)
 
     setNewEvent({
       title: "",
@@ -287,16 +283,45 @@ export default function CalendarPage() {
   }
 
   const handleJoinEvent = (event: any) => {
-    if (event.onlineMeeting) {
-      window.open(event.onlineMeeting, "_blank")
+    if (event.onlineMeeting || event.location) {
+      const link = event.onlineMeeting || event.location
+      if (link.startsWith("http://") || link.startsWith("https://")) {
+        window.open(link, "_blank")
+      } else {
+        alert("This event doesn't have a valid online meeting link")
+      }
     } else {
       alert("No online meeting link available for this event")
     }
   }
 
-  const handleCreateVacation = () => {
-    // console.log("Creating vacation:", newVacation)
-    setVacations([...vacations, { ...newVacation, id: String(Date.now()) }])
+  const handleCreateVacation = async () => {
+    console.log("[v0] Creating vacation:", newVacation)
+
+    if (isEditingVacation && selectedVacation) {
+      // Update existing vacation
+      await updateVacation(selectedVacation.id, {
+        employee_name: newVacation.employee,
+        start_date: newVacation.startDate,
+        end_date: newVacation.endDate,
+        status: newVacation.status,
+      })
+    } else {
+      await addVacation(
+        {
+          employee_name: newVacation.employee,
+          start_date: newVacation.startDate,
+          end_date: newVacation.endDate,
+          status: newVacation.status,
+        },
+        user?.email || "",
+      )
+    }
+
+    // Reload vacations from database
+    const updatedVacations = await getVacations()
+    setVacations(updatedVacations)
+
     setNewVacation({
       employee: "",
       department: "",
@@ -307,26 +332,31 @@ export default function CalendarPage() {
     })
     setIsVacationModalOpen(false)
     setIsEditingVacation(false)
+    setSelectedVacation(null)
   }
 
   const handleEditVacation = (vacation: any) => {
     setSelectedVacation(vacation)
     setNewVacation({
-      employee: vacation.employee,
-      department: vacation.department,
-      startDate: vacation.startDate,
-      endDate: vacation.endDate,
-      type: vacation.type,
-      status: vacation.status,
+      employee: vacation.employee_name || "",
+      department: vacation.department || "",
+      startDate: vacation.start_date || "",
+      endDate: vacation.end_date || "",
+      type: vacation.type || "Holiday Leave",
+      status: vacation.status || "pending",
     })
     setIsEditingVacation(true)
     setIsVacationModalOpen(true)
   }
 
-  const handleDeleteVacation = (vacationId: number) => {
+  const handleDeleteVacation = async (vacationId: number) => {
     if (confirm("Are you sure you want to delete this vacation request?")) {
-      // console.log("Deleting vacation:", vacationId)
-      setVacations(vacations.filter((vacation) => vacation.id !== vacationId))
+      console.log("[v0] Deleting vacation:", vacationId)
+      await deleteVacation(vacationId)
+
+      // Reload vacations from database
+      const updatedVacations = await getVacations()
+      setVacations(updatedVacations)
     }
   }
 
@@ -394,31 +424,150 @@ export default function CalendarPage() {
   }
 
   const handleEditEvent = (event: any) => {
-    setEditingEvent(event)
+    const startDate = new Date(event.start_time)
+
+    // Get local hours and minutes (not UTC)
+    const hours = startDate.getHours().toString().padStart(2, "0")
+    const minutes = startDate.getMinutes().toString().padStart(2, "0")
+    const timeIn24Hour = `${hours}:${minutes}`
+
+    setEditingEvent({
+      ...event,
+      date: event.date, // Ensure date is preserved
+      time: timeIn24Hour, // Use 24-hour format in local timezone for the time input
+      duration: event.duration || "", // Ensure duration is preserved
+      location: event.location || "", // Ensure location is preserved
+      description: event.description || "", // Ensure description is preserved
+      onlineMeeting: event.onlineMeeting || "", // Ensure onlineMeeting is preserved
+      attendees: Array.isArray(event.attendees) ? event.attendees.join(",") : event.attendees || "", // Ensure attendees is preserved
+    })
     setIsEditEventModalOpen(true)
   }
 
-  const handleDeleteEvent = (eventId: string) => {
+  const handleDeleteEvent = async (eventId: string) => {
     if (window.confirm("Are you sure you want to delete this event?")) {
-      setEvents(events.filter((event) => event.id !== eventId))
+      await deleteCalendarEvent(eventId)
+
+      // Reload events from database
+      const updatedEvents = await getCalendarEvents()
+      const parsedEvents = updatedEvents.map((event: any) => {
+        const startDate = new Date(event.start_time)
+        const endDate = new Date(event.end_time)
+
+        return {
+          ...event,
+          date: startDate.toISOString().split("T")[0],
+          time: startDate.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          duration: `${Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60))} minutes`,
+          onlineMeeting: event.online_meeting_link || null,
+        }
+      })
+      setEvents(parsedEvents)
     }
   }
 
-  const handleUpdateEvent = () => {
+  const handleUpdateEvent = async () => {
     if (editingEvent) {
-      const updatedEvents = events.map((event) => (event.id === editingEvent.id ? editingEvent : event))
-      setEvents(updatedEvents)
+      console.log("[v0] Starting event update with editingEvent:", editingEvent)
 
-      // Save to localStorage
-      localStorage.setItem("calendar_events", JSON.stringify(updatedEvents))
+      if (!editingEvent.date || !editingEvent.time) {
+        alert("Please enter both date and time for the event")
+        return
+      }
 
-      // Dispatch storage event
-      window.dispatchEvent(
-        new StorageEvent("storage", {
-          key: "calendar_events",
-          newValue: JSON.stringify(updatedEvents),
-        }),
-      )
+      let timeString = editingEvent.time
+
+      // If time is in 12-hour format (e.g., "02:30 PM"), convert to 24-hour format
+      if (timeString.includes("AM") || timeString.includes("PM")) {
+        const [time, period] = timeString.split(" ")
+        const [hours, minutes] = time.split(":")
+        let hour = Number.parseInt(hours)
+
+        if (period === "PM" && hour !== 12) {
+          hour += 12
+        } else if (period === "AM" && hour === 12) {
+          hour = 0
+        }
+
+        timeString = `${hour.toString().padStart(2, "0")}:${minutes}`
+      }
+
+      const startDateTime = new Date(`${editingEvent.date}T${timeString}:00`)
+
+      if (isNaN(startDateTime.getTime())) {
+        alert("Invalid date or time. Please check your input.")
+        return
+      }
+
+      const endDateTime = new Date(startDateTime)
+
+      if (editingEvent.duration) {
+        const durationMatch = editingEvent.duration.match(/(\d+)\s*(hour|hr|h|minute|min|m)/i)
+        if (durationMatch) {
+          const value = Number.parseInt(durationMatch[1])
+          const unit = durationMatch[2].toLowerCase()
+          if (unit.startsWith("h")) {
+            endDateTime.setHours(endDateTime.getHours() + value)
+          } else if (unit.startsWith("m")) {
+            endDateTime.setMinutes(endDateTime.getMinutes() + value)
+          }
+        } else {
+          // Default to 1 hour if duration format not recognized
+          endDateTime.setHours(endDateTime.getHours() + 1)
+        }
+      } else {
+        // Default to 1 hour if no duration specified
+        endDateTime.setHours(endDateTime.getHours() + 1)
+      }
+
+      console.log("[v0] editingEvent.location:", editingEvent.location)
+      console.log("[v0] editingEvent.onlineMeeting:", editingEvent.onlineMeeting)
+
+      const updateData = {
+        title: editingEvent.title,
+        description: editingEvent.description,
+        startTime: startDateTime.toISOString(),
+        endTime: endDateTime.toISOString(),
+        location: editingEvent.location || "",
+        onlineMeetingLink: editingEvent.onlineMeeting || null,
+        attendees: editingEvent.attendees ? editingEvent.attendees.split(",") : [],
+        color: editingEvent.color || "#3b82f6",
+        type: editingEvent.type || "meeting",
+      }
+
+      console.log("[v0] Calling updateCalendarEvent with data:", updateData)
+
+      const result = await updateCalendarEvent(editingEvent.id, updateData)
+
+      console.log("[v0] updateCalendarEvent result:", result)
+
+      // Reload events from database
+      const updatedEvents = await getCalendarEvents()
+      const parsedEvents = updatedEvents.map((event: any) => {
+        const startDate = new Date(event.start_time)
+        const endDate = new Date(event.end_time)
+
+        return {
+          ...event,
+          date: startDate.toISOString().split("T")[0],
+          time: startDate.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          duration: `${Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60))} minutes`,
+          onlineMeeting: event.online_meeting_link || null,
+        }
+      })
+
+      console.log("[v0] Events reloaded after update:", parsedEvents)
+      setEvents(parsedEvents)
 
       setIsEditEventModalOpen(false)
       setEditingEvent(null)
@@ -585,18 +734,18 @@ export default function CalendarPage() {
               <p className="text-xl text-gray-600">Manage events, meetings, and team vacation schedules</p>
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-              <AdminOnly>
-                <Button size="sm" onClick={openEventModal}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Event
-                </Button>
-              </AdminOnly>
-              <AdminOnly>
-                <Button size="sm" onClick={openVacationModal}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Vacation
-                </Button>
-              </AdminOnly>
+              {canEditCalendar && (
+                <>
+                  <Button size="sm" onClick={openEventModal}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Event
+                  </Button>
+                  <Button size="sm" onClick={openVacationModal}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Vacation
+                  </Button>
+                </>
+              )}
             </div>
           </div>
 
@@ -670,7 +819,7 @@ export default function CalendarPage() {
                   <div className="grid grid-cols-7 gap-1 sm:gap-2">
                     {getDaysInMonth().map((day, index) => {
                       if (!day) {
-                        return <div key={index} className="p-1 sm:p-2"></div>
+                        return <div key={`empty-${index}`} className="p-1 sm:p-2"></div>
                       }
 
                       const hasEvent = events.some((event) => {
@@ -683,15 +832,15 @@ export default function CalendarPage() {
                       })
 
                       const hasVacation = vacations.some((vacation) => {
-                        const startDate = new Date(vacation.startDate)
-                        const endDate = new Date(vacation.endDate)
+                        const startDate = new Date(vacation.start_date)
+                        const endDate = new Date(vacation.end_date)
                         const checkDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
                         return checkDate >= startDate && checkDate <= endDate
                       })
 
                       return (
                         <div
-                          key={day}
+                          key={`day-${day}`}
                           className={`p-1 sm:p-2 text-center text-sm border border-gray-100 rounded cursor-pointer hover:bg-gray-50 ${
                             isToday(day) ? "bg-primary text-white" : ""
                           }`}
@@ -708,163 +857,148 @@ export default function CalendarPage() {
                 </CardContent>
               </Card>
 
+              {/* Upcoming Events Section */}
               <Card className="border-gray-100 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-2xl font-semibold text-gray-900 font-serif">
-                    This Week's Schedule
-                  </CardTitle>
-                  <CardDescription className="text-gray-600">Events and meetings for this week</CardDescription>
+                  <CardTitle className="text-2xl font-semibold text-gray-900 font-serif">Upcoming Events</CardTitle>
+                  <CardDescription className="text-gray-600">Events and meetings from the calendar</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="border-b border-gray-100 pb-4">
-                      <h5 className="font-medium text-gray-700 mb-3">Monday</h5>
-                      <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
-                        <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                          <Users className="h-6 w-6 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-gray-900 text-lg">Daily Standup</h4>
-                          <p className="text-gray-600 truncate">9:00 AM - 9:30 AM • Conference Room B</p>
-                        </div>
-                        <Badge className="bg-primary text-white hidden sm:inline-flex">Meeting</Badge>
-                      </div>
+                  {events.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <CalendarIcon className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                      <p>No upcoming events scheduled</p>
                     </div>
-
-                    <div className="border-b border-gray-100 pb-4">
-                      <h5 className="font-medium text-gray-700 mb-3">Tuesday</h5>
-                      <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
-                        <div className="h-12 w-12 rounded-xl bg-chart-2/10 flex items-center justify-center">
-                          <Calendar className="h-6 w-6 text-chart-2" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-gray-900 text-lg">Project Review Meeting</h4>
-                          <p className="text-gray-600 truncate">2:00 PM - 3:30 PM • Conference Room A</p>
-                        </div>
-                        <Badge className="bg-chart-2 text-white hidden sm:inline-flex">Meeting</Badge>
-                      </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {events
+                        .filter((event) => {
+                          const eventDate = new Date(event.start_time || event.date)
+                          const now = new Date()
+                          return eventDate > now
+                        })
+                        .sort((a, b) => {
+                          const dateA = new Date(a.start_time || a.date)
+                          const dateB = new Date(b.start_time || b.date)
+                          return dateA.getTime() - dateB.getTime()
+                        })
+                        .slice(0, 5)
+                        .map((event) => (
+                          <div
+                            key={`upcoming-${event.id}`}
+                            onClick={() => handleViewDetails(event)}
+                            className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl hover:border-primary/20 hover:bg-gray-50/50 transition-colors cursor-pointer"
+                          >
+                            <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                              {getEventTypeIcon(event.type)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-gray-900 text-lg">{event.title}</h4>
+                              <p className="text-gray-600 truncate">
+                                {new Date(event.date + "T00:00:00").toLocaleDateString()} • {event.time}{" "}
+                                {event.timezone && `(${event.timezone})`} • {event.location}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge className={getEventTypeColor(event.type)}>{event.type}</Badge>
+                              {event.onlineMeeting && (
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                  Online
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                     </div>
-
-                    <div className="border-b border-gray-100 pb-4">
-                      <h5 className="font-medium text-gray-700 mb-3">Wednesday</h5>
-                      <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
-                        <div className="h-12 w-12 rounded-xl bg-chart-4/10 flex items-center justify-center flex-shrink-0">
-                          <Coffee className="h-6 w-6 text-chart-4" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-gray-900 text-lg">Coffee Chat with Design Team</h4>
-                          <p className="text-gray-600 truncate">3:00 PM - 4:00 PM • Kitchen Area</p>
-                        </div>
-                        <Badge className="bg-chart-4 text-white hidden sm:inline-flex">Social</Badge>
-                      </div>
-                    </div>
-
-                    <div className="border-b border-gray-100 pb-4">
-                      <h5 className="font-medium text-gray-700 mb-3">Thursday</h5>
-                      <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
-                        <div className="h-12 w-12 rounded-xl bg-chart-3/10 flex items-center justify-center">
-                          <Users className="h-6 w-6 text-chart-3" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-gray-900 text-lg">Team Building Workshop</h4>
-                          <p className="text-gray-600 truncate">10:00 AM - 12:00 PM • Training Room</p>
-                        </div>
-                        <Badge className="bg-chart-3 text-white hidden sm:inline-flex">Workshop</Badge>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h5 className="font-medium text-gray-700 mb-3">Friday</h5>
-                      <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors">
-                        <div className="h-12 w-12 rounded-xl bg-chart-1/10 flex items-center justify-center">
-                          <Calendar className="h-6 w-6 text-chart-1" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-gray-900 text-lg">Weekly Retrospective</h4>
-                          <p className="text-gray-600 truncate">4:00 PM - 5:00 PM • Conference Room C</p>
-                        </div>
-                        <Badge className="bg-chart-1 text-white hidden sm:inline-flex">Meeting</Badge>
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="events" className="space-y-8">
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                {events.map((event) => (
-                  <Card key={event.id} className="border-gray-100 shadow-sm">
-                    <CardHeader>
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-center gap-4 min-w-0 flex-1">
-                          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            {getEventTypeIcon(event.type)}
+                {events
+                  .sort((a, b) => {
+                    const dateA = new Date(a.start_time || a.date)
+                    const dateB = new Date(b.start_time || b.date)
+                    return dateB.getTime() - dateA.getTime() // Descending order (newest first)
+                  })
+                  .map((event) => (
+                    <Card key={event.id} className="border-gray-100 shadow-sm">
+                      <CardHeader>
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-center gap-4 min-w-0 flex-1">
+                            <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                              {getEventTypeIcon(event.type)}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <CardTitle className="text-xl font-semibold text-gray-900 font-serif truncate">
+                                {event.title}
+                              </CardTitle>
+                              <CardDescription className="text-gray-600 line-clamp-2">
+                                {event.description}
+                              </CardDescription>
+                            </div>
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <CardTitle className="text-xl font-semibold text-gray-900 font-serif truncate">
-                              {event.title}
-                            </CardTitle>
-                            <CardDescription className="text-gray-600 line-clamp-2">
-                              {event.description}
-                            </CardDescription>
+                          <Badge className={getEventTypeColor(event.type)} className="flex-shrink-0">
+                            {event.type}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                          <div className="flex items-center gap-2">
+                            <CalendarIcon className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700">
+                              {new Date(event.date + "T00:00:00").toLocaleDateString()}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700">
+                              {event.time} {event.timezone && `(${event.timezone})`}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700 truncate">{event.location}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700">{event.attendees} attendees</span>
                           </div>
                         </div>
-                        <Badge className={getEventTypeColor(event.type)} className="flex-shrink-0">
-                          {event.type}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <CalendarIcon className="h-4 w-4 text-gray-500" />
-                          <span className="text-gray-700">
-                            {new Date(event.date + "T00:00:00").toLocaleDateString()}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-gray-500" />
-                          <span className="text-gray-700">{event.time}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-gray-500" />
-                          <span className="text-gray-700 truncate">{event.location}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Users className="h-4 w-4 text-gray-500" />
-                          <span className="text-gray-700">{event.attendees} attendees</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 bg-transparent"
-                          onClick={() => handleViewDetails(event)}
-                        >
-                          View Details
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => handleJoinEvent(event)}
-                          disabled={!event.onlineMeeting}
-                        >
-                          Join Event
-                        </Button>
-                        <AdminOnly>
-                          <Button variant="outline" size="sm" onClick={() => handleEditEvent(event)}>
-                            <Pencil className="h-4 w-4" />
+                        <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 bg-transparent"
+                            onClick={() => handleViewDetails(event)}
+                          >
+                            View Details
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => handleDeleteEvent(event.id)}>
-                            <Trash2 className="h-4 w-4" />
+                          <Button
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => handleJoinEvent(event)}
+                            disabled={!event.onlineMeeting && !event.location}
+                          >
+                            Join Event
                           </Button>
-                        </AdminOnly>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                          {canEditEvent(event.created_by) && (
+                            <>
+                              <Button variant="outline" size="sm" onClick={() => handleEditEvent(event)}>
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button variant="outline" size="sm" onClick={() => handleDeleteEvent(event.id)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
               </div>
             </TabsContent>
 
@@ -915,78 +1049,88 @@ export default function CalendarPage() {
                         Team member time off and vacation requests
                       </CardDescription>
                     </div>
-                    <AdminOnly>
+                    {canEditCalendar && (
                       <Button size="sm" onClick={openVacationModal}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Vacation
                       </Button>
-                    </AdminOnly>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {vacations.map((vacation) => (
-                      <div
-                        key={vacation.id}
-                        className="flex items-center gap-4 p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors"
-                      >
-                        <Avatar className="h-12 w-12 flex-shrink-0">
-                          <AvatarImage src={vacation.avatar || "/placeholder.svg"} />
-                          <AvatarFallback>
-                            {vacation.employee
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-                            <h4 className="font-semibold text-gray-900 text-lg">{vacation.employee}</h4>
-                            <Badge variant="outline" className="border-gray-300 text-gray-700 w-fit">
-                              {vacation.department}
-                            </Badge>
-                          </div>
-                          <p className="text-gray-600 mb-3">{vacation.type}</p>
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-500">
-                            <div className="flex items-center gap-2">
-                              <CalendarIcon className="h-4 w-4" />
-                              <span>
-                                {new Date(vacation.startDate).toLocaleDateString()} -{" "}
-                                {new Date(vacation.endDate).toLocaleDateString()}
-                              </span>
+                  {vacations.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Plane className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                      <p>No vacation requests yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {vacations.map((vacation) => {
+                        const startDate = new Date(vacation.start_date)
+                        const endDate = new Date(vacation.end_date)
+                        const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+
+                        return (
+                          <div
+                            key={vacation.id}
+                            className="flex items-center gap-4 p-6 border border-gray-100 rounded-xl hover:border-primary/20 transition-colors"
+                          >
+                            <Avatar className="h-12 w-12 flex-shrink-0">
+                              <AvatarImage src="/placeholder.svg" />
+                              <AvatarFallback>
+                                {vacation.employee_name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                                <h4 className="font-semibold text-gray-900 text-lg">{vacation.employee_name}</h4>
+                              </div>
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-500">
+                                <div className="flex items-center gap-2">
+                                  <CalendarIcon className="h-4 w-4" />
+                                  <span>
+                                    {startDate.toLocaleDateString()} - {endDate.toLocaleDateString()}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Clock className="h-4 w-4" />
+                                  <span>{days} days</span>
+                                </div>
+                              </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Clock className="h-4 w-4" />
-                              <span>{vacation.days} days</span>
+                              <Badge className={`${getVacationStatusColor(vacation.status)} flex-shrink-0`}>
+                                {vacation.status}
+                              </Badge>
+                              {canEditVacation(vacation.created_by, vacation.employee_name) && (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEditVacation(vacation)}
+                                    className="text-gray-600 hover:text-primary"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeleteVacation(vacation.id)}
+                                    className="text-gray-600 hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              )}
                             </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge className={`${getVacationStatusColor(vacation.status)} flex-shrink-0`}>
-                            {vacation.status}
-                          </Badge>
-                          <AdminOnly>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditVacation(vacation)}
-                              className="text-gray-600 hover:text-primary"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteVacation(vacation.id)}
-                              className="text-gray-600 hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AdminOnly>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                        )
+                      })}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -1164,11 +1308,22 @@ export default function CalendarPage() {
               </div>
 
               {selectedEvent.onlineMeeting && (
-                <div>
-                  <Label className="text-sm font-medium text-gray-500">Online Meeting</Label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-lg truncate flex-1">{selectedEvent.onlineMeeting}</p>
-                    <Button size="sm" onClick={() => handleJoinEvent(selectedEvent)}>
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <Label className="text-sm font-semibold text-blue-900 mb-2 block">Online Meeting Link</Label>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <a
+                      href={selectedEvent.onlineMeeting}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-base font-medium text-blue-600 hover:text-blue-800 underline decoration-2 underline-offset-2 break-all flex-1"
+                    >
+                      {selectedEvent.onlineMeeting}
+                    </a>
+                    <Button
+                      size="sm"
+                      onClick={() => handleJoinEvent(selectedEvent)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0"
+                    >
                       Join Now
                     </Button>
                   </div>
@@ -1210,52 +1365,19 @@ export default function CalendarPage() {
               <Label htmlFor="employee" className="text-right font-medium">
                 Employee
               </Label>
-              <Input
-                id="employee"
+              <Select
                 value={newVacation.employee}
-                onChange={(e) => setNewVacation({ ...newVacation, employee: e.target.value })}
-                className="col-span-3"
-                placeholder="Employee name"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="department" className="text-right font-medium">
-                Department
-              </Label>
-              <Select
-                value={newVacation.department}
-                onValueChange={(value) => setNewVacation({ ...newVacation, department: value })}
+                onValueChange={(value) => setNewVacation({ ...newVacation, employee: value })}
               >
                 <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select department" />
+                  <SelectValue placeholder="Select employee" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Marketing">Marketing</SelectItem>
-                  <SelectItem value="Design">Design</SelectItem>
-                  <SelectItem value="Development">Development</SelectItem>
-                  <SelectItem value="Sales">Sales</SelectItem>
-                  <SelectItem value="HR">HR</SelectItem>
-                  <SelectItem value="Finance">Finance</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="vacationType" className="text-right font-medium">
-                Type
-              </Label>
-              <Select
-                value={newVacation.type}
-                onValueChange={(value) => setNewVacation({ ...newVacation, type: value })}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Holiday Leave">Holiday Leave</SelectItem>
-                  <SelectItem value="Personal Leave">Personal Leave</SelectItem>
-                  <SelectItem value="Sick Leave">Sick Leave</SelectItem>
-                  <SelectItem value="Maternity Leave">Maternity Leave</SelectItem>
-                  <SelectItem value="Paternity Leave">Paternity Leave</SelectItem>
+                  {teamMembers.map((member) => (
+                    <SelectItem key={member.id} value={member.name}>
+                      {member.name} - {member.role}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -1316,107 +1438,138 @@ export default function CalendarPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Edit Event Modal */}
       <Dialog open={isEditEventModalOpen} onOpenChange={setIsEditEventModalOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Edit Event</DialogTitle>
+            <DialogTitle className="text-2xl font-semibold font-serif">Edit Event</DialogTitle>
             <DialogDescription>Update the event details below.</DialogDescription>
           </DialogHeader>
           {editingEvent && (
-            <div className="grid gap-4 py-4">
+            <div className="grid gap-6 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-title" className="text-right">
+                <Label htmlFor="edit-title" className="text-right font-medium">
                   Title
                 </Label>
                 <Input
                   id="edit-title"
-                  value={editingEvent.title}
+                  value={editingEvent.title || ""}
                   onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
                   className="col-span-3"
+                  placeholder="Enter event title"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-type" className="text-right">
+                <Label htmlFor="edit-type" className="text-right font-medium">
                   Type
                 </Label>
                 <Select
-                  value={editingEvent.type}
+                  value={editingEvent.type || "meeting"}
                   onValueChange={(value) => setEditingEvent({ ...editingEvent, type: value })}
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Meeting">Meeting</SelectItem>
-                    <SelectItem value="Workshop">Workshop</SelectItem>
-                    <SelectItem value="Conference">Conference</SelectItem>
-                    <SelectItem value="Training">Training</SelectItem>
-                    <SelectItem value="Social">Social</SelectItem>
+                    <SelectItem value="meeting">Meeting</SelectItem>
+                    <SelectItem value="deadline">Deadline</SelectItem>
+                    <SelectItem value="event">Event</SelectItem>
+                    <SelectItem value="training">Training</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-date" className="text-right">
+                <Label htmlFor="edit-date" className="text-right font-medium">
                   Date
                 </Label>
                 <Input
                   id="edit-date"
                   type="date"
-                  value={editingEvent.date}
+                  value={editingEvent.date || ""}
                   onChange={(e) => setEditingEvent({ ...editingEvent, date: e.target.value })}
                   className="col-span-3"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-time" className="text-right">
+                <Label htmlFor="edit-time" className="text-right font-medium">
                   Time
                 </Label>
                 <Input
                   id="edit-time"
                   type="time"
-                  value={editingEvent.time}
+                  value={editingEvent.time || ""}
                   onChange={(e) => setEditingEvent({ ...editingEvent, time: e.target.value })}
                   className="col-span-3"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-location" className="text-right">
+                <Label htmlFor="edit-duration" className="text-right font-medium">
+                  Duration
+                </Label>
+                <Input
+                  id="edit-duration"
+                  value={editingEvent.duration || ""}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, duration: e.target.value })}
+                  className="col-span-3"
+                  placeholder="e.g., 2 hours, All day"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-location" className="text-right font-medium">
                   Location
                 </Label>
                 <Input
                   id="edit-location"
-                  value={editingEvent.location}
+                  value={editingEvent.location || ""}
                   onChange={(e) => setEditingEvent({ ...editingEvent, location: e.target.value })}
                   className="col-span-3"
+                  placeholder="Conference Room A, Remote, etc."
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-online-meeting" className="text-right">
+                <Label htmlFor="edit-attendees" className="text-right font-medium">
+                  Attendees
+                </Label>
+                <Input
+                  id="edit-attendees"
+                  value={editingEvent.attendees || ""}
+                  onChange={(e) => setEditingEvent({ ...editingEvent, attendees: e.target.value })}
+                  className="col-span-3"
+                  placeholder="Number of expected attendees"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-online-meeting" className="text-right font-medium">
                   Online Meeting
                 </Label>
                 <Input
                   id="edit-online-meeting"
                   value={editingEvent.onlineMeeting || ""}
                   onChange={(e) => setEditingEvent({ ...editingEvent, onlineMeeting: e.target.value })}
-                  placeholder="Meeting link (optional)"
+                  placeholder="https://meet.google.com/... or https://zoom.us/..."
                   className="col-span-3"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-description" className="text-right">
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="edit-description" className="text-right font-medium">
                   Description
                 </Label>
-                <textarea
+                <Textarea
                   id="edit-description"
-                  value={editingEvent.description}
+                  value={editingEvent.description || ""}
                   onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
-                  className="col-span-3 min-h-[80px] px-3 py-2 border border-gray-300 rounded-md"
+                  className="col-span-3"
+                  placeholder="Event description and details"
+                  rows={3}
                 />
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button type="submit" onClick={handleUpdateEvent}>
+            <Button variant="outline" onClick={() => setIsEditEventModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateEvent} disabled={!editingEvent?.title || !editingEvent?.date}>
               Update Event
             </Button>
           </DialogFooter>

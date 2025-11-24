@@ -18,7 +18,6 @@ import {
   Settings,
   Users,
   Shield,
-  Activity,
   Calendar,
   FolderOpen,
   Bell,
@@ -34,111 +33,175 @@ import {
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
 import { useState, useEffect } from "react"
+import { getAllUsers, addUser, updateUser, deleteUser } from "@/app/actions/auth"
+import { getProjects } from "@/app/actions/projects"
+import { Checkbox } from "@/components/ui/checkbox"
 
 export default function AdminPage() {
   const { user, logout, isAuthenticated, isAdmin } = useAuth()
 
-  const [users, setUsers] = useState([])
+  const [users, setUsers] = useState<any[]>([])
+  const [projects, setProjects] = useState<any[]>([])
   const [isAddUserOpen, setIsAddUserOpen] = useState(false)
   const [isEditUserOpen, setIsEditUserOpen] = useState(false)
-  const [editingUser, setEditingUser] = useState(null)
+  const [editingUser, setEditingUser] = useState<any>(null)
   const [newUser, setNewUser] = useState({
-    name: "",
     email: "",
-    password: "",
-    role: "user",
+    name: "", // Added name field
+    password: "", // Added password field
+    role: "user" as "administrator" | "lead" | "user",
+    projects: [] as number[],
   })
   const [editForm, setEditForm] = useState({
-    name: "",
     email: "",
-    password: "",
-    role: "user",
+    name: "", // Added name field
+    password: "", // Added password field (optional for edit)
+    role: "user" as "administrator" | "lead" | "user",
+    projects: [] as number[],
   })
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    const loadUsers = () => {
+    const loadData = async () => {
       try {
-        const storedUsers = localStorage.getItem("admin-users")
-        if (storedUsers) {
-          setUsers(JSON.parse(storedUsers))
-        } else {
-          // Initialize with default users if none exist
-          const defaultUsers = [
-            { id: 1, name: "Admin User", email: "admin@company.com", role: "admin" },
-            { id: 2, name: "Regular User", email: "user@company.com", role: "user" },
-          ]
-          setUsers(defaultUsers)
-          localStorage.setItem("admin-users", JSON.stringify(defaultUsers))
-        }
+        const [usersData, projectsData] = await Promise.all([getAllUsers(), getProjects()])
+        setUsers(usersData)
+        setProjects(projectsData)
+        console.log("[v0] Loaded users:", usersData)
+        console.log("[v0] Loaded projects:", projectsData)
       } catch (error) {
-        console.error("Error loading users:", error)
+        console.error("[v0] Error loading data:", error)
       }
     }
-    loadUsers()
+    loadData()
   }, [])
 
-  const handleAddUser = () => {
-    if (!newUser.name || !newUser.email || !newUser.password) return
-
-    const user = {
-      id: Date.now(),
-      name: newUser.name,
-      email: newUser.email,
-      password: newUser.password,
-      role: newUser.role,
-      createdAt: new Date().toISOString(),
+  const handleAddUser = async () => {
+    if (!newUser.email || !newUser.name || !newUser.password) {
+      alert("Please fill in all required fields")
+      return
     }
 
-    const updatedUsers = [...users, user]
-    setUsers(updatedUsers)
-    localStorage.setItem("admin-users", JSON.stringify(updatedUsers))
+    setIsLoading(true)
+    try {
+      const result = await addUser(newUser.email, newUser.name, newUser.password, newUser.role, newUser.projects)
 
-    // Reset form and close modal
-    setNewUser({ name: "", email: "", password: "", role: "user" })
-    setIsAddUserOpen(false)
+      if (result.success) {
+        // Reload users
+        const usersData = await getAllUsers()
+        setUsers(usersData)
 
-    // console.log("[v0] Added new user:", user)
+        setNewUser({ email: "", name: "", password: "", role: "user", projects: [] })
+        setIsAddUserOpen(false)
+
+        console.log("[v0] Added new user:", newUser.email)
+      } else {
+        console.error("[v0] Failed to add user:", result.error)
+        alert(`Failed to add user: ${result.error}`)
+      }
+    } catch (error) {
+      console.error("[v0] Error adding user:", error)
+      alert("Failed to add user")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleEditUser = (userToEdit) => {
+  const handleEditUser = (userToEdit: any) => {
     setEditingUser(userToEdit)
     setEditForm({
-      name: userToEdit.name,
       email: userToEdit.email,
-      password: userToEdit.password || "",
+      name: userToEdit.name || "", // Load name
+      password: "", // Leave password empty (optional for edit)
       role: userToEdit.role,
+      projects: userToEdit.projects || [],
     })
     setIsEditUserOpen(true)
   }
 
-  const handleUpdateUser = () => {
-    if (!editForm.name || !editForm.email) return
+  const handleUpdateUser = async () => {
+    if (!editForm.email || !editForm.name) {
+      alert("Please fill in all required fields")
+      return
+    }
 
-    const updatedUsers = users.map((u) =>
-      u.id === editingUser.id
-        ? { ...u, name: editForm.name, email: editForm.email, password: editForm.password, role: editForm.role }
-        : u,
-    )
+    setIsLoading(true)
+    try {
+      const result = await updateUser(
+        editForm.email,
+        editForm.name,
+        editForm.password || null, // Pass null if password is empty
+        editForm.role,
+        editForm.projects,
+      )
 
-    setUsers(updatedUsers)
-    localStorage.setItem("admin-users", JSON.stringify(updatedUsers))
+      if (result.success) {
+        // Reload users
+        const usersData = await getAllUsers()
+        setUsers(usersData)
 
-    setIsEditUserOpen(false)
-    setEditingUser(null)
+        setIsEditUserOpen(false)
+        setEditingUser(null)
 
-    // console.log("[v0] Updated user:", editingUser.id)
+        console.log("[v0] Updated user:", editForm.email)
+      } else {
+        console.error("[v0] Failed to update user:", result.error)
+        alert(`Failed to update user: ${result.error}`)
+      }
+    } catch (error) {
+      console.error("[v0] Error updating user:", error)
+      alert("Failed to update user")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleDeleteUser = (userId) => {
-    const updatedUsers = users.filter((u) => u.id !== userId)
-    setUsers(updatedUsers)
-    localStorage.setItem("admin-users", JSON.stringify(updatedUsers))
+  const handleDeleteUser = async (userEmail: string) => {
+    if (!confirm(`Are you sure you want to delete user ${userEmail}?`)) return
 
-    // console.log("[v0] Deleted user with ID:", userId)
+    setIsLoading(true)
+    try {
+      const result = await deleteUser(userEmail)
+
+      if (result.success) {
+        // Reload users
+        const usersData = await getAllUsers()
+        setUsers(usersData)
+
+        console.log("[v0] Deleted user:", userEmail)
+      } else {
+        console.error("[v0] Failed to delete user:", result.error)
+        alert(`Failed to delete user: ${result.error}`)
+      }
+    } catch (error) {
+      console.error("[v0] Error deleting user:", error)
+      alert("Failed to delete user")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const adminUsers = users.filter((u) => u.role === "admin")
+  const toggleProject = (projectId: number, isNewUser: boolean) => {
+    if (isNewUser) {
+      setNewUser((prev) => ({
+        ...prev,
+        projects: prev.projects.includes(projectId)
+          ? prev.projects.filter((id) => id !== projectId)
+          : [...prev.projects, projectId],
+      }))
+    } else {
+      setEditForm((prev) => ({
+        ...prev,
+        projects: prev.projects.includes(projectId)
+          ? prev.projects.filter((id) => id !== projectId)
+          : [...prev.projects, projectId],
+      }))
+    }
+  }
+
+  const adminUsers = users.filter((u) => u.role === "administrator")
+  const leadUsers = users.filter((u) => u.role === "lead")
   const regularUsers = users.filter((u) => u.role === "user")
 
   if (!isAuthenticated() || !isAdmin()) {
@@ -328,17 +391,14 @@ export default function AdminPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold text-gray-900">Admin Dashboard</h2>
-              <p className="text-gray-600">Manage system settings and configurations</p>
+              <p className="text-gray-600">Manage users, roles, and permissions</p>
             </div>
           </div>
 
-          {/* Tabs */}
           <Tabs defaultValue="users" className="space-y-6">
             <TabsList>
               <TabsTrigger value="users">User Management</TabsTrigger>
               <TabsTrigger value="roles">Roles & Permissions</TabsTrigger>
-              <TabsTrigger value="activity">Activity Log</TabsTrigger>
-              <TabsTrigger value="settings">System Settings</TabsTrigger>
             </TabsList>
 
             <TabsContent value="users" className="space-y-6">
@@ -354,23 +414,24 @@ export default function AdminPage() {
                       Add User
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Add New User</DialogTitle>
                       <DialogDescription>Create a new user account with appropriate access level</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="name">Full Name</Label>
+                        <Label htmlFor="name">Full Name *</Label>
                         <Input
                           id="name"
+                          type="text"
                           value={newUser.name}
                           onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
                           placeholder="Enter full name"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="email">Email Address</Label>
+                        <Label htmlFor="email">Email Address *</Label>
                         <Input
                           id="email"
                           type="email"
@@ -380,30 +441,58 @@ export default function AdminPage() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="password">Password</Label>
+                        <Label htmlFor="password">Temporary Password *</Label>
                         <Input
                           id="password"
                           type="password"
                           value={newUser.password}
                           onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                          placeholder="Enter password"
+                          placeholder="Enter temporary password"
                         />
+                        <p className="text-xs text-gray-600 mt-1">User should change this password after first login</p>
                       </div>
                       <div>
-                        <Label htmlFor="role">Role</Label>
-                        <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
+                        <Label htmlFor="role">Role *</Label>
+                        <Select
+                          value={newUser.role}
+                          onValueChange={(value: any) => setNewUser({ ...newUser, role: value, projects: [] })}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Select role" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="admin">Administrator</SelectItem>
+                            <SelectItem value="administrator">Administrator</SelectItem>
+                            <SelectItem value="lead">Lead</SelectItem>
                             <SelectItem value="user">User</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
+                      {newUser.role === "lead" && (
+                        <div>
+                          <Label>Assigned Projects</Label>
+                          <p className="text-sm text-gray-600 mb-2">Select projects this lead can manage</p>
+                          <div className="border border-gray-200 rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
+                            {projects.map((project) => (
+                              <div key={project.id} className="flex items-center gap-2">
+                                <Checkbox
+                                  id={`new-project-${project.id}`}
+                                  checked={newUser.projects.includes(project.id)}
+                                  onCheckedChange={() => toggleProject(project.id, true)}
+                                />
+                                <Label htmlFor={`new-project-${project.id}`} className="cursor-pointer">
+                                  {project.name}
+                                </Label>
+                              </div>
+                            ))}
+                            {projects.length === 0 && (
+                              <p className="text-sm text-gray-500 text-center py-4">No projects available</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
                       <div className="flex gap-2 pt-4">
-                        <Button onClick={handleAddUser} className="flex-1">
-                          Add User
+                        <Button onClick={handleAddUser} className="flex-1" disabled={isLoading}>
+                          {isLoading ? "Adding..." : "Add User"}
                         </Button>
                         <Button variant="outline" onClick={() => setIsAddUserOpen(false)} className="flex-1">
                           Cancel
@@ -414,37 +503,33 @@ export default function AdminPage() {
                 </Dialog>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Administrator Group */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Crown className="h-5 w-5 text-primary" />
-                        Administrator ({adminUsers.length})
+                        Administrators ({adminUsers.length})
                       </div>
                     </CardTitle>
-                    <CardDescription>Users with full system access</CardDescription>
+                    <CardDescription>Full system access</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
                       {adminUsers.map((user) => (
                         <div
-                          key={user.id}
+                          key={user.email}
                           className="flex items-center justify-between p-3 border border-gray-100 rounded-lg"
                         >
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
                               <AvatarFallback className="bg-primary/20 text-primary-foreground">
-                                {user.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
+                                {user.email.substring(0, 2).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="font-medium text-sm">{user.name}</p>
-                              <p className="text-xs text-gray-600">{user.email}</p>
+                              <p className="font-medium text-sm">{user.email}</p>
                             </div>
                           </div>
                           <div className="flex gap-1">
@@ -459,7 +544,7 @@ export default function AdminPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDeleteUser(user.id)}
+                              onClick={() => handleDeleteUser(user.email)}
                               className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
                             >
                               <Trash2 className="h-3 w-3" />
@@ -474,36 +559,35 @@ export default function AdminPage() {
                   </CardContent>
                 </Card>
 
-                {/* User Group */}
+                {/* Lead Group */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <User className="h-5 w-5 text-secondary" />
-                        User ({regularUsers.length})
+                        <Shield className="h-5 w-5 text-chart-3" />
+                        Leads ({leadUsers.length})
                       </div>
                     </CardTitle>
-                    <CardDescription>Users with standard access</CardDescription>
+                    <CardDescription>Project owners & tech leads</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {regularUsers.map((user) => (
+                      {leadUsers.map((user) => (
                         <div
-                          key={user.id}
+                          key={user.email}
                           className="flex items-center justify-between p-3 border border-gray-100 rounded-lg"
                         >
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
-                              <AvatarFallback className="bg-secondary/20 text-secondary-foreground">
-                                {user.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
+                              <AvatarFallback className="bg-chart-3/20 text-chart-3">
+                                {user.email.substring(0, 2).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="font-medium text-sm">{user.name}</p>
-                              <p className="text-xs text-gray-600">{user.email}</p>
+                              <p className="font-medium text-sm">{user.email}</p>
+                              <p className="text-xs text-gray-600">
+                                {user.projects.length} project{user.projects.length !== 1 ? "s" : ""}
+                              </p>
                             </div>
                           </div>
                           <div className="flex gap-1">
@@ -518,7 +602,62 @@ export default function AdminPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDeleteUser(user.id)}
+                              onClick={() => handleDeleteUser(user.email)}
+                              className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      {leadUsers.length === 0 && (
+                        <p className="text-sm text-gray-500 text-center py-4">No leads found</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* User Group */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <User className="h-5 w-5 text-secondary" />
+                        Users ({regularUsers.length})
+                      </div>
+                    </CardTitle>
+                    <CardDescription>Standard access</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {regularUsers.map((user) => (
+                        <div
+                          key={user.email}
+                          className="flex items-center justify-between p-3 border border-gray-100 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="bg-secondary/20 text-secondary-foreground">
+                                {user.email.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium text-sm">{user.email}</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditUser(user)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteUser(user.email)}
                               className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
                             >
                               <Trash2 className="h-3 w-3" />
@@ -536,16 +675,17 @@ export default function AdminPage() {
 
               {/* Edit User Dialog */}
               <Dialog open={isEditUserOpen} onOpenChange={setIsEditUserOpen}>
-                <DialogContent>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Edit User</DialogTitle>
-                    <DialogDescription>Update user information and access level</DialogDescription>
+                    <DialogDescription>Update user information, role and project assignments</DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="edit-name">Full Name</Label>
+                      <Label htmlFor="edit-name">Full Name *</Label>
                       <Input
                         id="edit-name"
+                        type="text"
                         value={editForm.name}
                         onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                         placeholder="Enter full name"
@@ -553,42 +693,61 @@ export default function AdminPage() {
                     </div>
                     <div>
                       <Label htmlFor="edit-email">Email Address</Label>
-                      <Input
-                        id="edit-email"
-                        type="email"
-                        value={editForm.email}
-                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                        placeholder="Enter email address"
-                      />
+                      <Input id="edit-email" type="email" value={editForm.email} disabled className="bg-gray-50" />
                     </div>
                     <div>
-                      <Label htmlFor="edit-password">Password</Label>
+                      <Label htmlFor="edit-password">New Password (optional)</Label>
                       <Input
                         id="edit-password"
                         type="password"
                         value={editForm.password}
                         onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
-                        placeholder="Enter new password (leave blank to keep current)"
+                        placeholder="Leave blank to keep current password"
                       />
+                      <p className="text-xs text-gray-600 mt-1">Only fill this if you want to change the password</p>
                     </div>
                     <div>
-                      <Label htmlFor="edit-role">Role</Label>
+                      <Label htmlFor="edit-role">Role *</Label>
                       <Select
                         value={editForm.role}
-                        onValueChange={(value) => setEditForm({ ...editForm, role: value })}
+                        onValueChange={(value: any) => setEditForm({ ...editForm, role: value, projects: [] })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select role" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="admin">Administrator</SelectItem>
+                          <SelectItem value="administrator">Administrator</SelectItem>
+                          <SelectItem value="lead">Lead</SelectItem>
                           <SelectItem value="user">User</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
+                    {editForm.role === "lead" && (
+                      <div>
+                        <Label>Assigned Projects</Label>
+                        <p className="text-sm text-gray-600 mb-2">Select projects this lead can manage</p>
+                        <div className="border border-gray-200 rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
+                          {projects.map((project) => (
+                            <div key={project.id} className="flex items-center gap-2">
+                              <Checkbox
+                                id={`edit-project-${project.id}`}
+                                checked={editForm.projects.includes(project.id)}
+                                onCheckedChange={() => toggleProject(project.id, false)}
+                              />
+                              <Label htmlFor={`edit-project-${project.id}`} className="cursor-pointer">
+                                {project.name}
+                              </Label>
+                            </div>
+                          ))}
+                          {projects.length === 0 && (
+                            <p className="text-sm text-gray-500 text-center py-4">No projects available</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     <div className="flex gap-2 pt-4">
-                      <Button onClick={handleUpdateUser} className="flex-1">
-                        Update User
+                      <Button onClick={handleUpdateUser} className="flex-1" disabled={isLoading}>
+                        {isLoading ? "Updating..." : "Update User"}
                       </Button>
                       <Button variant="outline" onClick={() => setIsEditUserOpen(false)} className="flex-1">
                         Cancel
@@ -600,32 +759,32 @@ export default function AdminPage() {
             </TabsContent>
 
             <TabsContent value="roles" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Crown className="h-5 w-5 text-primary" />
-                      Administrator Role
+                      Administrator
                     </CardTitle>
-                    <CardDescription>Full system access and user management</CardDescription>
+                    <CardDescription>Full system access</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <Shield className="h-4 w-4 text-chart-4" />
-                        <span className="text-sm">Create, edit, and delete projects</span>
+                        <span className="text-sm">Full access to all projects</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Shield className="h-4 w-4 text-chart-4" />
-                        <span className="text-sm">Manage events and calendar</span>
+                        <span className="text-sm">Manage all announcements</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Shield className="h-4 w-4 text-chart-4" />
-                        <span className="text-sm">Create and manage announcements</span>
+                        <span className="text-sm">Manage calendar & vacations</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Shield className="h-4 w-4 text-chart-4" />
-                        <span className="text-sm">Add and manage team members</span>
+                        <span className="text-sm">Manage team members</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Shield className="h-4 w-4 text-chart-4" />
@@ -638,24 +797,58 @@ export default function AdminPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <User className="h-5 w-5 text-secondary" />
-                      Regular User Role
+                      <Shield className="h-5 w-5 text-chart-3" />
+                      Lead
                     </CardTitle>
-                    <CardDescription>Standard access to view and interact with content</CardDescription>
+                    <CardDescription>Project owners & tech leads</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-chart-3" />
+                        <span className="text-sm">Full access to assigned projects</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-chart-3" />
+                        <span className="text-sm">Read-only for other projects</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-chart-3" />
+                        <span className="text-sm">Add/edit announcements</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-chart-3" />
+                        <span className="text-sm">Add/edit calendar events</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-chart-3" />
+                        <span className="text-sm">View team directory</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="h-5 w-5 text-secondary" />
+                      User
+                    </CardTitle>
+                    <CardDescription>Standard access</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <Shield className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">View projects and progress</span>
+                        <span className="text-sm">Read-only access to projects</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Shield className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">View calendar and events</span>
+                        <span className="text-sm">Add/edit announcements</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Shield className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">Read announcements</span>
+                        <span className="text-sm">Add/edit calendar events</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Shield className="h-4 w-4 text-muted-foreground" />
@@ -663,117 +856,8 @@ export default function AdminPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Shield className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">Request time off</span>
+                        <span className="text-sm">Request vacations</span>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="activity" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
-                  <CardDescription>System activity and user actions</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Settings className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">System configuration updated</p>
-                        <p className="text-sm text-gray-600">Admin settings modified</p>
-                        <p className="text-xs text-gray-500">1 day ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl">
-                      <div className="h-10 w-10 rounded-full bg-chart-3/10 flex items-center justify-center">
-                        <Activity className="h-5 w-5 text-chart-3" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">System backup completed</p>
-                        <p className="text-sm text-gray-600">Automated daily backup successful</p>
-                        <p className="text-xs text-gray-500">1 day ago</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="settings" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Security Settings</CardTitle>
-                    <CardDescription>Configure system security and access controls</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Require 2FA for admins</p>
-                        <p className="text-sm text-gray-600">Force two-factor authentication for admin users</p>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        Configure
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Session timeout</p>
-                        <p className="text-sm text-gray-600">Automatically log out inactive users</p>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        Configure
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Password policy</p>
-                        <p className="text-sm text-gray-600">Set minimum password requirements</p>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        Configure
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>System Maintenance</CardTitle>
-                    <CardDescription>System health and maintenance tools</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Database backup</p>
-                        <p className="text-sm text-gray-600">Last backup: 2 hours ago</p>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        Backup Now
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Clear cache</p>
-                        <p className="text-sm text-gray-600">Improve system performance</p>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        Clear Cache
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">System logs</p>
-                        <p className="text-sm text-gray-600">View detailed system logs</p>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        View Logs
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>

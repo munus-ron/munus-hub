@@ -17,3 +17,5 @@ export function AdminOnly({ children, fallback = null }: AdminOnlyProps) {
 
   return <>{children}</>
 }
+
+export default AdminOnly

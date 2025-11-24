@@ -43,403 +43,10 @@ import {
   Trash2,
   Settings,
 } from "lucide-react"
-import { AdminOnly } from "@/components/admin-only"
+import { usePermissions } from "@/hooks/use-permissions"
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
-
-const getUpdatedProjects = () => {
-  // console.log("[v0] Starting getUpdatedProjects...")
-  const staticProjects = [
-    {
-      id: 1,
-      title: "Ligala",
-      description: "Functions as a virtual law office, providing lawyers with comprehensive tools to onboard and connect with clients, generate attorney-client​ work products, conduct legal research, and manage client billings, all through an online platform.​ The product also allows individuals to connect with and engage lawyers for their legal needs, selecting them based on preferred location or practice area, as well as offering options for pro-bono or paid services.",
-      status: "In Progress",
-      progress: 95,
-      "team": [
-          {
-              "name": "Lani Billena",
-              "role": "Team Member",
-              "avatar": "/team-member-1.png",
-              "email": "lani.billena@company.com"
-          },
-          {
-              "name": "Nessa Dumo",
-              "role": "Team Member",
-              "avatar": "/team-member-2.png",
-              "email": "nessa.dumo@company.com"
-          },
-          {
-              "name": "Bryan Kwan",
-              "role": "Team Member",
-              "avatar": "/team-member-3.png",
-              "email": "bryan.kwan@company.com"
-          },
-          {
-              "name": "Malike Bouaoud",
-              "role": "Team Member",
-              "avatar": "/team-member-1.png",
-              "email": "malike.bouaoud@company.com"
-          },
-          {
-              "name": "Ernie Guevara",
-              "role": "Team Member",
-              "avatar": "/team-member-2.png",
-              "email": "ernie.guevara@company.com"
-          },
-          {
-              "name": "Mary Joy Mamalateo-Jusay",
-              "role": "Team Member",
-              "avatar": "/team-member-3.png",
-              "email": "mary.joy.mamalateo-jusay@company.com"
-          },
-          {
-              "name": "Michelle Mendez-Palmares",
-              "role": "Team Member",
-              "avatar": "/team-member-1.png",
-              "email": "michelle.mendez-palmares@company.com"
-          },
-          {
-              "name": "Studio After Six",
-              "role": "Team Member",
-              "avatar": "/team-member-2.png",
-              "email": "studio.after.six@company.com"
-          },
-          {
-              "name": "John Carlo Velasquez",
-              "role": "Team Member",
-              "avatar": "/team-member-3.png",
-              "email": "john.carlo.velasquez@company.com"
-          },
-          {
-              "name": "Roland Rei Espeleta",
-              "role": "Team Member",
-              "avatar": "/team-member-1.png",
-              "email": "roland.rei.espeleta@company.com"
-          },
-          {
-              "name": "Jelony Sobremisana",
-              "role": "Team Member",
-              "avatar": "/team-member-2.png",
-              "email": "jelony.sobremisana@company.com"
-          },
-          {
-              "name": "Juan David Aristizabal",
-              "role": "Team Member",
-              "avatar": "/team-member-3.png",
-              "email": "juan.david.aristizabal@company.com"
-          }
-      ],
-        "department": "Technology",
-      "startDate": "2024-05-01",
-      "endDate": "2025-10-01",
-      "priority": "High",
-      "budget": "$120,000",
-      "spent": "$54,000",
-      "milestones": [
-        {
-            "name": "Architecture Design",
-            "status": "completed",
-            "dueDate": "2024-10-01",
-            "startDate": "2024-09-15",
-            "endDate": "2024-09-30"
-        },
-        {
-            "name": "Core Features Development",
-            "status": "in-progress",
-            "dueDate": "2024-12-15",
-            "startDate": "2024-10-01",
-            "endDate": "2024-12-14"
-        },
-        {
-            "name": "Testing & Bug Fixes",
-            "status": "pending",
-            "dueDate": "2025-01-31",
-            "startDate": "2024-12-15",
-            "endDate": "2025-01-30"
-        },
-        {
-            "name": "App Store Submission",
-            "status": "pending",
-            "dueDate": "2025-02-28",
-            "startDate": "2025-02-01",
-            "endDate": "2025-02-28"
-        }
-    ],
-    "recentActivity": [
-        {
-            "user": "David Park",
-            "action": "completed user authentication module",
-            "time": "3 hours ago"
-        },
-        {
-            "user": "Lisa Wong",
-            "action": "implemented push notifications",
-            "time": "1 day ago"
-        },
-        {
-            "user": "Emily Johnson",
-            "action": "reviewed app store guidelines",
-            "time": "2 days ago"
-        }
-    ],
-    "functionalities": [
-        "Cross-platform mobile application",
-        "User authentication and profiles",
-        "Real-time notifications",
-        "Offline data synchronization"
-    ],
-    "features": [
-        "Biometric login support",
-        "Dark mode interface",
-        "In-app messaging system",
-        "Social media integration"
-    ],
-    "documents": [
-        {
-            "id": 1,
-            "name": "Mobile App Specifications.pdf",
-            "type": "PDF",
-            "size": "3.2 MB",
-            "uploadedBy": "Emily Johnson",
-            "uploadedDate": "2024-09-20",
-            "category": "Requirements",
-            "sharepointUrl": "https: //munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Mobile/App%20Specifications.pdf"
-        },
-        {
-            "id": 2,
-            "name": "UI Design Guidelines.sketch",
-            "type": "Sketch",
-            "size": "8.7 MB",
-            "uploadedBy": "David Park",
-            "uploadedDate": "2024-10-05",
-            "category": "Design",
-            "sharepointUrl": "https: //munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Mobile/UI%20Guidelines.sketch"
-        }
-    ],
-    "teamCount": 12,
-    "teamMembers": "Lani Billena, Nessa Dumo, Bryan Kwan, Malike Bouaoud, Ernie Guevara, Mary Joy Mamalateo-Jusay, Michelle Mendez-Palmares, Studio After Six, John Carlo Velasquez, Roland Rei Espeleta, Jelony Sobremisana, Juan David Aristizabal"
-    },
-    {
-      id: 2,
-      title: "Mobile App Launch",
-      description: "Development and launch of iOS and Android mobile applications",
-      status: "Planning",
-      progress: 25,
-      team: [
-        { name: "Emily Chen", role: "Mobile Developer", avatar: "/team-member-1.png" },
-        { name: "David Wilson", role: "QA Engineer", avatar: "/team-member-2.png" },
-        { name: "Lisa Anderson", role: "Product Manager", avatar: "/team-member-3.png" },
-        { name: "Tom Rodriguez", role: "Backend Developer", avatar: "/professional-headshot.png" },
-      ],
-      department: "Technology",
-      startDate: "2024-02-01",
-      endDate: "2024-06-15",
-      priority: "High",
-      budget: "$75,000",
-      spent: "$18,750",
-    },
-    {
-      id: 3,
-      title: "Q4 Planning Initiative",
-      description: "Strategic planning and goal setting for the fourth quarter",
-      status: "Complete",
-      progress: 100,
-      team: [
-        { name: "Robert Johnson", role: "Strategy Lead", avatar: "/ceo-headshot.png" },
-        { name: "Jennifer Smith", role: "Analyst", avatar: "/team-member-1.png" },
-      ],
-      department: "Operations",
-      startDate: "2024-09-01",
-      endDate: "2024-09-30",
-      priority: "Medium",
-      budget: "$25,000",
-      spent: "$25,000",
-    },
-    {
-      id: 4,
-      title: "Customer Support Portal",
-      description: "Implementation of new customer support ticketing system",
-      status: "In Progress",
-      progress: 40,
-      team: [
-        { name: "Alex Thompson", role: "System Admin", avatar: "/team-member-2.png" },
-        { name: "Maria Garcia", role: "Support Lead", avatar: "/team-member-3.png" },
-        { name: "Chris Lee", role: "Developer", avatar: "/team-member-1.png" },
-      ],
-      department: "Customer Service",
-      startDate: "2024-01-20",
-      endDate: "2024-04-10",
-      priority: "Medium",
-      budget: "$35,000",
-      spent: "$14,000",
-    },
-    {
-      id: 5,
-      title: "Data Analytics Dashboard",
-      description: "Business intelligence dashboard for real-time analytics",
-      status: "Planning",
-      progress: 15,
-      team: [
-        { name: "Kevin Park", role: "Data Analyst", avatar: "/professional-headshot.png" },
-        { name: "Rachel Green", role: "BI Developer", avatar: "/team-member-2.png" },
-      ],
-      department: "Analytics",
-      startDate: "2024-03-01",
-      endDate: "2024-07-15",
-      priority: "Low",
-      budget: "$50,000",
-      spent: "$7,500",
-    },
-    {
-      id: 6,
-      title: "Security Audit & Compliance",
-      description: "Comprehensive security review and compliance implementation",
-      status: "In Progress",
-      progress: 30,
-      team: [
-        { name: "Daniel Kim", role: "Security Specialist", avatar: "/team-member-3.png" },
-        { name: "Sophie Turner", role: "Compliance Officer", avatar: "/team-member-1.png" },
-      ],
-      department: "IT Security",
-      startDate: "2024-02-15",
-      endDate: "2024-05-30",
-      priority: "High",
-      budget: "$40,000",
-      spent: "$12,000",
-    },
-  ]
-
-  // console.log(
-  //   "[v0] Static projects loaded:",
-  //   staticProjects.map((p) => ({ id: p.id, title: p.title })),
-  // )
-
-  const activeProjects = []
-
-  // Check each static project for deletion and updates
-  for (const project of staticProjects) {
-    // Check if project is deleted
-    const deletionMarker = localStorage.getItem(`project_${project.id}_deleted`)
-    // console.log(
-    //   `[v0] Project ${project.id} (${project.title}) - Deletion marker: ${deletionMarker}, Is deleted: ${deletionMarker === "true"}`,
-    // )
-
-    if (deletionMarker === "true") {
-      // console.log(`[v0] Skipping deleted project: ${project.title}`)
-      continue // Skip deleted projects
-    }
-
-    // Load any updates from localStorage
-    const storedProjectData = localStorage.getItem(`project_${project.id}`)
-    if (storedProjectData) {
-      try {
-        const updatedProject = JSON.parse(storedProjectData)
-        // console.log(`[v0] Found updates for project ${project.id}:`, {
-        //   originalTitle: project.title,
-        //   updatedTitle: updatedProject.title,
-        // })
-
-        // Merge all properties from stored data
-        const mergedProject = {
-          ...project,
-          ...updatedProject,
-          team: updatedProject.team || project.team || [],
-        }
-        activeProjects.push(mergedProject)
-      } catch (error) {
-        console.error(`[v0] Error parsing stored project ${project.id}:`, error)
-        activeProjects.push(project)
-      }
-    } else {
-      activeProjects.push(project)
-    }
-  }
-
-  // console.log(
-  //   "[v0] Active projects after deletion filter:",
-  //   activeProjects.map((p) => ({ id: p.id, title: p.title })),
-  // )
-
-  const allKeys = Object.keys(localStorage)
-  // console.log("[v0] All localStorage keys:", allKeys)
-
-  const projectKeys = allKeys.filter((key) => key.startsWith("project_"))
-  // console.log("[v0] All project keys in localStorage:", projectKeys)
-
-  const staticProjectIds = staticProjects.map((p) => p.id)
-  // console.log("[v0] Static project IDs:", staticProjectIds)
-
-  const newProjectKeys = allKeys.filter((key) => {
-    if (!key.startsWith("project_") || key.endsWith("_deleted")) {
-      return false
-    }
-
-    // Extract project ID from key (e.g., "project_7" -> 7)
-    const projectIdMatch = key.match(/^project_(\d+)$/)
-    if (!projectIdMatch) {
-      return false
-    }
-
-    const projectId = Number.parseInt(projectIdMatch[1])
-    const isNewProject = !staticProjectIds.includes(projectId)
-
-    // console.log(`[v0] Checking key ${key}: projectId=${projectId}, isNewProject=${isNewProject}`)
-    return isNewProject
-  })
-
-  // console.log("[v0] New project keys found:", newProjectKeys)
-
-  if (newProjectKeys.length === 0) {
-    // console.log("[v0] No new projects found, checking localStorage again...")
-    // Force a fresh read of localStorage
-    const freshKeys = []
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (key && key.startsWith("project_") && !key.endsWith("_deleted")) {
-        freshKeys.push(key)
-      }
-    }
-    // console.log("[v0] Fresh localStorage scan found project keys:", freshKeys)
-
-    // Check for new projects in fresh scan
-    for (const key of freshKeys) {
-      const projectIdMatch = key.match(/^project_(\d+)$/)
-      if (projectIdMatch) {
-        const projectId = Number.parseInt(projectIdMatch[1])
-        if (!staticProjectIds.includes(projectId)) {
-          newProjectKeys.push(key)
-          // console.log(`[v0] Found new project in fresh scan: ${key}`)
-        }
-      }
-    }
-  }
-
-  for (const key of newProjectKeys) {
-    try {
-      const projectData = JSON.parse(localStorage.getItem(key))
-      if (projectData && projectData.id) {
-        // console.log(`[v0] Adding new project from localStorage:`, { id: projectData.id, title: projectData.title })
-        activeProjects.push(projectData)
-      }
-    } catch (error) {
-      console.error(`[v0] Error parsing new project ${key}:`, error)
-    }
-  }
-
-  // Calculate team counts for display
-  const projectsWithCounts = activeProjects.map((project) => ({
-    ...project,
-    teamCount: project.team ? project.team.length : 0,
-  }))
-
-  // console.log(
-  //   "[v0] Final project team counts:",
-  //   projectsWithCounts.map((p) => ({ id: p.id, title: p.title, teamCount: p.teamCount })),
-  // )
-
-  return projectsWithCounts
-}
+import { getProjects, createProject, updateProject, deleteProject } from "@/app/actions/projects"
 
 function getStatusColor(status: string) {
   switch (status) {
@@ -495,60 +102,15 @@ export default function ProjectsPage() {
   const [showMobileMenu, setShowMobileMenu] = useState(false)
 
   const { user, logout, isAuthenticated } = useAuth()
+  const { isAdministrator, canEditProject, loading: permissionsLoading } = usePermissions()
 
   useEffect(() => {
-    const updatedProjects = getUpdatedProjects()
-    // console.log(
-    //   "[v0] Projects loaded on mount:",
-    //   updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
-    // )
-    setProjects(updatedProjects)
-  }, [])
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        const updatedProjects = getUpdatedProjects()
-        // console.log(
-        //   "[v0] Projects updated on visibility change:",
-        //   updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
-        // )
-        setProjects(updatedProjects)
-      }
+    async function loadProjects() {
+      const projectsData = await getProjects()
+      console.log("[v0] Projects loaded from database:", projectsData)
+      setProjects(projectsData)
     }
-
-    const handleFocus = () => {
-      const updatedProjects = getUpdatedProjects()
-      // console.log(
-      //   "[v0] Projects updated on focus:",
-      //   updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
-      // )
-      setProjects(updatedProjects)
-    }
-
-    const handleStorageChange = (e) => {
-      if (e.key && e.key.startsWith("project_")) {
-        // console.log("[v0] Storage change detected:", e.key)
-        setTimeout(() => {
-          const updatedProjects = getUpdatedProjects()
-          // console.log(
-          //   "[v0] Projects updated on storage change:",
-          //   updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
-          // )
-          setProjects(updatedProjects)
-        }, 100)
-      }
-    }
-
-    document.addEventListener("visibilitychange", handleVisibilityChange)
-    window.addEventListener("focus", handleFocus)
-    window.addEventListener("storage", handleStorageChange)
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange)
-      window.removeEventListener("focus", handleFocus)
-      window.removeEventListener("storage", handleStorageChange)
-    }
+    loadProjects()
   }, [])
 
   const getAllTeamMembers = () => {
@@ -598,223 +160,94 @@ export default function ProjectsPage() {
     )
   }
 
-  const handleCreateProject = () => {
+  const handleCreateProject = async () => {
     if (!newProject.title || !newProject.description) {
       alert("Please fill in at least the title and description")
       return
     }
 
-    // Generate new project ID
-    const newId = Math.max(...projects.map((p) => p.id), 0) + 1
-    // console.log("[v0] Generated new project ID:", newId)
+    try {
+      await createProject(newProject)
 
-    // Create team array from comma-separated names
-    const teamMembers = newProject.teamMembers
-      ? newProject.teamMembers.split(",").map((name, index) => ({
-          name: name.trim(),
-          role: "Team Member",
-          avatar: `/team-member-${(index % 3) + 1}.png`,
-          email: `${name.trim().toLowerCase().replace(/\s+/g, ".")}@company.com`,
-        }))
-      : []
+      // Reload projects from database
+      const updatedProjects = await getProjects()
+      console.log("[v0] Projects after creation:", updatedProjects)
+      setProjects(updatedProjects)
 
-    const projectData = {
-      id: newId,
-      title: newProject.title,
-      description: newProject.description,
-      status: newProject.status,
-      progress: 0,
-      team: teamMembers,
-      department: newProject.department,
-      startDate: newProject.startDate,
-      endDate: newProject.endDate,
-      priority: newProject.priority,
-      budget: newProject.budget,
-      functionalities: [
-        "Core functionality implementation",
-        "User interface development",
-        "Testing and quality assurance",
-        "Documentation and deployment",
-      ],
-      milestones: [
-        {
-          name: "Project Kickoff",
-          status: "Completed",
-          startDate: newProject.startDate || new Date().toISOString().split("T")[0],
-          endDate: newProject.startDate || new Date().toISOString().split("T")[0],
-          description: "Initial project setup and planning",
-        },
-        {
-          name: "Development Phase",
-          status: "In Progress",
-          startDate: newProject.startDate || new Date().toISOString().split("T")[0],
-          endDate: newProject.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          description: "Core development and implementation",
-        },
-        {
-          name: "Testing & Review",
-          status: "Pending",
-          startDate: newProject.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          endDate: newProject.endDate || new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          description: "Quality assurance and testing phase",
-        },
-        {
-          name: "Project Completion",
-          status: "Pending",
-          startDate: newProject.endDate || new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          endDate: newProject.endDate || new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          description: "Final delivery and project closure",
-        },
-      ],
-      documents: [
-        {
-          id: 1,
-          name: "Project Charter.pdf",
-          size: "2.1 MB",
-          category: "Planning",
-          uploadedBy: "System",
-          uploadedAt: new Date().toISOString(),
-          sharepointUrl:
-            "https://sharepoint.company.com/projects/" +
-            newProject.title.toLowerCase().replace(/\s+/g, "-") +
-            "/charter.pdf",
-        },
-        {
-          id: 2,
-          name: "Requirements Document.docx",
-          size: "1.8 MB",
-          category: "Documentation",
-          uploadedBy: "System",
-          uploadedAt: new Date().toISOString(),
-          sharepointUrl:
-            "https://sharepoint.company.com/projects/" +
-            newProject.title.toLowerCase().replace(/\s+/g, "-") +
-            "/requirements.docx",
-        },
-      ],
-      spent: "$0",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      createdBy: "Current User",
+      // Reset form and close modal
+      setNewProject({
+        title: "",
+        description: "",
+        status: "Planning",
+        priority: "Medium",
+        department: "",
+        startDate: "",
+        endDate: "",
+        budget: "",
+        teamMembers: "",
+      })
+      setIsCreateModalOpen(false)
+    } catch (error) {
+      console.error("[v0] Error creating project:", error)
+      alert("Failed to create project. Please try again.")
     }
-
-    // console.log("[v0] Creating new project:", projectData)
-
-    localStorage.setItem(`project_${newId}`, JSON.stringify(projectData))
-    // console.log("[v0] Saved project to localStorage with key:", `project_${newId}`)
-
-    // Trigger storage event for immediate synchronization
-    window.dispatchEvent(
-      new StorageEvent("storage", {
-        key: `project_${newId}`,
-        newValue: JSON.stringify(projectData),
-      }),
-    )
-
-    const updatedProjects = getUpdatedProjects()
-    // console.log(
-    //   "[v0] Updated projects after creation:",
-    //   updatedProjects.map((p) => ({ id: p.id, title: p.title })),
-    // )
-    setProjects(updatedProjects)
-
-    // Reset form and close modal
-    setNewProject({
-      title: "",
-      description: "",
-      status: "Planning",
-      priority: "Medium",
-      department: "",
-      startDate: "",
-      endDate: "",
-      budget: "",
-      teamMembers: "",
-    })
-    setIsCreateModalOpen(false)
   }
 
   const handleEditProject = (project) => {
     setEditingProject({
       ...project,
-      teamMembers: project.team.map((member) => member.name).join(", "),
+      title: project.title || "",
+      description: project.description || "",
+      status: project.status || "Planning",
+      priority: project.priority || "Medium",
+      progress: project.progress || 0,
+      budget: project.budget || "",
+      department: project.department || "",
+      startDate: project.startDate || "",
+      endDate: project.endDate || "",
+      teamMembers: project.team?.map((member) => member.name).join(", ") || "",
     })
     setIsEditModalOpen(true)
   }
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingProject.title || !editingProject.description) {
       alert("Please fill in at least the title and description")
       return
     }
 
-    // Create team array from comma-separated names
-    const teamMembers = editingProject.teamMembers
-      ? editingProject.teamMembers.split(",").map((name, index) => ({
-          name: name.trim(),
-          role: "Team Member",
-          avatar: `/team-member-${(index % 3) + 1}.png`,
-          email: `${name.trim().toLowerCase().replace(/\s+/g, ".")}@company.com`,
-        }))
-      : []
+    try {
+      await updateProject(editingProject.id, editingProject)
 
-    const updatedProject = {
-      ...editingProject,
-      team: teamMembers,
-    }
-
-    // console.log("[v0] Updating project:", updatedProject)
-
-    localStorage.setItem(`project_${editingProject.id}`, JSON.stringify(updatedProject))
-
-    // Trigger storage event for immediate synchronization
-    window.dispatchEvent(
-      new StorageEvent("storage", {
-        key: `project_${editingProject.id}`,
-        newValue: JSON.stringify(updatedProject),
-      }),
-    )
-
-    setIsEditModalOpen(false)
-    setEditingProject(null)
-
-    // console.log("[v0] Project updated successfully")
-  }
-
-  const handleConfirmDelete = () => {
-    if (deletingProject) {
-      // console.log("[v0] Deleting project:", deletingProject)
-
-      // Set deletion marker in localStorage
-      localStorage.setItem(`project_${deletingProject.id}_deleted`, "true")
-
-      // Remove project data from localStorage
-      localStorage.removeItem(`project_${deletingProject.id}`)
-
-      // Update local state immediately
-      const updatedProjects = projects.filter((p) => p.id !== deletingProject.id)
+      // Reload projects from database
+      const updatedProjects = await getProjects()
+      console.log("[v0] Projects after update:", updatedProjects)
       setProjects(updatedProjects)
 
-      // Dispatch storage event for cross-tab sync
-      window.dispatchEvent(
-        new StorageEvent("storage", {
-          key: `project_${deletingProject.id}_deleted`,
-          newValue: "true",
-        }),
-      )
+      setIsEditModalOpen(false)
+      setEditingProject(null)
+    } catch (error) {
+      console.error("[v0] Error updating project:", error)
+      alert("Failed to update project. Please try again.")
+    }
+  }
 
-      // console.log("[v0] Project deleted successfully")
-      setDeletingProject(null)
-      setIsDeleteModalOpen(false)
+  const handleConfirmDelete = async () => {
+    if (deletingProject) {
+      try {
+        await deleteProject(deletingProject.id)
 
-      // Force immediate re-sync
-      setTimeout(() => {
-        const refreshedProjects = getUpdatedProjects()
-        setProjects(refreshedProjects)
-        // console.log(
-        //   "[v0] Projects refreshed after deletion:",
-        //   refreshedProjects.map((p) => ({ id: p.id, title: p.title })),
-        // )
-      }, 100)
+        // Reload projects from database
+        const updatedProjects = await getProjects()
+        console.log("[v0] Projects after deletion:", updatedProjects)
+        setProjects(updatedProjects)
+
+        setDeletingProject(null)
+        setIsDeleteModalOpen(false)
+      } catch (error) {
+        console.error("[v0] Error deleting project:", error)
+        alert("Failed to delete project. Please try again.")
+      }
     }
   }
 
@@ -951,7 +384,7 @@ export default function ProjectsPage() {
                   Team
                 </Button>
               </Link>
-              <AdminOnly>
+              {isAdministrator && (
                 <Link href="/admin" onClick={() => setShowMobileMenu(false)}>
                   <Button
                     variant="ghost"
@@ -961,7 +394,7 @@ export default function ProjectsPage() {
                     Admin
                   </Button>
                 </Link>
-              </AdminOnly>
+              )}
             </nav>
           </div>
         )}
@@ -974,12 +407,12 @@ export default function ProjectsPage() {
               <h2 className="text-3xl font-bold text-gray-900">Projects</h2>
               <p className="text-gray-600">Manage and track all company projects</p>
             </div>
-            <AdminOnly>
+            {isAdministrator && (
               <Button onClick={() => setIsCreateModalOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Project
               </Button>
-            </AdminOnly>
+            )}
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -1028,7 +461,7 @@ export default function ProjectsPage() {
                       <CardTitle className="text-lg mb-2">{project.title}</CardTitle>
                       <CardDescription className="line-clamp-2">{project.description}</CardDescription>
                     </div>
-                    <AdminOnly>
+                    {(isAdministrator || canEditProject(project.id)) && (
                       <div className="flex gap-2 ml-2">
                         <Button
                           variant="outline"
@@ -1040,19 +473,21 @@ export default function ProjectsPage() {
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            handleDeleteProject(project)
-                          }}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {isAdministrator && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              handleDeleteProject(project)
+                            }}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
-                    </AdminOnly>
+                    )}
                   </div>
                   <div className="flex gap-2 mt-3">
                     <Badge className={getStatusColor(project.status)}>{project.status}</Badge>
@@ -1110,7 +545,16 @@ export default function ProjectsPage() {
 
                     <div className="flex justify-between items-center pt-2 border-t border-border">
                       <div></div>
-                      <span className="text-sm font-medium">{project.budget}</span>
+                      <span className="text-sm font-medium">
+                        {project.budget
+                          ? new Intl.NumberFormat("en-US", {
+                              style: "currency",
+                              currency: "USD",
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            }).format(project.budget)
+                          : ""}
+                      </span>
                     </div>
                   </CardContent>
                 </Link>
