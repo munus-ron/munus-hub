@@ -16,6 +16,7 @@ import { getProjects } from "@/app/actions/projects";
 import { getTeamMembers } from "@/app/actions/team";
 import { getAnnouncements } from "@/app/actions/announcements";
 import { getCalendarEvents } from "@/app/actions/calendar";
+import LoginSSOButton from "@/components/login-sso-button";
 
 export default function Dashboard() {
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -419,12 +420,7 @@ export default function Dashboard() {
               >
                 Sign In
               </Button>
-              <Button
-                onClick={() => alert("hello")}
-                className="w-full text-lg py-6"
-              >
-                Sign In using SSO
-              </Button>
+              <LoginSSOButton />
             </CardContent>
           </Card>
         </div>
