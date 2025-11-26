@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/auth-context";
 function LoginSSOButton() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { ssoLogin, ssoLogout } = useAuth();
+  const { ssoLogin } = useAuth();
 
   const handleLogin = async () => {
     setIsLoading(true);
@@ -18,11 +18,6 @@ function LoginSSOButton() {
     setIsLoading(false);
   };
 
-  const handleLogout = () => {
-    ssoLogout();
-    console.log("Logout success!");
-  };
-
   return (
     <>
       <Button
@@ -30,12 +25,6 @@ function LoginSSOButton() {
         className="w-full text-lg py-6 cursor-pointer"
       >
         {isLoading ? "Signing in..." : "Sign In using SSO"}
-      </Button>
-      <Button
-        onClick={() => handleLogout()}
-        className="w-full text-lg py-6 cursor-pointer"
-      >
-        Logout
       </Button>
     </>
   );

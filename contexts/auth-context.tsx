@@ -3,7 +3,8 @@
 import type React from "react";
 import { createContext, useContext, useState, useEffect } from "react";
 import { authenticateUser } from "@/app/actions/auth";
-import { signIn, signOut } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
+import router from "next/router";
 
 interface User {
   id: string;
@@ -11,6 +12,7 @@ interface User {
   email: string;
   role: "administrator" | "lead" | "user";
   avatar?: string;
+  provider?: string;
 }
 
 interface AuthContextType {
@@ -18,7 +20,6 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   ssoLogin: () => Promise<void>;
-  ssoLogout: () => void;
   isAdmin: () => boolean;
   isAuthenticated: () => boolean;
 }
@@ -27,6 +28,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     // Check for stored user on mount
@@ -41,6 +44,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
   }, []);
+
+  useEffect(() => {
+    // This catches users logging in via SSO.
+    if (status === "authenticated" && !user && session?.user) {
+      const nextAuthUser = session.user as any;
+      const ssoUser: User = {
+        id: nextAuthUser.dbUserId || nextAuthUser.email,
+        name: nextAuthUser.name || nextAuthUser.email,
+        email: nextAuthUser.email,
+        role: nextAuthUser.role,
+        avatar: nextAuthUser.avatar || "/placeholder.svg",
+        provider: nextAuthUser.provider || "sso",
+      };
+
+      console.log("[v1] SSO Sync: Updating local context state.");
+
+      // 3. Manually update state and localStorage to match the SSO session
+      setUser(ssoUser);
+      localStorage.setItem("intranet-user", JSON.stringify(ssoUser));
+    }
+  }, [status, session, user, setUser]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     console.log("[v0] Login attempt for email:", email);
@@ -76,17 +100,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Check if the user object was created via SSO (manual sync) or Credential
+    const isSSO = user?.provider === "microsoft-entra-id" || user?.provider === "sso";
+
+    // 1. Clear local state first
     setUser(null);
     localStorage.removeItem("intranet-user");
+
+    // 2. Call NextAuth signOut to clear cookies
+    await signOut({ redirect: false });
+
+    if (isSSO) {
+      // 3. Remote SSO Logout (Microsoft Entra ID)
+      const tenantId = process.env.NEXT_PUBLIC_AZURE_AD_TENANT_ID;
+      const postLogoutRedirectUri = encodeURIComponent(`${window.location.origin}/`);
+      const logoutUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/logout?post_logout_redirect_uri=${postLogoutRedirectUri}`;
+      // router.push(logoutUrl);
+      window.location.href = logoutUrl;
+    } else {
+      // router.push("/");
+      window.location.href = "/";
+    }
   };
 
   const ssoLogin = async () => {
-    await signIn("microsoft-entra-id");
-  };
+    console.log("[v0] Initiating SSO redirect to Microsoft...");
 
-  const ssoLogout = () => {
-    signOut({ callbackUrl: "/" });
+    try {
+      await signIn("microsoft-entra-id", {
+        // callbackUrl: "/dashboard",
+      });
+
+      console.log("[v0] Redirect initiated.");
+    } catch (error) {
+      console.error("[v0] SSO sign-in failed during redirect initiation:", error);
+    }
   };
 
   const isAdmin = () => {
@@ -97,7 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return user !== null;
   };
 
-  return <AuthContext.Provider value={{ user, login, logout, ssoLogin, ssoLogout, isAdmin, isAuthenticated }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, login, logout, ssoLogin, isAdmin, isAuthenticated }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
