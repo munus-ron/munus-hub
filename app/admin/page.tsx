@@ -1,208 +1,182 @@
-"use client"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  Settings,
-  Users,
-  Shield,
-  Calendar,
-  FolderOpen,
-  Bell,
-  TrendingUp,
-  Menu,
-  LogOut,
-  Crown,
-  User,
-  Plus,
-  Edit,
-  Trash2,
-} from "lucide-react"
-import { useAuth } from "@/contexts/auth-context"
-import Link from "next/link"
-import { useState, useEffect } from "react"
-import { getAllUsers, addUser, updateUser, deleteUser } from "@/app/actions/auth"
-import { getProjects } from "@/app/actions/projects"
-import { Checkbox } from "@/components/ui/checkbox"
+"use client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Settings, Users, Shield, Calendar, FolderOpen, Bell, TrendingUp, Menu, LogOut, Crown, User, Plus, Edit, Trash2 } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { getAllUsers, addUser, updateUser, deleteUser } from "@/app/actions/auth";
+import { getProjects } from "@/app/actions/projects";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function AdminPage() {
-  const { user, logout, isAuthenticated, isAdmin } = useAuth()
+  const { user, logout, isAuthenticated, isAdmin } = useAuth();
 
-  const [users, setUsers] = useState<any[]>([])
-  const [projects, setProjects] = useState<any[]>([])
-  const [isAddUserOpen, setIsAddUserOpen] = useState(false)
-  const [isEditUserOpen, setIsEditUserOpen] = useState(false)
-  const [editingUser, setEditingUser] = useState<any>(null)
+  const [users, setUsers] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [isEditUserOpen, setIsEditUserOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
   const [newUser, setNewUser] = useState({
     email: "",
     name: "", // Added name field
     password: "", // Added password field
     role: "user" as "administrator" | "lead" | "user",
     projects: [] as number[],
-  })
+  });
   const [editForm, setEditForm] = useState({
     email: "",
     name: "", // Added name field
     password: "", // Added password field (optional for edit)
     role: "user" as "administrator" | "lead" | "user",
     projects: [] as number[],
-  })
-  const [showMobileMenu, setShowMobileMenu] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  });
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [usersData, projectsData] = await Promise.all([getAllUsers(), getProjects()])
-        setUsers(usersData)
-        setProjects(projectsData)
-        console.log("[v0] Loaded users:", usersData)
-        console.log("[v0] Loaded projects:", projectsData)
+        const [usersData, projectsData] = await Promise.all([getAllUsers(), getProjects()]);
+        setUsers(usersData);
+        setProjects(projectsData);
+        console.log("[v0] Loaded users:", usersData);
+        console.log("[v0] Loaded projects:", projectsData);
       } catch (error) {
-        console.error("[v0] Error loading data:", error)
+        console.error("[v0] Error loading data:", error);
       }
-    }
-    loadData()
-  }, [])
+    };
+    loadData();
+  }, []);
 
   const handleAddUser = async () => {
     if (!newUser.email || !newUser.name || !newUser.password) {
-      alert("Please fill in all required fields")
-      return
+      alert("Please fill in all required fields");
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const result = await addUser(newUser.email, newUser.name, newUser.password, newUser.role, newUser.projects)
+      const result = await addUser(newUser.email, newUser.name, newUser.password, newUser.role, newUser.projects);
 
       if (result.success) {
         // Reload users
-        const usersData = await getAllUsers()
-        setUsers(usersData)
+        const usersData = await getAllUsers();
+        setUsers(usersData);
 
-        setNewUser({ email: "", name: "", password: "", role: "user", projects: [] })
-        setIsAddUserOpen(false)
+        setNewUser({ email: "", name: "", password: "", role: "user", projects: [] });
+        setIsAddUserOpen(false);
 
-        console.log("[v0] Added new user:", newUser.email)
+        console.log("[v0] Added new user:", newUser.email);
       } else {
-        console.error("[v0] Failed to add user:", result.error)
-        alert(`Failed to add user: ${result.error}`)
+        console.error("[v0] Failed to add user:", result.error);
+        alert(`Failed to add user: ${result.error}`);
       }
     } catch (error) {
-      console.error("[v0] Error adding user:", error)
-      alert("Failed to add user")
+      console.error("[v0] Error adding user:", error);
+      alert("Failed to add user");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleEditUser = (userToEdit: any) => {
-    setEditingUser(userToEdit)
+    setEditingUser(userToEdit);
     setEditForm({
       email: userToEdit.email,
       name: userToEdit.name || "", // Load name
       password: "", // Leave password empty (optional for edit)
       role: userToEdit.role,
       projects: userToEdit.projects || [],
-    })
-    setIsEditUserOpen(true)
-  }
+    });
+    setIsEditUserOpen(true);
+  };
 
   const handleUpdateUser = async () => {
     if (!editForm.email || !editForm.name) {
-      alert("Please fill in all required fields")
-      return
+      alert("Please fill in all required fields");
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       const result = await updateUser(
         editForm.email,
         editForm.name,
         editForm.password || null, // Pass null if password is empty
         editForm.role,
-        editForm.projects,
-      )
+        editForm.projects
+      );
 
       if (result.success) {
         // Reload users
-        const usersData = await getAllUsers()
-        setUsers(usersData)
+        const usersData = await getAllUsers();
+        setUsers(usersData);
 
-        setIsEditUserOpen(false)
-        setEditingUser(null)
+        setIsEditUserOpen(false);
+        setEditingUser(null);
 
-        console.log("[v0] Updated user:", editForm.email)
+        console.log("[v0] Updated user:", editForm.email);
       } else {
-        console.error("[v0] Failed to update user:", result.error)
-        alert(`Failed to update user: ${result.error}`)
+        console.error("[v0] Failed to update user:", result.error);
+        alert(`Failed to update user: ${result.error}`);
       }
     } catch (error) {
-      console.error("[v0] Error updating user:", error)
-      alert("Failed to update user")
+      console.error("[v0] Error updating user:", error);
+      alert("Failed to update user");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleDeleteUser = async (userEmail: string) => {
-    if (!confirm(`Are you sure you want to delete user ${userEmail}?`)) return
+    if (!confirm(`Are you sure you want to delete user ${userEmail}?`)) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const result = await deleteUser(userEmail)
+      const result = await deleteUser(userEmail);
 
       if (result.success) {
         // Reload users
-        const usersData = await getAllUsers()
-        setUsers(usersData)
+        const usersData = await getAllUsers();
+        setUsers(usersData);
 
-        console.log("[v0] Deleted user:", userEmail)
+        console.log("[v0] Deleted user:", userEmail);
       } else {
-        console.error("[v0] Failed to delete user:", result.error)
-        alert(`Failed to delete user: ${result.error}`)
+        console.error("[v0] Failed to delete user:", result.error);
+        alert(`Failed to delete user: ${result.error}`);
       }
     } catch (error) {
-      console.error("[v0] Error deleting user:", error)
-      alert("Failed to delete user")
+      console.error("[v0] Error deleting user:", error);
+      alert("Failed to delete user");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const toggleProject = (projectId: number, isNewUser: boolean) => {
     if (isNewUser) {
       setNewUser((prev) => ({
         ...prev,
-        projects: prev.projects.includes(projectId)
-          ? prev.projects.filter((id) => id !== projectId)
-          : [...prev.projects, projectId],
-      }))
+        projects: prev.projects.includes(projectId) ? prev.projects.filter((id) => id !== projectId) : [...prev.projects, projectId],
+      }));
     } else {
       setEditForm((prev) => ({
         ...prev,
-        projects: prev.projects.includes(projectId)
-          ? prev.projects.filter((id) => id !== projectId)
-          : [...prev.projects, projectId],
-      }))
+        projects: prev.projects.includes(projectId) ? prev.projects.filter((id) => id !== projectId) : [...prev.projects, projectId],
+      }));
     }
-  }
+  };
 
-  const adminUsers = users.filter((u) => u.role === "administrator")
-  const leadUsers = users.filter((u) => u.role === "lead")
-  const regularUsers = users.filter((u) => u.role === "user")
+  const adminUsers = users.filter((u) => u.role === "administrator");
+  const leadUsers = users.filter((u) => u.role === "lead");
+  const regularUsers = users.filter((u) => u.role === "user");
 
   if (!isAuthenticated() || !isAdmin()) {
     return (
@@ -221,7 +195,7 @@ export default function AdminPage() {
           </Card>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -231,7 +205,11 @@ export default function AdminPage() {
         <div className="flex h-20 items-center justify-between px-8">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
-              <img src="/munus-logo.jpg" alt="Munus Logo" className="h-8 w-auto" />
+              <img
+                src="/munus-logo.jpg"
+                alt="Munus Logo"
+                className="h-8 w-auto"
+              />
               <span className="text-3xl font-bold text-gray-900 font-serif">Munus Hub</span>
             </div>
 
@@ -317,7 +295,12 @@ export default function AdminPage() {
                   {user?.role}
                 </p>
               </div>
-              <Button variant="ghost" size="sm" onClick={logout} className="text-gray-600 hover:text-primary">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={logout}
+                className="text-gray-600"
+              >
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
@@ -327,7 +310,10 @@ export default function AdminPage() {
         {showMobileMenu && (
           <div className="md:hidden border-t border-gray-100 bg-white">
             <nav className="px-4 py-2 space-y-1">
-              <Link href="/" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -336,7 +322,10 @@ export default function AdminPage() {
                   Dashboard
                 </Button>
               </Link>
-              <Link href="/projects" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/projects"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -345,7 +334,10 @@ export default function AdminPage() {
                   Projects
                 </Button>
               </Link>
-              <Link href="/calendar" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/calendar"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -354,7 +346,10 @@ export default function AdminPage() {
                   Calendar
                 </Button>
               </Link>
-              <Link href="/announcements" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/announcements"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -363,7 +358,10 @@ export default function AdminPage() {
                   Announcements
                 </Button>
               </Link>
-              <Link href="/team" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/team"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -395,19 +393,28 @@ export default function AdminPage() {
             </div>
           </div>
 
-          <Tabs defaultValue="users" className="space-y-6">
+          <Tabs
+            defaultValue="users"
+            className="space-y-6"
+          >
             <TabsList>
               <TabsTrigger value="users">User Management</TabsTrigger>
               <TabsTrigger value="roles">Roles & Permissions</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="users" className="space-y-6">
+            <TabsContent
+              value="users"
+              className="space-y-6"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-xl font-semibold">User Management</h3>
                   <p className="text-gray-600">Manage system users and their access levels</p>
                 </div>
-                <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
+                <Dialog
+                  open={isAddUserOpen}
+                  onOpenChange={setIsAddUserOpen}
+                >
                   <DialogTrigger asChild>
                     <Button className="gap-2">
                       <Plus className="h-4 w-4" />
@@ -473,28 +480,40 @@ export default function AdminPage() {
                           <p className="text-sm text-gray-600 mb-2">Select projects this lead can manage</p>
                           <div className="border border-gray-200 rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
                             {projects.map((project) => (
-                              <div key={project.id} className="flex items-center gap-2">
+                              <div
+                                key={project.id}
+                                className="flex items-center gap-2"
+                              >
                                 <Checkbox
                                   id={`new-project-${project.id}`}
                                   checked={newUser.projects.includes(project.id)}
                                   onCheckedChange={() => toggleProject(project.id, true)}
                                 />
-                                <Label htmlFor={`new-project-${project.id}`} className="cursor-pointer">
+                                <Label
+                                  htmlFor={`new-project-${project.id}`}
+                                  className="cursor-pointer"
+                                >
                                   {project.name}
                                 </Label>
                               </div>
                             ))}
-                            {projects.length === 0 && (
-                              <p className="text-sm text-gray-500 text-center py-4">No projects available</p>
-                            )}
+                            {projects.length === 0 && <p className="text-sm text-gray-500 text-center py-4">No projects available</p>}
                           </div>
                         </div>
                       )}
                       <div className="flex gap-2 pt-4">
-                        <Button onClick={handleAddUser} className="flex-1" disabled={isLoading}>
+                        <Button
+                          onClick={handleAddUser}
+                          className="flex-1"
+                          disabled={isLoading}
+                        >
                           {isLoading ? "Adding..." : "Add User"}
                         </Button>
-                        <Button variant="outline" onClick={() => setIsAddUserOpen(false)} className="flex-1">
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsAddUserOpen(false)}
+                          className="flex-1"
+                        >
                           Cancel
                         </Button>
                       </div>
@@ -524,9 +543,7 @@ export default function AdminPage() {
                         >
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
-                              <AvatarFallback className="bg-primary/20 text-primary-foreground">
-                                {user.email.substring(0, 2).toUpperCase()}
-                              </AvatarFallback>
+                              <AvatarFallback className="bg-primary/20 text-primary-foreground">{user.email.substring(0, 2).toUpperCase()}</AvatarFallback>
                             </Avatar>
                             <div>
                               <p className="font-medium text-sm">{user.email}</p>
@@ -552,9 +569,7 @@ export default function AdminPage() {
                           </div>
                         </div>
                       ))}
-                      {adminUsers.length === 0 && (
-                        <p className="text-sm text-gray-500 text-center py-4">No administrators found</p>
-                      )}
+                      {adminUsers.length === 0 && <p className="text-sm text-gray-500 text-center py-4">No administrators found</p>}
                     </div>
                   </CardContent>
                 </Card>
@@ -579,9 +594,7 @@ export default function AdminPage() {
                         >
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
-                              <AvatarFallback className="bg-chart-3/20 text-chart-3">
-                                {user.email.substring(0, 2).toUpperCase()}
-                              </AvatarFallback>
+                              <AvatarFallback className="bg-chart-3/20 text-chart-3">{user.email.substring(0, 2).toUpperCase()}</AvatarFallback>
                             </Avatar>
                             <div>
                               <p className="font-medium text-sm">{user.email}</p>
@@ -610,9 +623,7 @@ export default function AdminPage() {
                           </div>
                         </div>
                       ))}
-                      {leadUsers.length === 0 && (
-                        <p className="text-sm text-gray-500 text-center py-4">No leads found</p>
-                      )}
+                      {leadUsers.length === 0 && <p className="text-sm text-gray-500 text-center py-4">No leads found</p>}
                     </div>
                   </CardContent>
                 </Card>
@@ -637,9 +648,7 @@ export default function AdminPage() {
                         >
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
-                              <AvatarFallback className="bg-secondary/20 text-secondary-foreground">
-                                {user.email.substring(0, 2).toUpperCase()}
-                              </AvatarFallback>
+                              <AvatarFallback className="bg-secondary/20 text-secondary-foreground">{user.email.substring(0, 2).toUpperCase()}</AvatarFallback>
                             </Avatar>
                             <div>
                               <p className="font-medium text-sm">{user.email}</p>
@@ -665,16 +674,17 @@ export default function AdminPage() {
                           </div>
                         </div>
                       ))}
-                      {regularUsers.length === 0 && (
-                        <p className="text-sm text-gray-500 text-center py-4">No users found</p>
-                      )}
+                      {regularUsers.length === 0 && <p className="text-sm text-gray-500 text-center py-4">No users found</p>}
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
               {/* Edit User Dialog */}
-              <Dialog open={isEditUserOpen} onOpenChange={setIsEditUserOpen}>
+              <Dialog
+                open={isEditUserOpen}
+                onOpenChange={setIsEditUserOpen}
+              >
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Edit User</DialogTitle>
@@ -693,7 +703,13 @@ export default function AdminPage() {
                     </div>
                     <div>
                       <Label htmlFor="edit-email">Email Address</Label>
-                      <Input id="edit-email" type="email" value={editForm.email} disabled className="bg-gray-50" />
+                      <Input
+                        id="edit-email"
+                        type="email"
+                        value={editForm.email}
+                        disabled
+                        className="bg-gray-50"
+                      />
                     </div>
                     <div>
                       <Label htmlFor="edit-password">New Password (optional)</Label>
@@ -728,28 +744,40 @@ export default function AdminPage() {
                         <p className="text-sm text-gray-600 mb-2">Select projects this lead can manage</p>
                         <div className="border border-gray-200 rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
                           {projects.map((project) => (
-                            <div key={project.id} className="flex items-center gap-2">
+                            <div
+                              key={project.id}
+                              className="flex items-center gap-2"
+                            >
                               <Checkbox
                                 id={`edit-project-${project.id}`}
                                 checked={editForm.projects.includes(project.id)}
                                 onCheckedChange={() => toggleProject(project.id, false)}
                               />
-                              <Label htmlFor={`edit-project-${project.id}`} className="cursor-pointer">
+                              <Label
+                                htmlFor={`edit-project-${project.id}`}
+                                className="cursor-pointer"
+                              >
                                 {project.name}
                               </Label>
                             </div>
                           ))}
-                          {projects.length === 0 && (
-                            <p className="text-sm text-gray-500 text-center py-4">No projects available</p>
-                          )}
+                          {projects.length === 0 && <p className="text-sm text-gray-500 text-center py-4">No projects available</p>}
                         </div>
                       </div>
                     )}
                     <div className="flex gap-2 pt-4">
-                      <Button onClick={handleUpdateUser} className="flex-1" disabled={isLoading}>
+                      <Button
+                        onClick={handleUpdateUser}
+                        className="flex-1"
+                        disabled={isLoading}
+                      >
                         {isLoading ? "Updating..." : "Update User"}
                       </Button>
-                      <Button variant="outline" onClick={() => setIsEditUserOpen(false)} className="flex-1">
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsEditUserOpen(false)}
+                        className="flex-1"
+                      >
                         Cancel
                       </Button>
                     </div>
@@ -758,7 +786,10 @@ export default function AdminPage() {
               </Dialog>
             </TabsContent>
 
-            <TabsContent value="roles" className="space-y-6">
+            <TabsContent
+              value="roles"
+              className="space-y-6"
+            >
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card>
                   <CardHeader>
@@ -867,5 +898,5 @@ export default function AdminPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

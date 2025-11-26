@@ -1,22 +1,15 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,35 +19,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search, Plus, Edit, Trash2, MessageCircle, Camera, Menu, LogOut } from "lucide-react"
-import { useAuth } from "@/contexts/auth-context"
-import { AdminOnly } from "@/components/admin-only"
-import {
-  TrendingUp,
-  FolderOpen,
-  Bell,
-  MessageSquare,
-  Pencil,
-  Settings,
-  Users,
-  Building,
-  MapPin,
-  Mail,
-  Phone,
-  Upload,
-  Calendar,
-} from "lucide-react"
-import {
-  getTeamMembers,
-  createTeamMember,
-  updateTeamMember,
-  deleteTeamMember,
-  updateTeamMemberImage,
-} from "@/app/actions/team"
+} from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Plus, Edit, Trash2, MessageCircle, Camera, Menu, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
+import { AdminOnly } from "@/components/admin-only";
+import { TrendingUp, FolderOpen, Bell, MessageSquare, Pencil, Settings, Users, Building, MapPin, Mail, Phone, Upload, Calendar } from "lucide-react";
+import { getTeamMembers, createTeamMember, updateTeamMember, deleteTeamMember, updateTeamMemberImage } from "@/app/actions/team";
 
-import type React from "react"
+import type React from "react";
 
 // Removed: import { loadTeamDataFromStorage, saveTeamDataToStorage } from "@/lib/utils"
 
@@ -62,29 +35,29 @@ import type React from "react"
 // Removed: hard-coded founders, advisors, and consultants arrays - all data now comes from database
 
 function getDepartmentColor(department: string) {
-  return "bg-muted text-muted-foreground"
+  return "bg-muted text-muted-foreground";
 }
 
 function formatStartDate(dateString: string) {
-  const date = new Date(dateString)
-  const now = new Date()
-  const years = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24 * 365))
-  return `${years} year${years !== 1 ? "s" : ""}`
+  const date = new Date(dateString);
+  const now = new Date();
+  const years = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24 * 365));
+  return `${years} year${years !== 1 ? "s" : ""}`;
 }
 
 export default function TeamPage() {
-  const [selectedMember, setSelectedMember] = useState<any>(null)
-  const [messageContent, setMessageContent] = useState("")
-  const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const [selectedMember, setSelectedMember] = useState<any>(null);
+  const [messageContent, setMessageContent] = useState("");
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
-  const { user, logout, isAuthenticated } = useAuth()
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedLocation, setSelectedLocation] = useState("all")
-  const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [editingPerson, setEditingPerson] = useState<any>(null)
-  const [deletingPerson, setDeletingPerson] = useState<any>(null)
+  const { user, logout, isAuthenticated } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("all");
+  const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editingPerson, setEditingPerson] = useState<any>(null);
+  const [deletingPerson, setDeletingPerson] = useState<any>(null);
   const [newEmployee, setNewEmployee] = useState({
     name: "",
     role: "",
@@ -93,56 +66,56 @@ export default function TeamPage() {
     phone: "",
     location: "",
     category: "", // New field for category selection
-  })
-  const [isImageEditModalOpen, setIsImageEditModalOpen] = useState(false)
-  const [editingPersonImage, setEditingPersonImage] = useState<any>(null)
-  const [selectedPerson, setSelectedPerson] = useState<any>(null)
-  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
+  });
+  const [isImageEditModalOpen, setIsImageEditModalOpen] = useState(false);
+  const [editingPersonImage, setEditingPersonImage] = useState<any>(null);
+  const [selectedPerson, setSelectedPerson] = useState<any>(null);
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
 
-  const [foundersState, setFounders] = useState([])
-  const [advisorsState, setAdvisors] = useState([])
-  const [consultantsState, setConsultants] = useState([])
+  const [foundersState, setFounders] = useState([]);
+  const [advisorsState, setAdvisors] = useState([]);
+  const [consultantsState, setConsultants] = useState([]);
 
   useEffect(() => {
     async function loadTeamData() {
-      const teamData = await getTeamMembers()
-      console.log("[v0] Team data loaded from database:", teamData)
-      setFounders(teamData.founders.map((f: any) => ({ ...f, avatar: f.image || f.avatar })))
-      setAdvisors(teamData.advisors.map((a: any) => ({ ...a, avatar: a.image || a.avatar })))
-      setConsultants(teamData.consultants.map((c: any) => ({ ...c, avatar: c.image || c.avatar })))
+      const teamData = await getTeamMembers();
+      console.log("[v0] Team data loaded from database:", teamData);
+      setFounders(teamData.founders.map((f: any) => ({ ...f, avatar: f.image || f.avatar })));
+      setAdvisors(teamData.advisors.map((a: any) => ({ ...a, avatar: a.image || a.avatar })));
+      setConsultants(teamData.consultants.map((c: any) => ({ ...c, avatar: c.image || c.avatar })));
     }
-    loadTeamData()
-  }, [])
+    loadTeamData();
+  }, []);
 
   const getDistinctLocationsCount = () => {
     const allLocations = [
       ...foundersState.map((person) => person.location),
       ...advisorsState.map((person) => person.location),
       ...consultantsState.map((person) => person.location),
-    ]
+    ];
 
-    const uniqueLocations = new Set(allLocations)
-    return uniqueLocations.size
-  }
+    const uniqueLocations = new Set(allLocations);
+    return uniqueLocations.size;
+  };
 
   const getUniqueLocations = () => {
     const allLocations = [
       ...foundersState.map((person) => person.location),
       ...advisorsState.map((person) => person.location),
       ...consultantsState.map((person) => person.location),
-    ]
+    ];
 
     // Filter out empty/null locations and get unique values
-    const uniqueLocations = Array.from(new Set(allLocations.filter((loc) => loc && loc.trim() !== "")))
-    return uniqueLocations.sort() // Sort alphabetically
-  }
+    const uniqueLocations = Array.from(new Set(allLocations.filter((loc) => loc && loc.trim() !== "")));
+    return uniqueLocations.sort(); // Sort alphabetically
+  };
 
   const filteredFounders = Array.isArray(foundersState)
     ? foundersState.filter((person) => {
         const matchesSearch =
           person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           person.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          person.email.toLowerCase().includes(searchTerm.toLowerCase())
+          person.email.toLowerCase().includes(searchTerm.toLowerCase());
 
         const matchesLocation =
           selectedLocation === "all" ||
@@ -154,18 +127,18 @@ export default function TeamPage() {
               selectedLocation
                 .replace(/-/g, " ")
                 .replace(/[^a-z0-9\s]/g, "")
-                .replace(/\s+/g, " "),
-            )
+                .replace(/\s+/g, " ")
+            );
 
-        return matchesSearch && matchesLocation
+        return matchesSearch && matchesLocation;
       })
-    : []
+    : [];
 
   const filteredAdvisors = advisorsState.filter((person) => {
     const matchesSearch =
       person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       person.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      person.email.toLowerCase().includes(searchTerm.toLowerCase())
+      person.email.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesLocation =
       selectedLocation === "all" ||
@@ -177,17 +150,17 @@ export default function TeamPage() {
           selectedLocation
             .replace(/-/g, " ")
             .replace(/[^a-z0-9\s]/g, "")
-            .replace(/\s+/g, " "),
-        )
+            .replace(/\s+/g, " ")
+        );
 
-    return matchesSearch && matchesLocation
-  })
+    return matchesSearch && matchesLocation;
+  });
 
   const filteredConsultants = consultantsState.filter((person) => {
     const matchesSearch =
       person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       person.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      person.email.toLowerCase().includes(searchTerm.toLowerCase())
+      person.email.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesLocation =
       selectedLocation === "all" ||
@@ -199,36 +172,36 @@ export default function TeamPage() {
           selectedLocation
             .replace(/-/g, " ")
             .replace(/[^a-z0-9\s]/g, "")
-            .replace(/\s+/g, " "),
-        )
+            .replace(/\s+/g, " ")
+        );
 
-    return matchesSearch && matchesLocation
-  })
+    return matchesSearch && matchesLocation;
+  });
 
   const handleAddEmployee = async () => {
-    console.log("Adding new team member:", newEmployee)
+    console.log("Adding new team member:", newEmployee);
 
     if (newEmployee.name && newEmployee.category && newEmployee.email) {
       try {
         await createTeamMember({
           ...newEmployee,
           avatar: "/placeholder.svg",
-        })
+        });
 
         // Reload team data from database
-        const teamData = await getTeamMembers()
-        setFounders(teamData.founders.map((f: any) => ({ ...f, avatar: f.image || f.avatar })))
-        setAdvisors(teamData.advisors.map((a: any) => ({ ...a, avatar: a.image || a.avatar })))
-        setConsultants(teamData.consultants.map((c: any) => ({ ...c, avatar: c.image || c.avatar })))
+        const teamData = await getTeamMembers();
+        setFounders(teamData.founders.map((f: any) => ({ ...f, avatar: f.image || f.avatar })));
+        setAdvisors(teamData.advisors.map((a: any) => ({ ...a, avatar: a.image || a.avatar })));
+        setConsultants(teamData.consultants.map((c: any) => ({ ...c, avatar: c.image || c.avatar })));
 
-        console.log(`[v0] Added new ${newEmployee.category}`)
+        console.log(`[v0] Added new ${newEmployee.category}`);
       } catch (error) {
-        console.error("[v0] Error adding team member:", error)
-        alert("Failed to add team member. Please try again.")
+        console.error("[v0] Error adding team member:", error);
+        alert("Failed to add team member. Please try again.");
       }
     }
 
-    setIsAddEmployeeModalOpen(false)
+    setIsAddEmployeeModalOpen(false);
     setNewEmployee({
       name: "",
       role: "",
@@ -237,8 +210,8 @@ export default function TeamPage() {
       phone: "",
       location: "",
       category: "",
-    })
-  }
+    });
+  };
 
   const handleEditPerson = (person: any, category: string) => {
     setEditingPerson({
@@ -251,163 +224,163 @@ export default function TeamPage() {
       phone: person.phone || "",
       location: person.location || "",
       avatar: person.avatar || person.image || "",
-    })
-    setIsEditModalOpen(true)
-  }
+    });
+    setIsEditModalOpen(true);
+  };
 
   const handleDeletePerson = (person: any, category: string) => {
-    setDeletingPerson({ ...person, category })
-    setIsDeleteDialogOpen(true)
-  }
+    setDeletingPerson({ ...person, category });
+    setIsDeleteDialogOpen(true);
+  };
 
   const handleEditImage = (person: any, category: string) => {
-    setEditingPersonImage({ ...person, category })
-    setIsImageEditModalOpen(true)
-  }
+    setEditingPersonImage({ ...person, category });
+    setIsImageEditModalOpen(true);
+  };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+    const file = event.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert("File size must be less than 5MB")
-        return
+        alert("File size must be less than 5MB");
+        return;
       }
 
-      console.log("[v0] Uploading image file:", file.name, "Size:", file.size)
-      const reader = new FileReader()
+      console.log("[v0] Uploading image file:", file.name, "Size:", file.size);
+      const reader = new FileReader();
       reader.onload = (e) => {
-        const imageData = e.target?.result as string
-        console.log("[v0] Image converted to base64, length:", imageData.length)
+        const imageData = e.target?.result as string;
+        console.log("[v0] Image converted to base64, length:", imageData.length);
         setEditingPersonImage({
           ...editingPersonImage,
           image: imageData, // Store in 'image' field to match database
           avatar: imageData, // Also update avatar for immediate preview
-        })
-      }
+        });
+      };
       reader.onerror = (error) => {
-        console.error("[v0] Error reading file:", error)
-        alert("Failed to read image file. Please try again.")
-      }
-      reader.readAsDataURL(file)
+        console.error("[v0] Error reading file:", error);
+        alert("Failed to read image file. Please try again.");
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const handleSaveEdit = async () => {
-    if (!editingPerson) return
+    if (!editingPerson) return;
 
-    console.log("Saving edited person:", editingPerson)
+    console.log("Saving edited person:", editingPerson);
 
     try {
-      await updateTeamMember(editingPerson.id, editingPerson)
+      await updateTeamMember(editingPerson.id, editingPerson);
 
       // Reload team data from database
-      const teamData = await getTeamMembers()
-      setFounders(teamData.founders.map((f: any) => ({ ...f, avatar: f.image || f.avatar })))
-      setAdvisors(teamData.advisors.map((a: any) => ({ ...a, avatar: a.image || a.avatar })))
-      setConsultants(teamData.consultants.map((c: any) => ({ ...c, avatar: c.image || c.avatar })))
+      const teamData = await getTeamMembers();
+      setFounders(teamData.founders.map((f: any) => ({ ...f, avatar: f.image || f.avatar })));
+      setAdvisors(teamData.advisors.map((a: any) => ({ ...a, avatar: a.image || a.avatar })));
+      setConsultants(teamData.consultants.map((c: any) => ({ ...c, avatar: c.image || c.avatar })));
 
-      setIsEditModalOpen(false)
-      setEditingPerson(null)
+      setIsEditModalOpen(false);
+      setEditingPerson(null);
     } catch (error) {
-      console.error("[v0] Error updating team member:", error)
-      alert("Failed to update team member. Please try again.")
+      console.error("[v0] Error updating team member:", error);
+      alert("Failed to update team member. Please try again.");
     }
-  }
+  };
 
   const handleConfirmDelete = async () => {
-    if (!deletingPerson) return
+    if (!deletingPerson) return;
 
-    console.log("Deleting person:", deletingPerson)
+    console.log("Deleting person:", deletingPerson);
 
     try {
-      await deleteTeamMember(deletingPerson.id)
+      await deleteTeamMember(deletingPerson.id);
 
       // Reload team data from database
-      const teamData = await getTeamMembers()
-      setFounders(teamData.founders.map((f: any) => ({ ...f, avatar: f.image || f.avatar })))
-      setAdvisors(teamData.advisors.map((a: any) => ({ ...a, avatar: a.image || a.avatar })))
-      setConsultants(teamData.consultants.map((c: any) => ({ ...c, avatar: c.image || c.avatar })))
+      const teamData = await getTeamMembers();
+      setFounders(teamData.founders.map((f: any) => ({ ...f, avatar: f.image || f.avatar })));
+      setAdvisors(teamData.advisors.map((a: any) => ({ ...a, avatar: a.image || a.avatar })));
+      setConsultants(teamData.consultants.map((c: any) => ({ ...c, avatar: c.image || c.avatar })));
 
-      setIsDeleteDialogOpen(false)
-      setDeletingPerson(null)
+      setIsDeleteDialogOpen(false);
+      setDeletingPerson(null);
     } catch (error) {
-      console.error("[v0] Error deleting team member:", error)
-      alert("Failed to delete team member. Please try again.")
+      console.error("[v0] Error deleting team member:", error);
+      alert("Failed to delete team member. Please try again.");
     }
-  }
+  };
 
   const handleSaveImage = async () => {
-    if (!editingPersonImage) return
+    if (!editingPersonImage) return;
 
-    console.log("[v0] Saving new image for:", editingPersonImage.name)
-    console.log("[v0] Image data length:", editingPersonImage.image?.length || 0)
+    console.log("[v0] Saving new image for:", editingPersonImage.name);
+    console.log("[v0] Image data length:", editingPersonImage.image?.length || 0);
 
     if (!editingPersonImage.image) {
-      alert("Please select an image first")
-      return
+      alert("Please select an image first");
+      return;
     }
 
     try {
-      await updateTeamMemberImage(editingPersonImage.id, editingPersonImage.image)
-      console.log("[v0] Image saved successfully to database")
+      await updateTeamMemberImage(editingPersonImage.id, editingPersonImage.image);
+      console.log("[v0] Image saved successfully to database");
 
       // Reload team data from database
-      const teamData = await getTeamMembers()
-      console.log("[v0] Reloaded team data after image update")
-      setFounders(teamData.founders.map((f: any) => ({ ...f, avatar: f.image || f.avatar })))
-      setAdvisors(teamData.advisors.map((a: any) => ({ ...a, avatar: a.image || a.avatar })))
-      setConsultants(teamData.consultants.map((c: any) => ({ ...c, avatar: c.image || c.avatar })))
+      const teamData = await getTeamMembers();
+      console.log("[v0] Reloaded team data after image update");
+      setFounders(teamData.founders.map((f: any) => ({ ...f, avatar: f.image || f.avatar })));
+      setAdvisors(teamData.advisors.map((a: any) => ({ ...a, avatar: a.image || a.avatar })));
+      setConsultants(teamData.consultants.map((c: any) => ({ ...c, avatar: c.image || c.avatar })));
 
-      setIsImageEditModalOpen(false)
-      setEditingPersonImage(null)
+      setIsImageEditModalOpen(false);
+      setEditingPersonImage(null);
     } catch (error) {
-      console.error("[v0] Error updating team member image:", error)
-      alert("Failed to update team member image. Please try again.")
+      console.error("[v0] Error updating team member image:", error);
+      alert("Failed to update team member image. Please try again.");
     }
-  }
+  };
 
   const handleMessage = (person: any, category: string) => {
-    setSelectedPerson(person)
-    setSelectedMember(person)
-    setIsMessageModalOpen(true)
-  }
+    setSelectedPerson(person);
+    setSelectedMember(person);
+    setIsMessageModalOpen(true);
+  };
 
   const handleOutlookSelection = () => {
-    if (!selectedPerson) return
+    if (!selectedPerson) return;
 
     try {
-      const outlookUrl = `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(selectedPerson.email)}`
-      console.log("[v0] Opening Outlook URL:", outlookUrl)
-      window.open(outlookUrl, "_blank")
+      const outlookUrl = `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(selectedPerson.email)}`;
+      console.log("[v0] Opening Outlook URL:", outlookUrl);
+      window.open(outlookUrl, "_blank");
     } catch (error) {
-      console.error("[v0] Error opening Outlook:", error)
+      console.error("[v0] Error opening Outlook:", error);
       try {
-        const mailtoUrl = `mailto:${selectedPerson.email}`
-        window.location.href = mailtoUrl
+        const mailtoUrl = `mailto:${selectedPerson.email}`;
+        window.location.href = mailtoUrl;
       } catch (fallbackError) {
-        alert(`Failed to open email client for ${selectedPerson.email}`)
+        alert(`Failed to open email client for ${selectedPerson.email}`);
       }
     }
 
-    setIsMessageModalOpen(false)
-    setSelectedPerson(null)
-  }
+    setIsMessageModalOpen(false);
+    setSelectedPerson(null);
+  };
 
   const handleTeamsSelection = () => {
-    if (!selectedPerson) return
+    if (!selectedPerson) return;
 
     try {
-      const teamsUrl = `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(selectedPerson.email)}`
-      console.log("[v0] Opening Teams URL:", teamsUrl)
-      window.open(teamsUrl, "_blank")
+      const teamsUrl = `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(selectedPerson.email)}`;
+      console.log("[v0] Opening Teams URL:", teamsUrl);
+      window.open(teamsUrl, "_blank");
     } catch (error) {
-      console.error("[v0] Error opening Teams:", error)
-      alert(`Failed to open Microsoft Teams for ${selectedPerson.email}`)
+      console.error("[v0] Error opening Teams:", error);
+      alert(`Failed to open Microsoft Teams for ${selectedPerson.email}`);
     }
 
-    setIsMessageModalOpen(false)
-    setSelectedPerson(null)
-  }
+    setIsMessageModalOpen(false);
+    setSelectedPerson(null);
+  };
 
   return (
     <div className="min-h-screen bg-green-50">
@@ -416,7 +389,11 @@ export default function TeamPage() {
         <div className="flex h-20 items-center justify-between px-8">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
-              <img src="/munus-logo.jpg" alt="Munus Logo" className="h-8 w-auto" />
+              <img
+                src="/munus-logo.jpg"
+                alt="Munus Logo"
+                className="h-8 w-auto"
+              />
               <span className="text-3xl font-bold text-gray-900 font-serif">Munus Hub</span>
             </div>
 
@@ -490,7 +467,12 @@ export default function TeamPage() {
                 <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                 <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
               </div>
-              <Button variant="ghost" size="sm" onClick={logout} className="text-gray-600 hover:text-primary">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={logout}
+                className="text-gray-600"
+              >
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
@@ -500,7 +482,10 @@ export default function TeamPage() {
         {showMobileMenu && (
           <div className="md:hidden border-t border-gray-100 bg-white">
             <nav className="px-4 py-2 space-y-1">
-              <Link href="/" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -509,7 +494,10 @@ export default function TeamPage() {
                   Dashboard
                 </Button>
               </Link>
-              <Link href="/projects" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/projects"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -518,7 +506,10 @@ export default function TeamPage() {
                   Projects
                 </Button>
               </Link>
-              <Link href="/calendar" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/calendar"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -527,7 +518,10 @@ export default function TeamPage() {
                   Calendar
                 </Button>
               </Link>
-              <Link href="/announcements" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/announcements"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -544,7 +538,10 @@ export default function TeamPage() {
                 Team
               </Button>
               <AdminOnly>
-                <Link href="/admin" onClick={() => setShowMobileMenu(false)}>
+                <Link
+                  href="/admin"
+                  onClick={() => setShowMobileMenu(false)}
+                >
                   <Button
                     variant="ghost"
                     className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -621,14 +618,20 @@ export default function TeamPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+            <Select
+              value={selectedLocation}
+              onValueChange={setSelectedLocation}
+            >
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="Location" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Locations</SelectItem>
                 {getUniqueLocations().map((location) => (
-                  <SelectItem key={location} value={location.toLowerCase().replace(/\s+/g, "-")}>
+                  <SelectItem
+                    key={location}
+                    value={location.toLowerCase().replace(/\s+/g, "-")}
+                  >
                     {location}
                   </SelectItem>
                 ))}
@@ -637,7 +640,10 @@ export default function TeamPage() {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="founders" className="w-full space-y-4">
+          <Tabs
+            defaultValue="founders"
+            className="w-full space-y-4"
+          >
             <TabsList className="grid w-full grid-cols-3 bg-white border border-gray-200">
               <TabsTrigger
                 value="founders"
@@ -659,10 +665,16 @@ export default function TeamPage() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="founders" className="space-y-6">
+            <TabsContent
+              value="founders"
+              className="space-y-6"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredFounders.map((founder) => (
-                  <Card key={founder.id} className="hover:shadow-lg transition-shadow">
+                  <Card
+                    key={founder.id}
+                    className="hover:shadow-lg transition-shadow"
+                  >
                     <CardHeader>
                       <div className="flex items-start gap-4">
                         <Avatar className="h-16 w-16">
@@ -705,13 +717,25 @@ export default function TeamPage() {
                           Message
                         </Button>
                         <AdminOnly>
-                          <Button size="sm" variant="outline" onClick={() => handleEditImage(founder, "founder")}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditImage(founder, "founder")}
+                          >
                             <Camera className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleEditPerson(founder, "founder")}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditPerson(founder, "founder")}
+                          >
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleDeletePerson(founder, "founder")}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeletePerson(founder, "founder")}
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </AdminOnly>
@@ -722,10 +746,16 @@ export default function TeamPage() {
               </div>
             </TabsContent>
 
-            <TabsContent value="advisors" className="space-y-6">
+            <TabsContent
+              value="advisors"
+              className="space-y-6"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredAdvisors.map((advisor) => (
-                  <Card key={advisor.id} className="hover:shadow-lg transition-shadow">
+                  <Card
+                    key={advisor.id}
+                    className="hover:shadow-lg transition-shadow"
+                  >
                     <CardHeader>
                       <div className="flex items-start gap-4">
                         <Avatar className="h-16 w-16">
@@ -776,13 +806,25 @@ export default function TeamPage() {
                           Message
                         </Button>
                         <AdminOnly>
-                          <Button variant="outline" size="sm" onClick={() => handleEditImage(advisor, "advisor")}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditImage(advisor, "advisor")}
+                          >
                             <Camera className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => handleEditPerson(advisor, "advisor")}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditPerson(advisor, "advisor")}
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => handleDeletePerson(advisor, "advisor")}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeletePerson(advisor, "advisor")}
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </AdminOnly>
@@ -793,10 +835,16 @@ export default function TeamPage() {
               </div>
             </TabsContent>
 
-            <TabsContent value="consultants" className="space-y-6">
+            <TabsContent
+              value="consultants"
+              className="space-y-6"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredConsultants.map((consultant) => (
-                  <Card key={consultant.id} className="hover:shadow-lg transition-shadow">
+                  <Card
+                    key={consultant.id}
+                    className="hover:shadow-lg transition-shadow"
+                  >
                     <CardHeader>
                       <div className="flex items-start gap-4">
                         <Avatar className="h-16 w-16">
@@ -847,7 +895,11 @@ export default function TeamPage() {
                           Message
                         </Button>
                         <AdminOnly>
-                          <Button variant="outline" size="sm" onClick={() => handleEditImage(consultant, "consultant")}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditImage(consultant, "consultant")}
+                          >
                             <Camera className="h-4 w-4" />
                           </Button>
                           <Button
@@ -877,13 +929,14 @@ export default function TeamPage() {
 
       {/* Add Employee Modal */}
       <AdminOnly>
-        <Dialog open={isAddEmployeeModalOpen} onOpenChange={setIsAddEmployeeModalOpen}>
+        <Dialog
+          open={isAddEmployeeModalOpen}
+          onOpenChange={setIsAddEmployeeModalOpen}
+        >
           <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Add New Team Member</DialogTitle>
-              <DialogDescription>
-                Add a new team member to the organization. Fill in their details below.
-              </DialogDescription>
+              <DialogDescription>Add a new team member to the organization. Fill in their details below.</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
@@ -966,7 +1019,10 @@ export default function TeamPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddEmployeeModalOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsAddEmployeeModalOpen(false)}
+              >
                 Cancel
               </Button>
               <Button onClick={handleAddEmployee}>Add Team Member</Button>
@@ -977,7 +1033,10 @@ export default function TeamPage() {
 
       {/* Edit Person Modal */}
       <AdminOnly>
-        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <Dialog
+          open={isEditModalOpen}
+          onOpenChange={setIsEditModalOpen}
+        >
           <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Edit Team Member</DialogTitle>
@@ -1043,7 +1102,10 @@ export default function TeamPage() {
               </div>
             )}
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditModalOpen(false)}
+              >
                 Cancel
               </Button>
               <Button onClick={handleSaveEdit}>Save Changes</Button>
@@ -1054,13 +1116,14 @@ export default function TeamPage() {
 
       {/* Delete Confirmation Dialog */}
       <AdminOnly>
-        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Team Member</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete {deletingPerson?.name}? This action cannot be undone.
-              </AlertDialogDescription>
+              <AlertDialogDescription>Are you sure you want to delete {deletingPerson?.name}? This action cannot be undone.</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -1077,7 +1140,10 @@ export default function TeamPage() {
 
       {/* Image Edit Modal */}
       <AdminOnly>
-        <Dialog open={isImageEditModalOpen} onOpenChange={setIsImageEditModalOpen}>
+        <Dialog
+          open={isImageEditModalOpen}
+          onOpenChange={setIsImageEditModalOpen}
+        >
           <DialogContent className="sm:max-w-[400px]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -1100,7 +1166,10 @@ export default function TeamPage() {
                   </Avatar>
 
                   <div className="space-y-2">
-                    <Label htmlFor="image-upload" className="cursor-pointer">
+                    <Label
+                      htmlFor="image-upload"
+                      className="cursor-pointer"
+                    >
                       <div className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
                         <Upload className="h-4 w-4" />
                         Choose New Photo
@@ -1113,15 +1182,16 @@ export default function TeamPage() {
                       className="hidden"
                       onChange={handleImageUpload}
                     />
-                    <p className="text-xs text-muted-foreground text-center">
-                      Supported formats: JPG, PNG, GIF (max 5MB)
-                    </p>
+                    <p className="text-xs text-muted-foreground text-center">Supported formats: JPG, PNG, GIF (max 5MB)</p>
                   </div>
                 </div>
               </div>
             )}
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsImageEditModalOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsImageEditModalOpen(false)}
+              >
                 Cancel
               </Button>
               <Button onClick={handleSaveImage}>Save Photo</Button>
@@ -1130,7 +1200,10 @@ export default function TeamPage() {
         </Dialog>
       </AdminOnly>
 
-      <Dialog open={isMessageModalOpen} onOpenChange={setIsMessageModalOpen}>
+      <Dialog
+        open={isMessageModalOpen}
+        onOpenChange={setIsMessageModalOpen}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -1164,12 +1237,15 @@ export default function TeamPage() {
             </Button>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setIsMessageModalOpen(false)}>
+            <Button
+              variant="ghost"
+              onClick={() => setIsMessageModalOpen(false)}
+            >
               Cancel
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

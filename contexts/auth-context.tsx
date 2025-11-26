@@ -28,6 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const { data: session, status } = useSession();
 
@@ -47,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // This catches users logging in via SSO.
-    if (status === "authenticated" && !user && session?.user) {
+    if (status === "authenticated" && !user && session?.user && !isLoggingOut) {
       const nextAuthUser = session.user as any;
       const ssoUser: User = {
         id: nextAuthUser.dbUserId || nextAuthUser.email,
@@ -64,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(ssoUser);
       localStorage.setItem("intranet-user", JSON.stringify(ssoUser));
     }
-  }, [status, session, user, setUser]);
+  }, [status, session, user, setUser, isLoggingOut]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     console.log("[v0] Login attempt for email:", email);
@@ -101,6 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
+    setIsLoggingOut(true);
     // Check if the user object was created via SSO (manual sync) or Credential
     const isSSO = user?.provider === "microsoft-entra-id" || user?.provider === "sso";
 
@@ -111,15 +113,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // 2. Call NextAuth signOut to clear cookies
     await signOut({ redirect: false });
 
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
     if (isSSO) {
       // 3. Remote SSO Logout (Microsoft Entra ID)
       const tenantId = process.env.NEXT_PUBLIC_AZURE_AD_TENANT_ID;
       const postLogoutRedirectUri = encodeURIComponent(`${window.location.origin}/`);
       const logoutUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/logout?post_logout_redirect_uri=${postLogoutRedirectUri}`;
-      // router.push(logoutUrl);
       window.location.href = logoutUrl;
     } else {
-      // router.push("/");
       window.location.href = "/";
     }
   };

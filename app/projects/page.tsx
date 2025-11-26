@@ -1,21 +1,14 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,69 +18,55 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Calendar,
-  Users,
-  Clock,
-  Search,
-  Plus,
-  FolderOpen,
-  TrendingUp,
-  Bell,
-  Menu,
-  LogOut,
-  Edit,
-  Trash2,
-  Settings,
-} from "lucide-react"
-import { usePermissions } from "@/hooks/use-permissions"
-import { useAuth } from "@/contexts/auth-context"
-import Link from "next/link"
-import { getProjects, createProject, updateProject, deleteProject } from "@/app/actions/projects"
+} from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar, Users, Clock, Search, Plus, FolderOpen, TrendingUp, Bell, Menu, LogOut, Edit, Trash2, Settings } from "lucide-react";
+import { usePermissions } from "@/hooks/use-permissions";
+import { useAuth } from "@/contexts/auth-context";
+import Link from "next/link";
+import { getProjects, createProject, updateProject, deleteProject } from "@/app/actions/projects";
 
 function getStatusColor(status: string) {
   switch (status) {
     case "Active":
-      return "bg-chart-4 text-white"
+      return "bg-chart-4 text-white";
     case "In Progress":
-      return "bg-chart-3 text-white"
+      return "bg-chart-3 text-white";
     case "Planning":
-      return "bg-muted text-muted-foreground"
+      return "bg-muted text-muted-foreground";
     case "Completed":
-      return "bg-chart-4 text-white"
+      return "bg-chart-4 text-white";
     default:
-      return "bg-muted text-muted-foreground"
+      return "bg-muted text-muted-foreground";
   }
 }
 
 function getPriorityColor(priority: string) {
   switch (priority) {
     case "Critical":
-      return "bg-destructive text-destructive-foreground"
+      return "bg-destructive text-destructive-foreground";
     case "High":
-      return "bg-chart-3 text-white"
+      return "bg-chart-3 text-white";
     case "Medium":
-      return "bg-accent text-accent-foreground"
+      return "bg-accent text-accent-foreground";
     case "Low":
-      return "bg-muted text-muted-foreground"
+      return "bg-muted text-muted-foreground";
     default:
-      return "bg-muted text-muted-foreground"
+      return "bg-muted text-muted-foreground";
   }
 }
 
 export default function ProjectsPage() {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [editingProject, setEditingProject] = useState(null)
-  const [deletingProject, setDeletingProject] = useState(null)
-  const [selectedMember, setSelectedMember] = useState("all")
-  const [selectedStatus, setSelectedStatus] = useState("all")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [projects, setProjects] = useState([])
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState(null);
+  const [deletingProject, setDeletingProject] = useState(null);
+  const [selectedMember, setSelectedMember] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [projects, setProjects] = useState([]);
   const [newProject, setNewProject] = useState({
     title: "",
     description: "",
@@ -98,47 +77,45 @@ export default function ProjectsPage() {
     endDate: "",
     budget: "",
     teamMembers: "",
-  })
-  const [showMobileMenu, setShowMobileMenu] = useState(false)
+  });
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
-  const { user, logout, isAuthenticated } = useAuth()
-  const { isAdministrator, canEditProject, loading: permissionsLoading } = usePermissions()
+  const { user, logout, isAuthenticated } = useAuth();
+  const { isAdministrator, canEditProject, loading: permissionsLoading } = usePermissions();
 
   useEffect(() => {
     async function loadProjects() {
-      const projectsData = await getProjects()
-      console.log("[v0] Projects loaded from database:", projectsData)
-      setProjects(projectsData)
+      const projectsData = await getProjects();
+      console.log("[v0] Projects loaded from database:", projectsData);
+      setProjects(projectsData);
     }
-    loadProjects()
-  }, [])
+    loadProjects();
+  }, []);
 
   const getAllTeamMembers = () => {
-    const allMembers = projects.flatMap((project) => project.team.map((member) => member.name))
-    return [...new Set(allMembers)].sort()
-  }
+    const allMembers = projects.flatMap((project) => project.team.map((member) => member.name));
+    return [...new Set(allMembers)].sort();
+  };
 
-  const uniqueTeamMembers = getAllTeamMembers()
+  const uniqueTeamMembers = getAllTeamMembers();
 
   const filteredProjects = projects.filter((project) => {
-    const memberMatch =
-      selectedMember === "all" ||
-      project.team.some((member) => member.name.toLowerCase().replace(/\s+/g, "-") === selectedMember)
+    const memberMatch = selectedMember === "all" || project.team.some((member) => member.name.toLowerCase().replace(/\s+/g, "-") === selectedMember);
 
-    const statusMatch = selectedStatus === "all" || project.status.toLowerCase().replace(/\s+/g, "-") === selectedStatus
+    const statusMatch = selectedStatus === "all" || project.status.toLowerCase().replace(/\s+/g, "-") === selectedStatus;
 
     const searchMatch =
       searchTerm === "" ||
       project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchTerm.toLowerCase())
+      project.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-    return memberMatch && statusMatch && searchMatch
-  })
+    return memberMatch && statusMatch && searchMatch;
+  });
 
   const handleDeleteProject = (project) => {
-    setDeletingProject(project)
-    setIsDeleteModalOpen(true)
-  }
+    setDeletingProject(project);
+    setIsDeleteModalOpen(true);
+  };
 
   if (!isAuthenticated()) {
     return (
@@ -157,22 +134,22 @@ export default function ProjectsPage() {
           </Card>
         </div>
       </div>
-    )
+    );
   }
 
   const handleCreateProject = async () => {
     if (!newProject.title || !newProject.description) {
-      alert("Please fill in at least the title and description")
-      return
+      alert("Please fill in at least the title and description");
+      return;
     }
 
     try {
-      await createProject(newProject)
+      await createProject(newProject);
 
       // Reload projects from database
-      const updatedProjects = await getProjects()
-      console.log("[v0] Projects after creation:", updatedProjects)
-      setProjects(updatedProjects)
+      const updatedProjects = await getProjects();
+      console.log("[v0] Projects after creation:", updatedProjects);
+      setProjects(updatedProjects);
 
       // Reset form and close modal
       setNewProject({
@@ -185,13 +162,13 @@ export default function ProjectsPage() {
         endDate: "",
         budget: "",
         teamMembers: "",
-      })
-      setIsCreateModalOpen(false)
+      });
+      setIsCreateModalOpen(false);
     } catch (error) {
-      console.error("[v0] Error creating project:", error)
-      alert("Failed to create project. Please try again.")
+      console.error("[v0] Error creating project:", error);
+      alert("Failed to create project. Please try again.");
     }
-  }
+  };
 
   const handleEditProject = (project) => {
     setEditingProject({
@@ -206,50 +183,50 @@ export default function ProjectsPage() {
       startDate: project.startDate || "",
       endDate: project.endDate || "",
       teamMembers: project.team?.map((member) => member.name).join(", ") || "",
-    })
-    setIsEditModalOpen(true)
-  }
+    });
+    setIsEditModalOpen(true);
+  };
 
   const handleSaveEdit = async () => {
     if (!editingProject.title || !editingProject.description) {
-      alert("Please fill in at least the title and description")
-      return
+      alert("Please fill in at least the title and description");
+      return;
     }
 
     try {
-      await updateProject(editingProject.id, editingProject)
+      await updateProject(editingProject.id, editingProject);
 
       // Reload projects from database
-      const updatedProjects = await getProjects()
-      console.log("[v0] Projects after update:", updatedProjects)
-      setProjects(updatedProjects)
+      const updatedProjects = await getProjects();
+      console.log("[v0] Projects after update:", updatedProjects);
+      setProjects(updatedProjects);
 
-      setIsEditModalOpen(false)
-      setEditingProject(null)
+      setIsEditModalOpen(false);
+      setEditingProject(null);
     } catch (error) {
-      console.error("[v0] Error updating project:", error)
-      alert("Failed to update project. Please try again.")
+      console.error("[v0] Error updating project:", error);
+      alert("Failed to update project. Please try again.");
     }
-  }
+  };
 
   const handleConfirmDelete = async () => {
     if (deletingProject) {
       try {
-        await deleteProject(deletingProject.id)
+        await deleteProject(deletingProject.id);
 
         // Reload projects from database
-        const updatedProjects = await getProjects()
-        console.log("[v0] Projects after deletion:", updatedProjects)
-        setProjects(updatedProjects)
+        const updatedProjects = await getProjects();
+        console.log("[v0] Projects after deletion:", updatedProjects);
+        setProjects(updatedProjects);
 
-        setDeletingProject(null)
-        setIsDeleteModalOpen(false)
+        setDeletingProject(null);
+        setIsDeleteModalOpen(false);
       } catch (error) {
-        console.error("[v0] Error deleting project:", error)
-        alert("Failed to delete project. Please try again.")
+        console.error("[v0] Error deleting project:", error);
+        alert("Failed to delete project. Please try again.");
       }
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-green-50">
@@ -257,7 +234,11 @@ export default function ProjectsPage() {
         <div className="flex h-20 items-center justify-between px-8">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
-              <img src="/munus-logo.jpg" alt="Munus Logo" className="h-8 w-auto" />
+              <img
+                src="/munus-logo.jpg"
+                alt="Munus Logo"
+                className="h-8 w-auto"
+              />
               <span className="text-3xl font-bold text-gray-900 font-serif">Munus Hub</span>
             </div>
 
@@ -331,7 +312,12 @@ export default function ProjectsPage() {
                 <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                 <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
               </div>
-              <Button variant="ghost" size="sm" onClick={logout} className="text-gray-600 hover:text-primary">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={logout}
+                className="text-gray-600"
+              >
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
@@ -341,7 +327,10 @@ export default function ProjectsPage() {
         {showMobileMenu && (
           <div className="md:hidden border-t border-gray-100 bg-white">
             <nav className="px-4 py-2 space-y-1">
-              <Link href="/" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -357,7 +346,10 @@ export default function ProjectsPage() {
                 <FolderOpen className="h-4 w-4" />
                 Projects
               </Button>
-              <Link href="/calendar" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/calendar"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -366,7 +358,10 @@ export default function ProjectsPage() {
                   Calendar
                 </Button>
               </Link>
-              <Link href="/announcements" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/announcements"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -375,7 +370,10 @@ export default function ProjectsPage() {
                   Announcements
                 </Button>
               </Link>
-              <Link href="/team" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/team"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -385,7 +383,10 @@ export default function ProjectsPage() {
                 </Button>
               </Link>
               {isAdministrator && (
-                <Link href="/admin" onClick={() => setShowMobileMenu(false)}>
+                <Link
+                  href="/admin"
+                  onClick={() => setShowMobileMenu(false)}
+                >
                   <Button
                     variant="ghost"
                     className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -425,7 +426,10 @@ export default function ProjectsPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <Select
+              value={selectedStatus}
+              onValueChange={setSelectedStatus}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -437,14 +441,20 @@ export default function ProjectsPage() {
                 <SelectItem value="completed">Completed</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={selectedMember} onValueChange={setSelectedMember}>
+            <Select
+              value={selectedMember}
+              onValueChange={setSelectedMember}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by Member" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Members</SelectItem>
                 {uniqueTeamMembers.map((member) => (
-                  <SelectItem key={member} value={member.toLowerCase().replace(/\s+/g, "-")}>
+                  <SelectItem
+                    key={member}
+                    value={member.toLowerCase().replace(/\s+/g, "-")}
+                  >
                     {member}
                   </SelectItem>
                 ))}
@@ -454,7 +464,10 @@ export default function ProjectsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredProjects.map((project) => (
-              <Card key={project.id} className="h-full hover:shadow-lg transition-shadow">
+              <Card
+                key={project.id}
+                className="h-full hover:shadow-lg transition-shadow"
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -467,8 +480,8 @@ export default function ProjectsPage() {
                           variant="outline"
                           size="sm"
                           onClick={(e) => {
-                            e.preventDefault()
-                            handleEditProject(project)
+                            e.preventDefault();
+                            handleEditProject(project);
                           }}
                         >
                           <Edit className="h-4 w-4" />
@@ -478,8 +491,8 @@ export default function ProjectsPage() {
                             variant="outline"
                             size="sm"
                             onClick={(e) => {
-                              e.preventDefault()
-                              handleDeleteProject(project)
+                              e.preventDefault();
+                              handleDeleteProject(project);
                             }}
                             className="text-destructive hover:text-destructive"
                           >
@@ -491,7 +504,10 @@ export default function ProjectsPage() {
                   </div>
                   <div className="flex gap-2 mt-3">
                     <Badge className={getStatusColor(project.status)}>{project.status}</Badge>
-                    <Badge variant="outline" className={getPriorityColor(project.priority)}>
+                    <Badge
+                      variant="outline"
+                      className={getPriorityColor(project.priority)}
+                    >
                       {project.priority}
                     </Badge>
                   </div>
@@ -503,7 +519,10 @@ export default function ProjectsPage() {
                         <span>Progress</span>
                         <span>{project.progress}%</span>
                       </div>
-                      <Progress value={project.progress} className="h-2" />
+                      <Progress
+                        value={project.progress}
+                        className="h-2"
+                      />
                     </div>
 
                     <div>
@@ -513,7 +532,10 @@ export default function ProjectsPage() {
                       </div>
                       <div className="flex -space-x-2">
                         {project.team.slice(0, 3).map((member, index) => (
-                          <Avatar key={index} className="h-8 w-8 border-2 border-background">
+                          <Avatar
+                            key={index}
+                            className="h-8 w-8 border-2 border-background"
+                          >
                             <AvatarImage src={member.avatar || "/placeholder.svg"} />
                             <AvatarFallback className="text-xs">
                               {member.name
@@ -564,7 +586,10 @@ export default function ProjectsPage() {
         </div>
       </main>
 
-      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+      <Dialog
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+      >
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
@@ -572,7 +597,10 @@ export default function ProjectsPage() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right">
+              <Label
+                htmlFor="title"
+                className="text-right"
+              >
                 Title
               </Label>
               <Input
@@ -584,7 +612,10 @@ export default function ProjectsPage() {
               />
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="description" className="text-right pt-2">
+              <Label
+                htmlFor="description"
+                className="text-right pt-2"
+              >
                 Description
               </Label>
               <Textarea
@@ -597,7 +628,10 @@ export default function ProjectsPage() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="text-right">
+              <Label
+                htmlFor="status"
+                className="text-right"
+              >
                 Status
               </Label>
               <Select
@@ -616,7 +650,10 @@ export default function ProjectsPage() {
               </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="priority" className="text-right">
+              <Label
+                htmlFor="priority"
+                className="text-right"
+              >
                 Priority
               </Label>
               <Select
@@ -635,7 +672,10 @@ export default function ProjectsPage() {
               </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="department" className="text-right">
+              <Label
+                htmlFor="department"
+                className="text-right"
+              >
                 Department
               </Label>
               <Select
@@ -656,7 +696,10 @@ export default function ProjectsPage() {
               </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="startDate" className="text-right">
+              <Label
+                htmlFor="startDate"
+                className="text-right"
+              >
                 Start Date
               </Label>
               <Input
@@ -668,7 +711,10 @@ export default function ProjectsPage() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="endDate" className="text-right">
+              <Label
+                htmlFor="endDate"
+                className="text-right"
+              >
                 End Date
               </Label>
               <Input
@@ -680,7 +726,10 @@ export default function ProjectsPage() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="budget" className="text-right">
+              <Label
+                htmlFor="budget"
+                className="text-right"
+              >
                 Budget
               </Label>
               <Input
@@ -692,7 +741,10 @@ export default function ProjectsPage() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="teamMembers" className="text-right">
+              <Label
+                htmlFor="teamMembers"
+                className="text-right"
+              >
                 Team Members
               </Label>
               <Input
@@ -705,7 +757,10 @@ export default function ProjectsPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateModalOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleCreateProject}>Create Project</Button>
@@ -713,7 +768,10 @@ export default function ProjectsPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+      <Dialog
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+      >
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Project</DialogTitle>
@@ -722,7 +780,10 @@ export default function ProjectsPage() {
           {editingProject && (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-title" className="text-right">
+                <Label
+                  htmlFor="edit-title"
+                  className="text-right"
+                >
                   Title
                 </Label>
                 <Input
@@ -733,7 +794,10 @@ export default function ProjectsPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-start gap-4">
-                <Label htmlFor="edit-description" className="text-right pt-2">
+                <Label
+                  htmlFor="edit-description"
+                  className="text-right pt-2"
+                >
                   Description
                 </Label>
                 <Textarea
@@ -745,7 +809,10 @@ export default function ProjectsPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-status" className="text-right">
+                <Label
+                  htmlFor="edit-status"
+                  className="text-right"
+                >
                   Status
                 </Label>
                 <Select
@@ -764,7 +831,10 @@ export default function ProjectsPage() {
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-priority" className="text-right">
+                <Label
+                  htmlFor="edit-priority"
+                  className="text-right"
+                >
                   Priority
                 </Label>
                 <Select
@@ -783,7 +853,10 @@ export default function ProjectsPage() {
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-progress" className="text-right">
+                <Label
+                  htmlFor="edit-progress"
+                  className="text-right"
+                >
                   Progress (%)
                 </Label>
                 <Input
@@ -792,15 +865,16 @@ export default function ProjectsPage() {
                   min="0"
                   max="100"
                   value={editingProject.progress || 0}
-                  onChange={(e) =>
-                    setEditingProject({ ...editingProject, progress: Number.parseInt(e.target.value) || 0 })
-                  }
+                  onChange={(e) => setEditingProject({ ...editingProject, progress: Number.parseInt(e.target.value) || 0 })}
                   className="col-span-3"
                   placeholder="Enter progress percentage (0-100)"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-budget" className="text-right">
+                <Label
+                  htmlFor="edit-budget"
+                  className="text-right"
+                >
                   Budget
                 </Label>
                 <Input
@@ -811,7 +885,10 @@ export default function ProjectsPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-teamMembers" className="text-right">
+                <Label
+                  htmlFor="edit-teamMembers"
+                  className="text-right"
+                >
                   Team Members
                 </Label>
                 <Input
@@ -825,7 +902,10 @@ export default function ProjectsPage() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditModalOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleSaveEdit}>Save Changes</Button>
@@ -833,13 +913,16 @@ export default function ProjectsPage() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+      <AlertDialog
+        open={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Project</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deletingProject?.title}"? This action cannot be undone and will remove
-              all project data including team members and progress.
+              Are you sure you want to delete "{deletingProject?.title}"? This action cannot be undone and will remove all project data including team members
+              and progress.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -854,5 +937,5 @@ export default function ProjectsPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

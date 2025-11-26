@@ -612,7 +612,7 @@ export default function Dashboard() {
                 variant="ghost"
                 size="sm"
                 onClick={logout}
-                className="text-gray-600 hover:text-primary"
+                className="text-gray-600"
               >
                 <LogOut className="h-4 w-4" />
               </Button>

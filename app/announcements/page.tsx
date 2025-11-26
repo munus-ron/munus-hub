@@ -1,27 +1,27 @@
-"use client"
+"use client";
 
-import { DialogTrigger } from "@/components/ui/dialog"
+import { DialogTrigger } from "@/components/ui/dialog";
 
-import { CardDescription } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
+import { CardDescription } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogFooter as UIDialogFooter,
   DialogHeader as UIDialogHeader,
   DialogTitle as UIDialogTitle,
   DialogContent as UIDialogContent,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Bell,
   Search,
@@ -42,12 +42,12 @@ import {
   Settings,
   Edit,
   Trash2,
-} from "lucide-react"
-import AdminOnly from "@/components/admin-only"
-import { useAuth } from "@/contexts/auth-context"
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import { usePermissions } from "@/hooks/use-permissions"
+} from "lucide-react";
+import AdminOnly from "@/components/admin-only";
+import { useAuth } from "@/contexts/auth-context";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { usePermissions } from "@/hooks/use-permissions";
 
 import {
   getAnnouncements,
@@ -56,23 +56,23 @@ import {
   deleteAnnouncement,
   addComment, // Added import for addComment action
   toggleLike, // Import toggleLike action
-} from "@/app/actions/announcements"
+} from "@/app/actions/announcements";
 
 export default function AnnouncementsPage() {
-  const [announcements, setAnnouncements] = useState<any[]>([])
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [editingAnnouncement, setEditingAnnouncement] = useState<any>(null)
-  const [deletingAnnouncement, setDeletingAnnouncement] = useState<any>(null)
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState<any>(null);
+  const [deletingAnnouncement, setDeletingAnnouncement] = useState<any>(null);
   // const [announcementLikes, setAnnouncementLikes] = useState<{
   //   [key: number]: { users: string[]; currentUserLiked: boolean }
   // }>({})
-  const [showLikesList, setShowLikesList] = useState<{ [key: number]: boolean }>({})
-  const [showComments, setShowComments] = useState<{ [key: number]: boolean }>({})
-  const [showAllComments, setShowAllComments] = useState<{ [key: number]: boolean }>({})
-  const [newComments, setNewComments] = useState<{ [key: number]: string }>({})
-  const [highlightedAnnouncement, setHighlightedAnnouncement] = useState<number | null>(null)
+  const [showLikesList, setShowLikesList] = useState<{ [key: number]: boolean }>({});
+  const [showComments, setShowComments] = useState<{ [key: number]: boolean }>({});
+  const [showAllComments, setShowAllComments] = useState<{ [key: number]: boolean }>({});
+  const [newComments, setNewComments] = useState<{ [key: number]: string }>({});
+  const [highlightedAnnouncement, setHighlightedAnnouncement] = useState<number | null>(null);
   const [newAnnouncement, setNewAnnouncement] = useState({
     title: "",
     content: "",
@@ -81,98 +81,98 @@ export default function AnnouncementsPage() {
     isPinned: false,
     tags: "",
     date: new Date().toISOString().split("T")[0], // Format: YYYY-MM-DD
-  })
-  const [showMobileMenu, setShowMobileMenu] = useState(false)
+  });
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
-  const { user, logout, isAuthenticated } = useAuth()
-  const searchParams = useSearchParams()
-  const highlightId = searchParams.get("highlight")
-  const { canEditAnnouncements, canEditItem, isAdministrator } = usePermissions()
+  const { user, logout, isAuthenticated } = useAuth();
+  const searchParams = useSearchParams();
+  const highlightId = searchParams.get("highlight");
+  const { canEditAnnouncements, canEditItem, isAdministrator } = usePermissions();
 
   useEffect(() => {
     async function loadAnnouncements() {
-      const announcementsData = await getAnnouncements()
-      console.log("[v0] Announcements loaded from database:", announcementsData)
-      setAnnouncements(announcementsData)
+      const announcementsData = await getAnnouncements();
+      console.log("[v0] Announcements loaded from database:", announcementsData);
+      setAnnouncements(announcementsData);
     }
-    loadAnnouncements()
-  }, [])
+    loadAnnouncements();
+  }, []);
 
   useEffect(() => {
     if (highlightId) {
-      const id = Number.parseInt(highlightId)
-      setHighlightedAnnouncement(id)
+      const id = Number.parseInt(highlightId);
+      setHighlightedAnnouncement(id);
       // Auto-scroll to highlighted announcement after a short delay
       setTimeout(() => {
-        const element = document.getElementById(`announcement-${id}`)
+        const element = document.getElementById(`announcement-${id}`);
         if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "center" })
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
         }
-      }, 500)
+      }, 500);
       // Remove highlight after 3 seconds
       setTimeout(() => {
-        setHighlightedAnnouncement(null)
-      }, 3000)
+        setHighlightedAnnouncement(null);
+      }, 3000);
     }
-  }, [highlightId]) // Use extracted highlightId instead of searchParams
+  }, [highlightId]); // Use extracted highlightId instead of searchParams
 
   function getPriorityColor(priority: string) {
     switch (priority) {
       case "critical":
-        return "bg-destructive text-destructive-foreground"
+        return "bg-destructive text-destructive-foreground";
       case "high":
-        return "bg-chart-3 text-white"
+        return "bg-chart-3 text-white";
       case "medium":
-        return "bg-secondary text-secondary-foreground"
+        return "bg-secondary text-secondary-foreground";
       case "low":
-        return "bg-muted text-muted-foreground"
+        return "bg-muted text-muted-foreground";
       default:
-        return "bg-muted text-muted-foreground"
+        return "bg-muted text-muted-foreground";
     }
   }
 
   function getPriorityIcon(priority: string) {
     switch (priority) {
       case "critical":
-        return <AlertCircle className="h-4 w-4" />
+        return <AlertCircle className="h-4 w-4" />;
       case "high":
-        return <Info className="h-4 w-4" />
+        return <Info className="h-4 w-4" />;
       case "medium":
-        return <CheckCircle className="h-4 w-4" />
+        return <CheckCircle className="h-4 w-4" />;
       default:
-        return <Info className="h-4 w-4" />
+        return <Info className="h-4 w-4" />;
     }
   }
 
   function getCategoryColor(category: string) {
     switch (category) {
       case "Company News":
-        return "bg-primary text-primary-foreground"
+        return "bg-primary text-primary-foreground";
       case "HR Policy":
-        return "bg-chart-4 text-white"
+        return "bg-chart-4 text-white";
       case "Events":
-        return "bg-accent text-accent-foreground"
+        return "bg-accent text-accent-foreground";
       case "Security":
-        return "bg-destructive text-destructive-foreground"
+        return "bg-destructive text-destructive-foreground";
       case "Recognition":
-        return "bg-chart-2 text-white"
+        return "bg-chart-2 text-white";
       case "Benefits":
-        return "bg-chart-1 text-white"
+        return "bg-chart-1 text-white";
       default:
-        return "bg-muted text-muted-foreground"
+        return "bg-muted text-muted-foreground";
     }
   }
 
   function formatTimeAgo(dateString: string) {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
 
-    if (diffInHours < 1) return "Just now"
-    if (diffInHours < 24) return `${diffInHours}h ago`
-    const diffInDays = Math.floor(diffInHours / 24)
-    if (diffInDays < 7) return `${diffInDays}d ago`
-    return date.toLocaleDateString()
+    if (diffInHours < 1) return "Just now";
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    return date.toLocaleDateString();
   }
 
   if (!isAuthenticated()) {
@@ -192,47 +192,47 @@ export default function AnnouncementsPage() {
           </Card>
         </div>
       </div>
-    )
+    );
   }
 
-  const pinnedAnnouncements = announcements.filter((a) => a.isPinned)
-  const regularAnnouncements = announcements.filter((a) => !a.isPinned)
+  const pinnedAnnouncements = announcements.filter((a) => a.isPinned);
+  const regularAnnouncements = announcements.filter((a) => !a.isPinned);
 
   const handleAddComment = async (announcementId: number) => {
     // Made function async
-    const commentText = newComments[announcementId]?.trim()
-    if (!commentText) return
+    const commentText = newComments[announcementId]?.trim();
+    if (!commentText) return;
 
     try {
       await addComment(announcementId, {
         author: user?.name || "Anonymous",
         content: commentText,
-      })
+      });
 
       // Reload announcements from database to get updated comments
-      const updatedAnnouncements = await getAnnouncements()
-      setAnnouncements(updatedAnnouncements)
+      const updatedAnnouncements = await getAnnouncements();
+      setAnnouncements(updatedAnnouncements);
 
       // Clear the comment input
       setNewComments({
         ...newComments,
         [announcementId]: "",
-      })
+      });
     } catch (error) {
-      console.error("[v0] Error adding comment:", error)
-      alert("Failed to add comment. Please try again.")
+      console.error("[v0] Error adding comment:", error);
+      alert("Failed to add comment. Please try again.");
     }
-  }
+  };
 
   const handleCommentChange = (announcementId: number, value: string) => {
     setNewComments({
       ...newComments,
       [announcementId]: value,
-    })
-  }
+    });
+  };
 
   const handleCreateAnnouncement = async () => {
-    console.log("Creating announcement:", newAnnouncement)
+    console.log("Creating announcement:", newAnnouncement);
 
     await createAnnouncement({
       ...newAnnouncement,
@@ -245,11 +245,11 @@ export default function AnnouncementsPage() {
         .split(",")
         .map((tag) => tag.trim())
         .filter((tag) => tag),
-    })
+    });
 
     // Reload announcements from database
-    const updatedAnnouncements = await getAnnouncements()
-    setAnnouncements(updatedAnnouncements)
+    const updatedAnnouncements = await getAnnouncements();
+    setAnnouncements(updatedAnnouncements);
 
     setNewAnnouncement({
       title: "",
@@ -259,23 +259,21 @@ export default function AnnouncementsPage() {
       isPinned: false,
       tags: "",
       date: new Date().toISOString().split("T")[0],
-    })
-    setIsCreateModalOpen(false)
-  }
+    });
+    setIsCreateModalOpen(false);
+  };
 
   const handleEditAnnouncement = (announcement: any) => {
     setEditingAnnouncement({
       ...announcement,
       tags: announcement.tags ? announcement.tags.join(", ") : "",
-      date: announcement.date
-        ? new Date(announcement.date).toISOString().split("T")[0]
-        : new Date().toISOString().split("T")[0],
-    })
-    setIsEditModalOpen(true)
-  }
+      date: announcement.date ? new Date(announcement.date).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+    });
+    setIsEditModalOpen(true);
+  };
 
   const handleUpdateAnnouncement = async () => {
-    console.log("Updating announcement:", editingAnnouncement)
+    console.log("Updating announcement:", editingAnnouncement);
 
     await updateAnnouncement(editingAnnouncement.id, {
       title: editingAnnouncement.title,
@@ -289,77 +287,73 @@ export default function AnnouncementsPage() {
         .split(",")
         .map((tag) => tag.trim())
         .filter((tag) => tag),
-    })
+    });
 
     // Reload announcements from database
-    const updatedAnnouncements = await getAnnouncements()
-    setAnnouncements(updatedAnnouncements)
+    const updatedAnnouncements = await getAnnouncements();
+    setAnnouncements(updatedAnnouncements);
 
-    setIsEditModalOpen(false)
-    setEditingAnnouncement(null)
-  }
+    setIsEditModalOpen(false);
+    setEditingAnnouncement(null);
+  };
 
   const handleDeleteAnnouncement = (announcement: any) => {
-    setDeletingAnnouncement(announcement)
-    setIsDeleteDialogOpen(true)
-  }
+    setDeletingAnnouncement(announcement);
+    setIsDeleteDialogOpen(true);
+  };
 
   const confirmDeleteAnnouncement = async () => {
-    console.log("Deleting announcement:", deletingAnnouncement)
+    console.log("Deleting announcement:", deletingAnnouncement);
 
-    if (!deletingAnnouncement) return
+    if (!deletingAnnouncement) return;
 
-    await deleteAnnouncement(deletingAnnouncement.id)
+    await deleteAnnouncement(deletingAnnouncement.id);
 
     // Reload announcements from database
-    const updatedAnnouncements = await getAnnouncements()
-    setAnnouncements(updatedAnnouncements)
+    const updatedAnnouncements = await getAnnouncements();
+    setAnnouncements(updatedAnnouncements);
 
-    setIsDeleteDialogOpen(false)
-    setDeletingAnnouncement(null)
-  }
+    setIsDeleteDialogOpen(false);
+    setDeletingAnnouncement(null);
+  };
 
   const handleLike = async (announcementId: number) => {
     if (!user?.email || !user?.name) {
-      alert("You must be logged in to like announcements")
-      return
+      alert("You must be logged in to like announcements");
+      return;
     }
 
-    const announcement = announcements.find((a) => a.id === announcementId)
+    const announcement = announcements.find((a) => a.id === announcementId);
     if (!announcement || !getLikeData(announcement).isEnabled) {
-      alert(
-        "Likes feature is not yet available. Please contact your administrator to run the database migration script (023_create_announcement_likes.sql).",
-      )
-      return
+      alert("Likes feature is not yet available. Please contact your administrator to run the database migration script (023_create_announcement_likes.sql).");
+      return;
     }
 
     try {
-      const result = await toggleLike(announcementId, user.email, user.name)
+      const result = await toggleLike(announcementId, user.email, user.name);
 
       // If the likes table doesn't exist, show a helpful message
       if (result && !result.success) {
-        console.log("[v0] Likes feature not available:", result.error)
-        alert(
-          "Likes feature is not yet set up. Please contact your administrator to run the database migration script.",
-        )
-        return
+        console.log("[v0] Likes feature not available:", result.error);
+        alert("Likes feature is not yet set up. Please contact your administrator to run the database migration script.");
+        return;
       }
 
       // Reload announcements from database to get updated likes
-      const updatedAnnouncements = await getAnnouncements()
-      setAnnouncements(updatedAnnouncements)
+      const updatedAnnouncements = await getAnnouncements();
+      setAnnouncements(updatedAnnouncements);
     } catch (error) {
-      console.error("[v0] Error toggling like:", error)
-      alert("Failed to update like. Please try again.")
+      console.error("[v0] Error toggling like:", error);
+      alert("Failed to update like. Please try again.");
     }
-  }
+  };
 
   const handleComment = (announcementId: number) => {
     setShowComments({
       ...showComments,
       [announcementId]: !showComments[announcementId],
-    })
-  }
+    });
+  };
 
   const handleShare = async (announcement: any) => {
     try {
@@ -369,135 +363,144 @@ export default function AnnouncementsPage() {
           title: announcement.title,
           text: announcement.content,
           url: window.location.href,
-        }
+        };
 
         if (navigator.canShare(shareData)) {
-          await navigator.share(shareData)
-          return
+          await navigator.share(shareData);
+          return;
         }
       }
 
       // Fallback: copy to clipboard with better formatting
-      const shareText = `📢 ${announcement.title}\n\n${announcement.content}\n\n🔗 Shared from Munus Hub: ${window.location.href}`
+      const shareText = `📢 ${announcement.title}\n\n${announcement.content}\n\n🔗 Shared from Munus Hub: ${window.location.href}`;
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(shareText)
+        await navigator.clipboard.writeText(shareText);
         // Show success message
-        const button = document.activeElement as HTMLElement
-        const originalText = button.textContent
-        button.textContent = "Copied!"
+        const button = document.activeElement as HTMLElement;
+        const originalText = button.textContent;
+        button.textContent = "Copied!";
         setTimeout(() => {
           if (button.textContent === "Copied!") {
-            button.textContent = originalText
+            button.textContent = originalText;
           }
-        }, 2000)
+        }, 2000);
       } else {
         // Final fallback for older browsers
-        const textArea = document.createElement("textarea")
-        textArea.value = shareText
-        document.body.appendChild(textArea)
-        textArea.select()
-        document.execCommand("copy")
-        document.body.removeChild(textArea)
-        alert("Announcement details copied to clipboard!")
+        const textArea = document.createElement("textarea");
+        textArea.value = shareText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        alert("Announcement details copied to clipboard!");
       }
     } catch (error) {
-      console.error("Error sharing announcement:", error)
-      alert("Unable to share announcement. Please try again.")
+      console.error("Error sharing announcement:", error);
+      alert("Unable to share announcement. Please try again.");
     }
-  }
+  };
 
   const getLikeData = (announcement: any) => {
-    const likesList = announcement.likesList || []
-    const currentUserLiked = likesList.some((like: any) => like.user_email === user?.email)
+    const likesList = announcement.likesList || [];
+    const currentUserLiked = likesList.some((like: any) => like.user_email === user?.email);
 
     return {
       liked: currentUserLiked,
       count: likesList.length,
       users: likesList.map((like: any) => like.user_name),
       isEnabled: announcement.likesList !== undefined, // Feature is enabled if likesList exists
-    }
-  }
+    };
+  };
 
   const toggleLikesList = (announcementId: number) => {
     setShowLikesList((prev) => ({
       ...prev,
       [announcementId]: !prev[announcementId],
-    }))
-  }
+    }));
+  };
 
   const toggleShowAllComments = (announcementId: number) => {
     setShowAllComments((prev) => ({
       ...prev,
       [announcementId]: !prev[announcementId],
-    }))
-  }
+    }));
+  };
 
   const renderAdminButtons = (announcement: any) => {
-    const canEdit = isAdministrator || (canEditAnnouncements && announcement.author === user?.name)
+    const canEdit = isAdministrator || (canEditAnnouncements && announcement.author === user?.name);
 
     return (
       <>
         {canEdit && (
           <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200">
-            <Button size="sm" variant="outline" onClick={() => handleEditAnnouncement(announcement)}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleEditAnnouncement(announcement)}
+            >
               <Edit className="h-4 w-4 mr-1" />
               Edit
             </Button>
-            <Button size="sm" variant="outline" onClick={() => handleDeleteAnnouncement(announcement)}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleDeleteAnnouncement(announcement)}
+            >
               <Trash2 className="h-4 w-4 mr-1" />
               Delete
             </Button>
-            <Button size="sm" variant="outline" onClick={() => handleShare(announcement)}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleShare(announcement)}
+            >
               <Share2 className="h-4 w-4 mr-1" />
               Share
             </Button>
           </div>
         )}
       </>
-    )
-  }
+    );
+  };
 
   const renderCommentSection = (announcement: any) => (
     <div className="mt-4 pt-4 border-t border-gray-200">
       <div className="flex items-center gap-2 mb-3">
         <MessageSquare className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm font-medium text-muted-foreground">
-          {announcement.commentsList?.length || 0} Comments
-        </span>
+        <span className="text-sm font-medium text-muted-foreground">{announcement.commentsList?.length || 0} Comments</span>
       </div>
       {announcement.commentsList && announcement.commentsList.length > 0 && (
         <div className="space-y-3 mb-4">
-          {(showAllComments[announcement.id] ? announcement.commentsList : announcement.commentsList.slice(0, 2)).map(
-            (comment: any) => {
-              const authorName =
-                typeof comment.author === "string" ? comment.author : String(comment.author || "Anonymous")
-              const commentContent =
-                typeof comment.content === "string" ? comment.content : String(comment.content || "")
-              const commentDate = comment.date || comment.created_at
+          {(showAllComments[announcement.id] ? announcement.commentsList : announcement.commentsList.slice(0, 2)).map((comment: any) => {
+            const authorName = typeof comment.author === "string" ? comment.author : String(comment.author || "Anonymous");
+            const commentContent = typeof comment.content === "string" ? comment.content : String(comment.content || "");
+            const commentDate = comment.date || comment.created_at;
 
-              return (
-                <div key={comment.id} className="flex gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={comment.authorAvatar || "/placeholder.svg"} />
-                    <AvatarFallback className="text-xs">
-                      {authorName
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium">{authorName}</span>
-                      <span className="text-xs text-muted-foreground">{formatTimeAgo(commentDate)}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{commentContent}</p>
+            return (
+              <div
+                key={comment.id}
+                className="flex gap-3"
+              >
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={comment.authorAvatar || "/placeholder.svg"} />
+                  <AvatarFallback className="text-xs">
+                    {authorName
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium">{authorName}</span>
+                    <span className="text-xs text-muted-foreground">{formatTimeAgo(commentDate)}</span>
                   </div>
+                  <p className="text-sm text-muted-foreground">{commentContent}</p>
                 </div>
-              )
-            },
-          )}
+              </div>
+            );
+          })}
           {announcement.commentsList.length > 2 && (
             <Button
               variant="ghost"
@@ -529,8 +532,8 @@ export default function AnnouncementsPage() {
             onChange={(e) => handleCommentChange(announcement.id, e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault()
-                handleAddComment(announcement.id)
+                e.preventDefault();
+                handleAddComment(announcement.id);
               }
             }}
           />
@@ -544,7 +547,7 @@ export default function AnnouncementsPage() {
         </Button>
       </div>
     </div>
-  )
+  );
 
   return (
     <div className="min-h-screen bg-green-50">
@@ -553,7 +556,11 @@ export default function AnnouncementsPage() {
         <div className="flex h-20 items-center justify-between px-8">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
-              <img src="/munus-logo.jpg" alt="Munus Logo" className="h-8 w-auto" />
+              <img
+                src="/munus-logo.jpg"
+                alt="Munus Logo"
+                className="h-8 w-auto"
+              />
               <span className="text-3xl font-bold text-gray-900 font-serif">Munus Hub</span>
             </div>
 
@@ -627,7 +634,12 @@ export default function AnnouncementsPage() {
                 <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                 <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
               </div>
-              <Button variant="ghost" size="sm" onClick={logout} className="text-gray-600 hover:text-primary">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={logout}
+                className="text-gray-600"
+              >
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
@@ -637,7 +649,10 @@ export default function AnnouncementsPage() {
         {showMobileMenu && (
           <div className="md:hidden border-t border-gray-100 bg-white">
             <nav className="px-4 py-2 space-y-1">
-              <Link href="/" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -646,7 +661,10 @@ export default function AnnouncementsPage() {
                   Dashboard
                 </Button>
               </Link>
-              <Link href="/projects" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/projects"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -655,7 +673,10 @@ export default function AnnouncementsPage() {
                   Projects
                 </Button>
               </Link>
-              <Link href="/calendar" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/calendar"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -671,7 +692,10 @@ export default function AnnouncementsPage() {
                 <Bell className="h-4 w-4" />
                 Announcements
               </Button>
-              <Link href="/team" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/team"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -681,7 +705,10 @@ export default function AnnouncementsPage() {
                 </Button>
               </Link>
               <AdminOnly>
-                <Link href="/admin" onClick={() => setShowMobileMenu(false)}>
+                <Link
+                  href="/admin"
+                  onClick={() => setShowMobileMenu(false)}
+                >
                   <Button
                     variant="ghost"
                     className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -706,7 +733,10 @@ export default function AnnouncementsPage() {
               <p className="text-gray-600">Stay updated with company news and important information</p>
             </div>
             {canEditAnnouncements && (
-              <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+              <Dialog
+                open={isCreateModalOpen}
+                onOpenChange={setIsCreateModalOpen}
+              >
                 <DialogTrigger asChild>
                   <Button>
                     <Megaphone className="h-4 w-4 mr-2" />
@@ -803,7 +833,10 @@ export default function AnnouncementsPage() {
                     </div>
                   </div>
                   <UIDialogFooter>
-                    <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsCreateModalOpen(false)}
+                    >
                       Cancel
                     </Button>
                     <Button onClick={handleCreateAnnouncement}>Create Announcement</Button>
@@ -817,7 +850,10 @@ export default function AnnouncementsPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search announcements..." className="pl-10" />
+              <Input
+                placeholder="Search announcements..."
+                className="pl-10"
+              />
             </div>
             <Select>
               <SelectTrigger className="w-[180px]">
@@ -848,7 +884,10 @@ export default function AnnouncementsPage() {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="all" className="space-y-4">
+          <Tabs
+            defaultValue="all"
+            className="space-y-4"
+          >
             <TabsList>
               <TabsTrigger
                 value="all"
@@ -870,7 +909,10 @@ export default function AnnouncementsPage() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="all" className="space-y-6">
+            <TabsContent
+              value="all"
+              className="space-y-6"
+            >
               {pinnedAnnouncements.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
@@ -966,7 +1008,11 @@ export default function AnnouncementsPage() {
                           </div>
                           <div className="flex gap-1">
                             {(announcement.tags || []).map((tag) => (
-                              <Badge key={tag} variant="outline" className="text-xs">
+                              <Badge
+                                key={tag}
+                                variant="outline"
+                                className="text-xs"
+                              >
                                 #{tag}
                               </Badge>
                             ))}
@@ -977,7 +1023,11 @@ export default function AnnouncementsPage() {
                             <p className="text-sm font-medium mb-2">Liked by:</p>
                             <div className="flex flex-wrap gap-2">
                               {getLikeData(announcement).users.map((userName, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
+                                <Badge
+                                  key={index}
+                                  variant="secondary"
+                                  className="text-xs"
+                                >
                                   {userName}
                                 </Badge>
                               ))}
@@ -1066,7 +1116,12 @@ export default function AnnouncementsPage() {
                             <MessageSquare className="h-4 w-4" />
                             {announcement.commentsList?.length || 0}
                           </Button>
-                          <Button variant="ghost" size="sm" className="gap-2" onClick={() => handleShare(announcement)}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => handleShare(announcement)}
+                          >
                             <Share2 className="h-4 w-4" />
                             Share
                           </Button>
@@ -1074,7 +1129,11 @@ export default function AnnouncementsPage() {
                         </div>
                         <div className="flex gap-1">
                           {(announcement.tags || []).map((tag) => (
-                            <Badge key={tag} variant="outline" className="text-xs">
+                            <Badge
+                              key={tag}
+                              variant="outline"
+                              className="text-xs"
+                            >
                               #{tag}
                             </Badge>
                           ))}
@@ -1085,7 +1144,11 @@ export default function AnnouncementsPage() {
                           <p className="text-sm font-medium mb-2">Liked by:</p>
                           <div className="flex flex-wrap gap-2">
                             {getLikeData(announcement).users.map((userName, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
+                              <Badge
+                                key={index}
+                                variant="secondary"
+                                className="text-xs"
+                              >
                                 {userName}
                               </Badge>
                             ))}
@@ -1099,7 +1162,10 @@ export default function AnnouncementsPage() {
               </div>
             </TabsContent>
 
-            <TabsContent value="pinned" className="space-y-4">
+            <TabsContent
+              value="pinned"
+              className="space-y-4"
+            >
               {pinnedAnnouncements.map((announcement) => (
                 <Card
                   key={announcement.id}
@@ -1176,7 +1242,12 @@ export default function AnnouncementsPage() {
                           <MessageSquare className="h-4 w-4" />
                           {announcement.commentsList?.length || 0}
                         </Button>
-                        <Button variant="ghost" size="sm" className="gap-2" onClick={() => handleShare(announcement)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="gap-2"
+                          onClick={() => handleShare(announcement)}
+                        >
                           <Share2 className="h-4 w-4" />
                           Share
                         </Button>
@@ -1184,7 +1255,11 @@ export default function AnnouncementsPage() {
                       </div>
                       <div className="flex gap-1">
                         {(announcement.tags || []).map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs">
+                          <Badge
+                            key={tag}
+                            variant="outline"
+                            className="text-xs"
+                          >
                             #{tag}
                           </Badge>
                         ))}
@@ -1195,7 +1270,10 @@ export default function AnnouncementsPage() {
               ))}
             </TabsContent>
 
-            <TabsContent value="recent" className="space-y-4">
+            <TabsContent
+              value="recent"
+              className="space-y-4"
+            >
               {announcements.slice(0, 3).map((announcement) => (
                 <Card
                   key={announcement.id}
@@ -1269,7 +1347,12 @@ export default function AnnouncementsPage() {
                           <MessageSquare className="h-4 w-4" />
                           {announcement.commentsList?.length || 0}
                         </Button>
-                        <Button variant="ghost" size="sm" className="gap-2" onClick={() => handleShare(announcement)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="gap-2"
+                          onClick={() => handleShare(announcement)}
+                        >
                           <Share2 className="h-4 w-4" />
                           Share
                         </Button>
@@ -1277,7 +1360,11 @@ export default function AnnouncementsPage() {
                       </div>
                       <div className="flex gap-1">
                         {(announcement.tags || []).map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs">
+                          <Badge
+                            key={tag}
+                            variant="outline"
+                            className="text-xs"
+                          >
                             #{tag}
                           </Badge>
                         ))}
@@ -1288,7 +1375,11 @@ export default function AnnouncementsPage() {
                         <p className="text-sm font-medium mb-2">Liked by:</p>
                         <div className="flex flex-wrap gap-2">
                           {getLikeData(announcement).users.map((userName, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
+                            <Badge
+                              key={index}
+                              variant="secondary"
+                              className="text-xs"
+                            >
                               {userName}
                             </Badge>
                           ))}
@@ -1304,7 +1395,10 @@ export default function AnnouncementsPage() {
         </div>
       </main>
 
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+      <Dialog
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+      >
         <UIDialogContent className="max-w-2xl">
           <UIDialogHeader>
             <UIDialogTitle>Edit Announcement</UIDialogTitle>
@@ -1397,7 +1491,10 @@ export default function AnnouncementsPage() {
             </div>
           )}
           <UIDialogFooter>
-            <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditModalOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleUpdateAnnouncement}>Update Announcement</Button>
@@ -1405,26 +1502,33 @@ export default function AnnouncementsPage() {
         </UIDialogContent>
       </Dialog>
 
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <Dialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <UIDialogContent className="max-w-md">
           <UIDialogHeader>
             <UIDialogTitle>Delete Announcement</UIDialogTitle>
           </UIDialogHeader>
           <div className="py-4">
-            <p className="text-sm text-muted-foreground">
-              Are you sure you want to delete "{deletingAnnouncement?.title}"? This action cannot be undone.
-            </p>
+            <p className="text-sm text-muted-foreground">Are you sure you want to delete "{deletingAnnouncement?.title}"? This action cannot be undone.</p>
           </div>
           <UIDialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={confirmDeleteAnnouncement}>
+            <Button
+              variant="destructive"
+              onClick={confirmDeleteAnnouncement}
+            >
               Delete
             </Button>
           </UIDialogFooter>
         </UIDialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
