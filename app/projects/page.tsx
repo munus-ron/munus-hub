@@ -1,21 +1,14 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,462 +18,56 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Calendar,
-  Users,
-  Clock,
-  Search,
-  Plus,
-  FolderOpen,
-  TrendingUp,
-  Bell,
-  Menu,
-  LogOut,
-  Edit,
-  Trash2,
-  Settings,
-} from "lucide-react"
-import { AdminOnly } from "@/components/admin-only"
-import { useAuth } from "@/contexts/auth-context"
-import Link from "next/link"
-
-const getUpdatedProjects = () => {
-  // console.log("[v0] Starting getUpdatedProjects...")
-  const staticProjects = [
-    {
-      id: 1,
-      title: "Ligala",
-      description: "Functions as a virtual law office, providing lawyers with comprehensive tools to onboard and connect with clients, generate attorney-client​ work products, conduct legal research, and manage client billings, all through an online platform.​ The product also allows individuals to connect with and engage lawyers for their legal needs, selecting them based on preferred location or practice area, as well as offering options for pro-bono or paid services.",
-      status: "In Progress",
-      progress: 95,
-      "team": [
-          {
-              "name": "Lani Billena",
-              "role": "Team Member",
-              "avatar": "/team-member-1.png",
-              "email": "lani.billena@company.com"
-          },
-          {
-              "name": "Nessa Dumo",
-              "role": "Team Member",
-              "avatar": "/team-member-2.png",
-              "email": "nessa.dumo@company.com"
-          },
-          {
-              "name": "Bryan Kwan",
-              "role": "Team Member",
-              "avatar": "/team-member-3.png",
-              "email": "bryan.kwan@company.com"
-          },
-          {
-              "name": "Malike Bouaoud",
-              "role": "Team Member",
-              "avatar": "/team-member-1.png",
-              "email": "malike.bouaoud@company.com"
-          },
-          {
-              "name": "Ernie Guevara",
-              "role": "Team Member",
-              "avatar": "/team-member-2.png",
-              "email": "ernie.guevara@company.com"
-          },
-          {
-              "name": "Mary Joy Mamalateo-Jusay",
-              "role": "Team Member",
-              "avatar": "/team-member-3.png",
-              "email": "mary.joy.mamalateo-jusay@company.com"
-          },
-          {
-              "name": "Michelle Mendez-Palmares",
-              "role": "Team Member",
-              "avatar": "/team-member-1.png",
-              "email": "michelle.mendez-palmares@company.com"
-          },
-          {
-              "name": "Studio After Six",
-              "role": "Team Member",
-              "avatar": "/team-member-2.png",
-              "email": "studio.after.six@company.com"
-          },
-          {
-              "name": "John Carlo Velasquez",
-              "role": "Team Member",
-              "avatar": "/team-member-3.png",
-              "email": "john.carlo.velasquez@company.com"
-          },
-          {
-              "name": "Roland Rei Espeleta",
-              "role": "Team Member",
-              "avatar": "/team-member-1.png",
-              "email": "roland.rei.espeleta@company.com"
-          },
-          {
-              "name": "Jelony Sobremisana",
-              "role": "Team Member",
-              "avatar": "/team-member-2.png",
-              "email": "jelony.sobremisana@company.com"
-          },
-          {
-              "name": "Juan David Aristizabal",
-              "role": "Team Member",
-              "avatar": "/team-member-3.png",
-              "email": "juan.david.aristizabal@company.com"
-          }
-      ],
-        "department": "Technology",
-      "startDate": "2024-05-01",
-      "endDate": "2025-10-01",
-      "priority": "High",
-      "budget": "$120,000",
-      "spent": "$54,000",
-      "milestones": [
-        {
-            "name": "Architecture Design",
-            "status": "completed",
-            "dueDate": "2024-10-01",
-            "startDate": "2024-09-15",
-            "endDate": "2024-09-30"
-        },
-        {
-            "name": "Core Features Development",
-            "status": "in-progress",
-            "dueDate": "2024-12-15",
-            "startDate": "2024-10-01",
-            "endDate": "2024-12-14"
-        },
-        {
-            "name": "Testing & Bug Fixes",
-            "status": "pending",
-            "dueDate": "2025-01-31",
-            "startDate": "2024-12-15",
-            "endDate": "2025-01-30"
-        },
-        {
-            "name": "App Store Submission",
-            "status": "pending",
-            "dueDate": "2025-02-28",
-            "startDate": "2025-02-01",
-            "endDate": "2025-02-28"
-        }
-    ],
-    "recentActivity": [
-        {
-            "user": "David Park",
-            "action": "completed user authentication module",
-            "time": "3 hours ago"
-        },
-        {
-            "user": "Lisa Wong",
-            "action": "implemented push notifications",
-            "time": "1 day ago"
-        },
-        {
-            "user": "Emily Johnson",
-            "action": "reviewed app store guidelines",
-            "time": "2 days ago"
-        }
-    ],
-    "functionalities": [
-        "Cross-platform mobile application",
-        "User authentication and profiles",
-        "Real-time notifications",
-        "Offline data synchronization"
-    ],
-    "features": [
-        "Biometric login support",
-        "Dark mode interface",
-        "In-app messaging system",
-        "Social media integration"
-    ],
-    "documents": [
-        {
-            "id": 1,
-            "name": "Mobile App Specifications.pdf",
-            "type": "PDF",
-            "size": "3.2 MB",
-            "uploadedBy": "Emily Johnson",
-            "uploadedDate": "2024-09-20",
-            "category": "Requirements",
-            "sharepointUrl": "https: //munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Mobile/App%20Specifications.pdf"
-        },
-        {
-            "id": 2,
-            "name": "UI Design Guidelines.sketch",
-            "type": "Sketch",
-            "size": "8.7 MB",
-            "uploadedBy": "David Park",
-            "uploadedDate": "2024-10-05",
-            "category": "Design",
-            "sharepointUrl": "https: //munuslaw.sharepoint.com/sites/ProjectDocuments/Shared%20Documents/Mobile/UI%20Guidelines.sketch"
-        }
-    ],
-    "teamCount": 12,
-    "teamMembers": "Lani Billena, Nessa Dumo, Bryan Kwan, Malike Bouaoud, Ernie Guevara, Mary Joy Mamalateo-Jusay, Michelle Mendez-Palmares, Studio After Six, John Carlo Velasquez, Roland Rei Espeleta, Jelony Sobremisana, Juan David Aristizabal"
-    },
-    {
-      id: 2,
-      title: "Mobile App Launch",
-      description: "Development and launch of iOS and Android mobile applications",
-      status: "Planning",
-      progress: 25,
-      team: [
-        { name: "Emily Chen", role: "Mobile Developer", avatar: "/team-member-1.png" },
-        { name: "David Wilson", role: "QA Engineer", avatar: "/team-member-2.png" },
-        { name: "Lisa Anderson", role: "Product Manager", avatar: "/team-member-3.png" },
-        { name: "Tom Rodriguez", role: "Backend Developer", avatar: "/professional-headshot.png" },
-      ],
-      department: "Technology",
-      startDate: "2024-02-01",
-      endDate: "2024-06-15",
-      priority: "High",
-      budget: "$75,000",
-      spent: "$18,750",
-    },
-    {
-      id: 3,
-      title: "Q4 Planning Initiative",
-      description: "Strategic planning and goal setting for the fourth quarter",
-      status: "Complete",
-      progress: 100,
-      team: [
-        { name: "Robert Johnson", role: "Strategy Lead", avatar: "/ceo-headshot.png" },
-        { name: "Jennifer Smith", role: "Analyst", avatar: "/team-member-1.png" },
-      ],
-      department: "Operations",
-      startDate: "2024-09-01",
-      endDate: "2024-09-30",
-      priority: "Medium",
-      budget: "$25,000",
-      spent: "$25,000",
-    },
-    {
-      id: 4,
-      title: "Customer Support Portal",
-      description: "Implementation of new customer support ticketing system",
-      status: "In Progress",
-      progress: 40,
-      team: [
-        { name: "Alex Thompson", role: "System Admin", avatar: "/team-member-2.png" },
-        { name: "Maria Garcia", role: "Support Lead", avatar: "/team-member-3.png" },
-        { name: "Chris Lee", role: "Developer", avatar: "/team-member-1.png" },
-      ],
-      department: "Customer Service",
-      startDate: "2024-01-20",
-      endDate: "2024-04-10",
-      priority: "Medium",
-      budget: "$35,000",
-      spent: "$14,000",
-    },
-    {
-      id: 5,
-      title: "Data Analytics Dashboard",
-      description: "Business intelligence dashboard for real-time analytics",
-      status: "Planning",
-      progress: 15,
-      team: [
-        { name: "Kevin Park", role: "Data Analyst", avatar: "/professional-headshot.png" },
-        { name: "Rachel Green", role: "BI Developer", avatar: "/team-member-2.png" },
-      ],
-      department: "Analytics",
-      startDate: "2024-03-01",
-      endDate: "2024-07-15",
-      priority: "Low",
-      budget: "$50,000",
-      spent: "$7,500",
-    },
-    {
-      id: 6,
-      title: "Security Audit & Compliance",
-      description: "Comprehensive security review and compliance implementation",
-      status: "In Progress",
-      progress: 30,
-      team: [
-        { name: "Daniel Kim", role: "Security Specialist", avatar: "/team-member-3.png" },
-        { name: "Sophie Turner", role: "Compliance Officer", avatar: "/team-member-1.png" },
-      ],
-      department: "IT Security",
-      startDate: "2024-02-15",
-      endDate: "2024-05-30",
-      priority: "High",
-      budget: "$40,000",
-      spent: "$12,000",
-    },
-  ]
-
-  // console.log(
-  //   "[v0] Static projects loaded:",
-  //   staticProjects.map((p) => ({ id: p.id, title: p.title })),
-  // )
-
-  const activeProjects = []
-
-  // Check each static project for deletion and updates
-  for (const project of staticProjects) {
-    // Check if project is deleted
-    const deletionMarker = localStorage.getItem(`project_${project.id}_deleted`)
-    // console.log(
-    //   `[v0] Project ${project.id} (${project.title}) - Deletion marker: ${deletionMarker}, Is deleted: ${deletionMarker === "true"}`,
-    // )
-
-    if (deletionMarker === "true") {
-      // console.log(`[v0] Skipping deleted project: ${project.title}`)
-      continue // Skip deleted projects
-    }
-
-    // Load any updates from localStorage
-    const storedProjectData = localStorage.getItem(`project_${project.id}`)
-    if (storedProjectData) {
-      try {
-        const updatedProject = JSON.parse(storedProjectData)
-        // console.log(`[v0] Found updates for project ${project.id}:`, {
-        //   originalTitle: project.title,
-        //   updatedTitle: updatedProject.title,
-        // })
-
-        // Merge all properties from stored data
-        const mergedProject = {
-          ...project,
-          ...updatedProject,
-          team: updatedProject.team || project.team || [],
-        }
-        activeProjects.push(mergedProject)
-      } catch (error) {
-        console.error(`[v0] Error parsing stored project ${project.id}:`, error)
-        activeProjects.push(project)
-      }
-    } else {
-      activeProjects.push(project)
-    }
-  }
-
-  // console.log(
-  //   "[v0] Active projects after deletion filter:",
-  //   activeProjects.map((p) => ({ id: p.id, title: p.title })),
-  // )
-
-  const allKeys = Object.keys(localStorage)
-  // console.log("[v0] All localStorage keys:", allKeys)
-
-  const projectKeys = allKeys.filter((key) => key.startsWith("project_"))
-  // console.log("[v0] All project keys in localStorage:", projectKeys)
-
-  const staticProjectIds = staticProjects.map((p) => p.id)
-  // console.log("[v0] Static project IDs:", staticProjectIds)
-
-  const newProjectKeys = allKeys.filter((key) => {
-    if (!key.startsWith("project_") || key.endsWith("_deleted")) {
-      return false
-    }
-
-    // Extract project ID from key (e.g., "project_7" -> 7)
-    const projectIdMatch = key.match(/^project_(\d+)$/)
-    if (!projectIdMatch) {
-      return false
-    }
-
-    const projectId = Number.parseInt(projectIdMatch[1])
-    const isNewProject = !staticProjectIds.includes(projectId)
-
-    // console.log(`[v0] Checking key ${key}: projectId=${projectId}, isNewProject=${isNewProject}`)
-    return isNewProject
-  })
-
-  // console.log("[v0] New project keys found:", newProjectKeys)
-
-  if (newProjectKeys.length === 0) {
-    // console.log("[v0] No new projects found, checking localStorage again...")
-    // Force a fresh read of localStorage
-    const freshKeys = []
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (key && key.startsWith("project_") && !key.endsWith("_deleted")) {
-        freshKeys.push(key)
-      }
-    }
-    // console.log("[v0] Fresh localStorage scan found project keys:", freshKeys)
-
-    // Check for new projects in fresh scan
-    for (const key of freshKeys) {
-      const projectIdMatch = key.match(/^project_(\d+)$/)
-      if (projectIdMatch) {
-        const projectId = Number.parseInt(projectIdMatch[1])
-        if (!staticProjectIds.includes(projectId)) {
-          newProjectKeys.push(key)
-          // console.log(`[v0] Found new project in fresh scan: ${key}`)
-        }
-      }
-    }
-  }
-
-  for (const key of newProjectKeys) {
-    try {
-      const projectData = JSON.parse(localStorage.getItem(key))
-      if (projectData && projectData.id) {
-        // console.log(`[v0] Adding new project from localStorage:`, { id: projectData.id, title: projectData.title })
-        activeProjects.push(projectData)
-      }
-    } catch (error) {
-      console.error(`[v0] Error parsing new project ${key}:`, error)
-    }
-  }
-
-  // Calculate team counts for display
-  const projectsWithCounts = activeProjects.map((project) => ({
-    ...project,
-    teamCount: project.team ? project.team.length : 0,
-  }))
-
-  // console.log(
-  //   "[v0] Final project team counts:",
-  //   projectsWithCounts.map((p) => ({ id: p.id, title: p.title, teamCount: p.teamCount })),
-  // )
-
-  return projectsWithCounts
-}
+} from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar, Users, Clock, Search, Plus, FolderOpen, TrendingUp, Bell, Menu, LogOut, Edit, Trash2, Settings } from "lucide-react";
+import { usePermissions } from "@/hooks/use-permissions";
+import { useAuth } from "@/contexts/auth-context";
+import Link from "next/link";
+import { getProjects, createProject, updateProject, deleteProject } from "@/app/actions/projects";
+import UserProfile from "@/components/user-profile";
 
 function getStatusColor(status: string) {
   switch (status) {
     case "Active":
-      return "bg-chart-4 text-white"
+      return "bg-chart-4 text-white";
     case "In Progress":
-      return "bg-chart-3 text-white"
+      return "bg-chart-3 text-white";
     case "Planning":
-      return "bg-muted text-muted-foreground"
+      return "bg-muted text-muted-foreground";
     case "Completed":
-      return "bg-chart-4 text-white"
+      return "bg-chart-4 text-white";
     default:
-      return "bg-muted text-muted-foreground"
+      return "bg-muted text-muted-foreground";
   }
 }
 
 function getPriorityColor(priority: string) {
   switch (priority) {
     case "Critical":
-      return "bg-destructive text-destructive-foreground"
+      return "bg-destructive text-destructive-foreground";
     case "High":
-      return "bg-chart-3 text-white"
+      return "bg-chart-3 text-white";
     case "Medium":
-      return "bg-accent text-accent-foreground"
+      return "bg-accent text-accent-foreground";
     case "Low":
-      return "bg-muted text-muted-foreground"
+      return "bg-muted text-muted-foreground";
     default:
-      return "bg-muted text-muted-foreground"
+      return "bg-muted text-muted-foreground";
   }
 }
 
 export default function ProjectsPage() {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [editingProject, setEditingProject] = useState(null)
-  const [deletingProject, setDeletingProject] = useState(null)
-  const [selectedMember, setSelectedMember] = useState("all")
-  const [selectedStatus, setSelectedStatus] = useState("all")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [projects, setProjects] = useState([])
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState(null);
+  const [deletingProject, setDeletingProject] = useState(null);
+  const [selectedMember, setSelectedMember] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [projects, setProjects] = useState([]);
   const [newProject, setNewProject] = useState({
     title: "",
     description: "",
@@ -491,92 +78,45 @@ export default function ProjectsPage() {
     endDate: "",
     budget: "",
     teamMembers: "",
-  })
-  const [showMobileMenu, setShowMobileMenu] = useState(false)
+  });
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
-  const { user, logout, isAuthenticated } = useAuth()
-
-  useEffect(() => {
-    const updatedProjects = getUpdatedProjects()
-    // console.log(
-    //   "[v0] Projects loaded on mount:",
-    //   updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
-    // )
-    setProjects(updatedProjects)
-  }, [])
+  const { user, logout, isAuthenticated } = useAuth();
+  const { isAdministrator, canEditProject, loading: permissionsLoading } = usePermissions();
 
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        const updatedProjects = getUpdatedProjects()
-        // console.log(
-        //   "[v0] Projects updated on visibility change:",
-        //   updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
-        // )
-        setProjects(updatedProjects)
-      }
+    async function loadProjects() {
+      const projectsData = await getProjects();
+      console.log("[v0] Projects loaded from database:", projectsData);
+      setProjects(projectsData);
     }
-
-    const handleFocus = () => {
-      const updatedProjects = getUpdatedProjects()
-      // console.log(
-      //   "[v0] Projects updated on focus:",
-      //   updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
-      // )
-      setProjects(updatedProjects)
-    }
-
-    const handleStorageChange = (e) => {
-      if (e.key && e.key.startsWith("project_")) {
-        // console.log("[v0] Storage change detected:", e.key)
-        setTimeout(() => {
-          const updatedProjects = getUpdatedProjects()
-          // console.log(
-          //   "[v0] Projects updated on storage change:",
-          //   updatedProjects.map((p) => ({ id: p.id, title: p.title, teamCount: p.team.length })),
-          // )
-          setProjects(updatedProjects)
-        }, 100)
-      }
-    }
-
-    document.addEventListener("visibilitychange", handleVisibilityChange)
-    window.addEventListener("focus", handleFocus)
-    window.addEventListener("storage", handleStorageChange)
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange)
-      window.removeEventListener("focus", handleFocus)
-      window.removeEventListener("storage", handleStorageChange)
-    }
-  }, [])
+    loadProjects();
+  }, []);
 
   const getAllTeamMembers = () => {
-    const allMembers = projects.flatMap((project) => project.team.map((member) => member.name))
-    return [...new Set(allMembers)].sort()
-  }
+    const allMembers = projects.flatMap((project) => project.team.map((member) => member.name));
+    return [...new Set(allMembers)].sort();
+  };
 
-  const uniqueTeamMembers = getAllTeamMembers()
+  const uniqueTeamMembers = getAllTeamMembers();
 
   const filteredProjects = projects.filter((project) => {
-    const memberMatch =
-      selectedMember === "all" ||
-      project.team.some((member) => member.name.toLowerCase().replace(/\s+/g, "-") === selectedMember)
+    const memberMatch = selectedMember === "all" || project.team.some((member) => member.name.toLowerCase().replace(/\s+/g, "-") === selectedMember);
 
-    const statusMatch = selectedStatus === "all" || project.status.toLowerCase().replace(/\s+/g, "-") === selectedStatus
+    const statusMatch = selectedStatus === "all" || project.status.toLowerCase().replace(/\s+/g, "-") === selectedStatus;
 
     const searchMatch =
       searchTerm === "" ||
       project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchTerm.toLowerCase())
+      project.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-    return memberMatch && statusMatch && searchMatch
-  })
+    return memberMatch && statusMatch && searchMatch;
+  });
 
   const handleDeleteProject = (project) => {
-    setDeletingProject(project)
-    setIsDeleteModalOpen(true)
-  }
+    setDeletingProject(project);
+    setIsDeleteModalOpen(true);
+  };
 
   if (!isAuthenticated()) {
     return (
@@ -595,228 +135,99 @@ export default function ProjectsPage() {
           </Card>
         </div>
       </div>
-    )
+    );
   }
 
-  const handleCreateProject = () => {
+  const handleCreateProject = async () => {
     if (!newProject.title || !newProject.description) {
-      alert("Please fill in at least the title and description")
-      return
+      alert("Please fill in at least the title and description");
+      return;
     }
 
-    // Generate new project ID
-    const newId = Math.max(...projects.map((p) => p.id), 0) + 1
-    // console.log("[v0] Generated new project ID:", newId)
+    try {
+      await createProject(newProject);
 
-    // Create team array from comma-separated names
-    const teamMembers = newProject.teamMembers
-      ? newProject.teamMembers.split(",").map((name, index) => ({
-          name: name.trim(),
-          role: "Team Member",
-          avatar: `/team-member-${(index % 3) + 1}.png`,
-          email: `${name.trim().toLowerCase().replace(/\s+/g, ".")}@company.com`,
-        }))
-      : []
+      // Reload projects from database
+      const updatedProjects = await getProjects();
+      console.log("[v0] Projects after creation:", updatedProjects);
+      setProjects(updatedProjects);
 
-    const projectData = {
-      id: newId,
-      title: newProject.title,
-      description: newProject.description,
-      status: newProject.status,
-      progress: 0,
-      team: teamMembers,
-      department: newProject.department,
-      startDate: newProject.startDate,
-      endDate: newProject.endDate,
-      priority: newProject.priority,
-      budget: newProject.budget,
-      functionalities: [
-        "Core functionality implementation",
-        "User interface development",
-        "Testing and quality assurance",
-        "Documentation and deployment",
-      ],
-      milestones: [
-        {
-          name: "Project Kickoff",
-          status: "Completed",
-          startDate: newProject.startDate || new Date().toISOString().split("T")[0],
-          endDate: newProject.startDate || new Date().toISOString().split("T")[0],
-          description: "Initial project setup and planning",
-        },
-        {
-          name: "Development Phase",
-          status: "In Progress",
-          startDate: newProject.startDate || new Date().toISOString().split("T")[0],
-          endDate: newProject.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          description: "Core development and implementation",
-        },
-        {
-          name: "Testing & Review",
-          status: "Pending",
-          startDate: newProject.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          endDate: newProject.endDate || new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          description: "Quality assurance and testing phase",
-        },
-        {
-          name: "Project Completion",
-          status: "Pending",
-          startDate: newProject.endDate || new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          endDate: newProject.endDate || new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          description: "Final delivery and project closure",
-        },
-      ],
-      documents: [
-        {
-          id: 1,
-          name: "Project Charter.pdf",
-          size: "2.1 MB",
-          category: "Planning",
-          uploadedBy: "System",
-          uploadedAt: new Date().toISOString(),
-          sharepointUrl:
-            "https://sharepoint.company.com/projects/" +
-            newProject.title.toLowerCase().replace(/\s+/g, "-") +
-            "/charter.pdf",
-        },
-        {
-          id: 2,
-          name: "Requirements Document.docx",
-          size: "1.8 MB",
-          category: "Documentation",
-          uploadedBy: "System",
-          uploadedAt: new Date().toISOString(),
-          sharepointUrl:
-            "https://sharepoint.company.com/projects/" +
-            newProject.title.toLowerCase().replace(/\s+/g, "-") +
-            "/requirements.docx",
-        },
-      ],
-      spent: "$0",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      createdBy: "Current User",
+      // Reset form and close modal
+      setNewProject({
+        title: "",
+        description: "",
+        status: "Planning",
+        priority: "Medium",
+        department: "",
+        startDate: "",
+        endDate: "",
+        budget: "",
+        teamMembers: "",
+      });
+      setIsCreateModalOpen(false);
+    } catch (error) {
+      console.error("[v0] Error creating project:", error);
+      alert("Failed to create project. Please try again.");
     }
-
-    // console.log("[v0] Creating new project:", projectData)
-
-    localStorage.setItem(`project_${newId}`, JSON.stringify(projectData))
-    // console.log("[v0] Saved project to localStorage with key:", `project_${newId}`)
-
-    // Trigger storage event for immediate synchronization
-    window.dispatchEvent(
-      new StorageEvent("storage", {
-        key: `project_${newId}`,
-        newValue: JSON.stringify(projectData),
-      }),
-    )
-
-    const updatedProjects = getUpdatedProjects()
-    // console.log(
-    //   "[v0] Updated projects after creation:",
-    //   updatedProjects.map((p) => ({ id: p.id, title: p.title })),
-    // )
-    setProjects(updatedProjects)
-
-    // Reset form and close modal
-    setNewProject({
-      title: "",
-      description: "",
-      status: "Planning",
-      priority: "Medium",
-      department: "",
-      startDate: "",
-      endDate: "",
-      budget: "",
-      teamMembers: "",
-    })
-    setIsCreateModalOpen(false)
-  }
+  };
 
   const handleEditProject = (project) => {
     setEditingProject({
       ...project,
-      teamMembers: project.team.map((member) => member.name).join(", "),
-    })
-    setIsEditModalOpen(true)
-  }
+      title: project.title || "",
+      description: project.description || "",
+      status: project.status || "Planning",
+      priority: project.priority || "Medium",
+      progress: project.progress || 0,
+      budget: project.budget || "",
+      department: project.department || "",
+      startDate: project.startDate || "",
+      endDate: project.endDate || "",
+      teamMembers: project.team?.map((member) => member.name).join(", ") || "",
+    });
+    setIsEditModalOpen(true);
+  };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingProject.title || !editingProject.description) {
-      alert("Please fill in at least the title and description")
-      return
+      alert("Please fill in at least the title and description");
+      return;
     }
 
-    // Create team array from comma-separated names
-    const teamMembers = editingProject.teamMembers
-      ? editingProject.teamMembers.split(",").map((name, index) => ({
-          name: name.trim(),
-          role: "Team Member",
-          avatar: `/team-member-${(index % 3) + 1}.png`,
-          email: `${name.trim().toLowerCase().replace(/\s+/g, ".")}@company.com`,
-        }))
-      : []
+    try {
+      await updateProject(editingProject.id, editingProject);
 
-    const updatedProject = {
-      ...editingProject,
-      team: teamMembers,
+      // Reload projects from database
+      const updatedProjects = await getProjects();
+      console.log("[v0] Projects after update:", updatedProjects);
+      setProjects(updatedProjects);
+
+      setIsEditModalOpen(false);
+      setEditingProject(null);
+    } catch (error) {
+      console.error("[v0] Error updating project:", error);
+      alert("Failed to update project. Please try again.");
     }
+  };
 
-    // console.log("[v0] Updating project:", updatedProject)
-
-    localStorage.setItem(`project_${editingProject.id}`, JSON.stringify(updatedProject))
-
-    // Trigger storage event for immediate synchronization
-    window.dispatchEvent(
-      new StorageEvent("storage", {
-        key: `project_${editingProject.id}`,
-        newValue: JSON.stringify(updatedProject),
-      }),
-    )
-
-    setIsEditModalOpen(false)
-    setEditingProject(null)
-
-    // console.log("[v0] Project updated successfully")
-  }
-
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deletingProject) {
-      // console.log("[v0] Deleting project:", deletingProject)
+      try {
+        await deleteProject(deletingProject.id);
 
-      // Set deletion marker in localStorage
-      localStorage.setItem(`project_${deletingProject.id}_deleted`, "true")
+        // Reload projects from database
+        const updatedProjects = await getProjects();
+        console.log("[v0] Projects after deletion:", updatedProjects);
+        setProjects(updatedProjects);
 
-      // Remove project data from localStorage
-      localStorage.removeItem(`project_${deletingProject.id}`)
-
-      // Update local state immediately
-      const updatedProjects = projects.filter((p) => p.id !== deletingProject.id)
-      setProjects(updatedProjects)
-
-      // Dispatch storage event for cross-tab sync
-      window.dispatchEvent(
-        new StorageEvent("storage", {
-          key: `project_${deletingProject.id}_deleted`,
-          newValue: "true",
-        }),
-      )
-
-      // console.log("[v0] Project deleted successfully")
-      setDeletingProject(null)
-      setIsDeleteModalOpen(false)
-
-      // Force immediate re-sync
-      setTimeout(() => {
-        const refreshedProjects = getUpdatedProjects()
-        setProjects(refreshedProjects)
-        // console.log(
-        //   "[v0] Projects refreshed after deletion:",
-        //   refreshedProjects.map((p) => ({ id: p.id, title: p.title })),
-        // )
-      }, 100)
+        setDeletingProject(null);
+        setIsDeleteModalOpen(false);
+      } catch (error) {
+        console.error("[v0] Error deleting project:", error);
+        alert("Failed to delete project. Please try again.");
+      }
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-green-50">
@@ -824,7 +235,11 @@ export default function ProjectsPage() {
         <div className="flex h-20 items-center justify-between px-8">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
-              <img src="/munus-logo.jpg" alt="Munus Logo" className="h-8 w-auto" />
+              <img
+                src="/munus-logo.jpg"
+                alt="Munus Logo"
+                className="h-8 w-auto"
+              />
               <span className="text-3xl font-bold text-gray-900 font-serif">Munus Hub</span>
             </div>
 
@@ -886,7 +301,7 @@ export default function ProjectsPage() {
             </Button>
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={user?.avatar || "/placeholder.svg"} />
+                <UserProfile />
                 <AvatarFallback>
                   {user?.name
                     ?.split(" ")
@@ -898,7 +313,12 @@ export default function ProjectsPage() {
                 <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                 <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
               </div>
-              <Button variant="ghost" size="sm" onClick={logout} className="text-gray-600 hover:text-primary">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={logout}
+                className="text-gray-600"
+              >
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
@@ -908,7 +328,10 @@ export default function ProjectsPage() {
         {showMobileMenu && (
           <div className="md:hidden border-t border-gray-100 bg-white">
             <nav className="px-4 py-2 space-y-1">
-              <Link href="/" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -924,7 +347,10 @@ export default function ProjectsPage() {
                 <FolderOpen className="h-4 w-4" />
                 Projects
               </Button>
-              <Link href="/calendar" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/calendar"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -933,7 +359,10 @@ export default function ProjectsPage() {
                   Calendar
                 </Button>
               </Link>
-              <Link href="/announcements" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/announcements"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -942,7 +371,10 @@ export default function ProjectsPage() {
                   Announcements
                 </Button>
               </Link>
-              <Link href="/team" onClick={() => setShowMobileMenu(false)}>
+              <Link
+                href="/team"
+                onClick={() => setShowMobileMenu(false)}
+              >
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -951,8 +383,11 @@ export default function ProjectsPage() {
                   Team
                 </Button>
               </Link>
-              <AdminOnly>
-                <Link href="/admin" onClick={() => setShowMobileMenu(false)}>
+              {isAdministrator && (
+                <Link
+                  href="/admin"
+                  onClick={() => setShowMobileMenu(false)}
+                >
                   <Button
                     variant="ghost"
                     className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -961,7 +396,7 @@ export default function ProjectsPage() {
                     Admin
                   </Button>
                 </Link>
-              </AdminOnly>
+              )}
             </nav>
           </div>
         )}
@@ -974,12 +409,12 @@ export default function ProjectsPage() {
               <h2 className="text-3xl font-bold text-gray-900">Projects</h2>
               <p className="text-gray-600">Manage and track all company projects</p>
             </div>
-            <AdminOnly>
+            {isAdministrator && (
               <Button onClick={() => setIsCreateModalOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Project
               </Button>
-            </AdminOnly>
+            )}
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -992,7 +427,10 @@ export default function ProjectsPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <Select
+              value={selectedStatus}
+              onValueChange={setSelectedStatus}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -1004,14 +442,20 @@ export default function ProjectsPage() {
                 <SelectItem value="completed">Completed</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={selectedMember} onValueChange={setSelectedMember}>
+            <Select
+              value={selectedMember}
+              onValueChange={setSelectedMember}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by Member" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Members</SelectItem>
                 {uniqueTeamMembers.map((member) => (
-                  <SelectItem key={member} value={member.toLowerCase().replace(/\s+/g, "-")}>
+                  <SelectItem
+                    key={member}
+                    value={member.toLowerCase().replace(/\s+/g, "-")}
+                  >
                     {member}
                   </SelectItem>
                 ))}
@@ -1021,42 +465,50 @@ export default function ProjectsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredProjects.map((project) => (
-              <Card key={project.id} className="h-full hover:shadow-lg transition-shadow">
+              <Card
+                key={project.id}
+                className="h-full hover:shadow-lg transition-shadow"
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className="text-lg mb-2">{project.title}</CardTitle>
                       <CardDescription className="line-clamp-2">{project.description}</CardDescription>
                     </div>
-                    <AdminOnly>
+                    {(isAdministrator || canEditProject(project.id)) && (
                       <div className="flex gap-2 ml-2">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={(e) => {
-                            e.preventDefault()
-                            handleEditProject(project)
+                            e.preventDefault();
+                            handleEditProject(project);
                           }}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            handleDeleteProject(project)
-                          }}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {isAdministrator && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleDeleteProject(project);
+                            }}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
-                    </AdminOnly>
+                    )}
                   </div>
                   <div className="flex gap-2 mt-3">
                     <Badge className={getStatusColor(project.status)}>{project.status}</Badge>
-                    <Badge variant="outline" className={getPriorityColor(project.priority)}>
+                    <Badge
+                      variant="outline"
+                      className={getPriorityColor(project.priority)}
+                    >
                       {project.priority}
                     </Badge>
                   </div>
@@ -1068,7 +520,10 @@ export default function ProjectsPage() {
                         <span>Progress</span>
                         <span>{project.progress}%</span>
                       </div>
-                      <Progress value={project.progress} className="h-2" />
+                      <Progress
+                        value={project.progress}
+                        className="h-2"
+                      />
                     </div>
 
                     <div>
@@ -1078,7 +533,10 @@ export default function ProjectsPage() {
                       </div>
                       <div className="flex -space-x-2">
                         {project.team.slice(0, 3).map((member, index) => (
-                          <Avatar key={index} className="h-8 w-8 border-2 border-background">
+                          <Avatar
+                            key={index}
+                            className="h-8 w-8 border-2 border-background"
+                          >
                             <AvatarImage src={member.avatar || "/placeholder.svg"} />
                             <AvatarFallback className="text-xs">
                               {member.name
@@ -1110,7 +568,16 @@ export default function ProjectsPage() {
 
                     <div className="flex justify-between items-center pt-2 border-t border-border">
                       <div></div>
-                      <span className="text-sm font-medium">{project.budget}</span>
+                      <span className="text-sm font-medium">
+                        {project.budget
+                          ? new Intl.NumberFormat("en-US", {
+                              style: "currency",
+                              currency: "USD",
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            }).format(project.budget)
+                          : ""}
+                      </span>
                     </div>
                   </CardContent>
                 </Link>
@@ -1120,7 +587,10 @@ export default function ProjectsPage() {
         </div>
       </main>
 
-      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+      <Dialog
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+      >
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
@@ -1128,7 +598,10 @@ export default function ProjectsPage() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right">
+              <Label
+                htmlFor="title"
+                className="text-right"
+              >
                 Title
               </Label>
               <Input
@@ -1140,7 +613,10 @@ export default function ProjectsPage() {
               />
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="description" className="text-right pt-2">
+              <Label
+                htmlFor="description"
+                className="text-right pt-2"
+              >
                 Description
               </Label>
               <Textarea
@@ -1153,7 +629,10 @@ export default function ProjectsPage() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="text-right">
+              <Label
+                htmlFor="status"
+                className="text-right"
+              >
                 Status
               </Label>
               <Select
@@ -1172,7 +651,10 @@ export default function ProjectsPage() {
               </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="priority" className="text-right">
+              <Label
+                htmlFor="priority"
+                className="text-right"
+              >
                 Priority
               </Label>
               <Select
@@ -1191,7 +673,10 @@ export default function ProjectsPage() {
               </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="department" className="text-right">
+              <Label
+                htmlFor="department"
+                className="text-right"
+              >
                 Department
               </Label>
               <Select
@@ -1212,7 +697,10 @@ export default function ProjectsPage() {
               </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="startDate" className="text-right">
+              <Label
+                htmlFor="startDate"
+                className="text-right"
+              >
                 Start Date
               </Label>
               <Input
@@ -1224,7 +712,10 @@ export default function ProjectsPage() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="endDate" className="text-right">
+              <Label
+                htmlFor="endDate"
+                className="text-right"
+              >
                 End Date
               </Label>
               <Input
@@ -1236,7 +727,10 @@ export default function ProjectsPage() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="budget" className="text-right">
+              <Label
+                htmlFor="budget"
+                className="text-right"
+              >
                 Budget
               </Label>
               <Input
@@ -1248,7 +742,10 @@ export default function ProjectsPage() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="teamMembers" className="text-right">
+              <Label
+                htmlFor="teamMembers"
+                className="text-right"
+              >
                 Team Members
               </Label>
               <Input
@@ -1261,7 +758,10 @@ export default function ProjectsPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateModalOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleCreateProject}>Create Project</Button>
@@ -1269,7 +769,10 @@ export default function ProjectsPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+      <Dialog
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+      >
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Project</DialogTitle>
@@ -1278,7 +781,10 @@ export default function ProjectsPage() {
           {editingProject && (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-title" className="text-right">
+                <Label
+                  htmlFor="edit-title"
+                  className="text-right"
+                >
                   Title
                 </Label>
                 <Input
@@ -1289,7 +795,10 @@ export default function ProjectsPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-start gap-4">
-                <Label htmlFor="edit-description" className="text-right pt-2">
+                <Label
+                  htmlFor="edit-description"
+                  className="text-right pt-2"
+                >
                   Description
                 </Label>
                 <Textarea
@@ -1301,7 +810,10 @@ export default function ProjectsPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-status" className="text-right">
+                <Label
+                  htmlFor="edit-status"
+                  className="text-right"
+                >
                   Status
                 </Label>
                 <Select
@@ -1320,7 +832,10 @@ export default function ProjectsPage() {
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-priority" className="text-right">
+                <Label
+                  htmlFor="edit-priority"
+                  className="text-right"
+                >
                   Priority
                 </Label>
                 <Select
@@ -1339,7 +854,10 @@ export default function ProjectsPage() {
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-progress" className="text-right">
+                <Label
+                  htmlFor="edit-progress"
+                  className="text-right"
+                >
                   Progress (%)
                 </Label>
                 <Input
@@ -1348,15 +866,16 @@ export default function ProjectsPage() {
                   min="0"
                   max="100"
                   value={editingProject.progress || 0}
-                  onChange={(e) =>
-                    setEditingProject({ ...editingProject, progress: Number.parseInt(e.target.value) || 0 })
-                  }
+                  onChange={(e) => setEditingProject({ ...editingProject, progress: Number.parseInt(e.target.value) || 0 })}
                   className="col-span-3"
                   placeholder="Enter progress percentage (0-100)"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-budget" className="text-right">
+                <Label
+                  htmlFor="edit-budget"
+                  className="text-right"
+                >
                   Budget
                 </Label>
                 <Input
@@ -1367,7 +886,10 @@ export default function ProjectsPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-teamMembers" className="text-right">
+                <Label
+                  htmlFor="edit-teamMembers"
+                  className="text-right"
+                >
                   Team Members
                 </Label>
                 <Input
@@ -1381,7 +903,10 @@ export default function ProjectsPage() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditModalOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleSaveEdit}>Save Changes</Button>
@@ -1389,13 +914,16 @@ export default function ProjectsPage() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+      <AlertDialog
+        open={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Project</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deletingProject?.title}"? This action cannot be undone and will remove
-              all project data including team members and progress.
+              Are you sure you want to delete "{deletingProject?.title}"? This action cannot be undone and will remove all project data including team members
+              and progress.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1410,5 +938,5 @@ export default function ProjectsPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }
