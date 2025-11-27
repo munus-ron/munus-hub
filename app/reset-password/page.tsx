@@ -1,3 +1,10 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { getAllUsersBasic, resetUserPassword } from "@/app/actions/auth"
+
 export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -12,12 +19,6 @@ export default function ResetPasswordPage() {
     </div>
   )
 }
-;("use client")
-
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { getAllUsersBasic, resetUserPassword } from "@/app/actions/auth"
 
 function ResetPasswordForm() {
   const [users, setUsers] = useState<any[]>([])
