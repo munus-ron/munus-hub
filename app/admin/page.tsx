@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import { getAllUsers, addUser, updateUser, deleteUser } from "@/app/actions/auth";
 import { getProjects } from "@/app/actions/projects";
 import { Checkbox } from "@/components/ui/checkbox";
+import UserProfile from "@/components/user-profile";
 
 export default function AdminPage() {
   const { user, logout, isAuthenticated, isAdmin } = useAuth();
@@ -280,7 +281,7 @@ export default function AdminPage() {
             </Button>
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={user?.avatar || "/placeholder.svg"} />
+                <UserProfile />
                 <AvatarFallback>
                   {user?.name
                     ?.split(" ")

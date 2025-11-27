@@ -26,6 +26,7 @@ import { usePermissions } from "@/hooks/use-permissions";
 import { useAuth } from "@/contexts/auth-context";
 import Link from "next/link";
 import { getProjects, createProject, updateProject, deleteProject } from "@/app/actions/projects";
+import UserProfile from "@/components/user-profile";
 
 function getStatusColor(status: string) {
   switch (status) {
@@ -300,7 +301,7 @@ export default function ProjectsPage() {
             </Button>
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={user?.avatar || "/placeholder.svg"} />
+                <UserProfile />
                 <AvatarFallback>
                   {user?.name
                     ?.split(" ")

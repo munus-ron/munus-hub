@@ -38,6 +38,7 @@ import { getCalendarEvents, createCalendarEvent, updateCalendarEvent, deleteCale
 import { getVacations, addVacation, updateVacation, deleteVacation } from "@/app/actions/vacations";
 import { getTeamMembers } from "@/app/actions/team";
 import { usePermissions } from "@/hooks/use-permissions";
+import UserProfile from "@/components/user-profile";
 
 function getEventTypeColor(type: string) {
   switch (type) {
@@ -631,7 +632,7 @@ export default function CalendarPage() {
             </Button>
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12">
-                <AvatarImage src={user?.avatar || "/placeholder.svg"} />
+                <UserProfile />
                 <AvatarFallback>
                   {user?.name
                     ?.split(" ")

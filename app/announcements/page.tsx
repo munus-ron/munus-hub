@@ -57,6 +57,7 @@ import {
   addComment, // Added import for addComment action
   toggleLike, // Import toggleLike action
 } from "@/app/actions/announcements";
+import UserProfile from "@/components/user-profile";
 
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<any[]>([]);
@@ -515,7 +516,7 @@ export default function AnnouncementsPage() {
       )}
       <div className="flex items-center gap-3">
         <Avatar className="h-10 w-10">
-          <AvatarImage src={user?.avatar || "/placeholder.svg"} />
+          <UserProfile />
           <AvatarFallback className="text-xs">
             {user?.name
               ?.split(" ")
@@ -622,7 +623,7 @@ export default function AnnouncementsPage() {
             </Button>
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={user?.avatar || "/placeholder.svg"} />
+                <UserProfile />
                 <AvatarFallback>
                   {user?.name
                     ?.split(" ")

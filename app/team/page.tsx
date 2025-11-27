@@ -28,6 +28,7 @@ import { TrendingUp, FolderOpen, Bell, MessageSquare, Pencil, Settings, Users, B
 import { getTeamMembers, createTeamMember, updateTeamMember, deleteTeamMember, updateTeamMemberImage } from "@/app/actions/team";
 
 import type React from "react";
+import UserProfile from "@/components/user-profile";
 
 // Removed: import { loadTeamDataFromStorage, saveTeamDataToStorage } from "@/lib/utils"
 
@@ -455,7 +456,7 @@ export default function TeamPage() {
             </Button>
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={user?.avatar || "/placeholder.svg"} />
+                <UserProfile />
                 <AvatarFallback>
                   {user?.name
                     ?.split(" ")

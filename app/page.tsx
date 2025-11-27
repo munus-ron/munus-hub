@@ -17,6 +17,7 @@ import { getTeamMembers } from "@/app/actions/team";
 import { getAnnouncements } from "@/app/actions/announcements";
 import { getCalendarEvents } from "@/app/actions/calendar";
 import LoginSSOButton from "@/components/login-sso-button";
+import UserProfile from "@/components/user-profile";
 
 export default function Dashboard() {
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -596,7 +597,7 @@ export default function Dashboard() {
             </Popover>
             <div className="flex items-center gap-3">
               <Avatar className="h-8 w-8 md:h-10 md:w-10">
-                <AvatarImage src={user?.avatar || "/placeholder.svg"} />
+                <UserProfile />
                 <AvatarFallback>
                   {user?.name
                     ?.split(" ")

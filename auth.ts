@@ -19,6 +19,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async jwt({ token, account }) {
       if (account) {
+        (token as any).accessToken = account.access_token;
+
         const email = token.email as string;
         const name = token.name as string;
 
@@ -50,9 +52,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     async session({ session, token }) {
+      (session as any).accessToken = token.accessToken;
+
       (session.user as any).dbUserId = token.dbUserId;
       (session.user as any).role = (token as any).role;
       return session;
     },
   },
+
+  secret: process.env.NEXTAUTH_SECRET,
 });
