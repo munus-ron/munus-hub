@@ -1,0 +1,21 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        # Install pnpm globally using npm
+        - npm install -g pnpm 
+        # Now pnpm is available to run your install command
+        - pnpm install --frozen-lockfile
+    build:
+      commands:
+        # Your Next.js build command
+        - pnpm run build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - .pnpm-store
