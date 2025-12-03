@@ -9,6 +9,14 @@ frontend:
         - pnpm install --no-frozen-lockfile
     build:
       commands:
+        # --- Inject Server-Side Secrets Here ---
+        - echo "AUTH_MICROSOFT_ENTRA_ID_ID=$AUTH_MICROSOFT_ENTRA_ID_ID" >> .env.production
+        - echo "AUTH_MICROSOFT_ENTRA_ID_SECRET=$AUTH_MICROSOFT_ENTRA_ID_SECRET" >> .env.production
+        - echo "AUTH_MICROSOFT_ENTRA_ID_TENANT=$AUTH_MICROSOFT_ENTRA_ID_TENANT" >> .env.production
+        - echo "AUTH_SECRET=$AUTH_SECRET" >> .env.production
+        - echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env.production
+        - echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env.production
+        # ---------------------------------------
         # Your Next.js build command
         - pnpm run build
   artifacts:
