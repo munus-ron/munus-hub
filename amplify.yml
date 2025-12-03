@@ -6,7 +6,7 @@ frontend:
         # Install pnpm globally using npm
         - npm install -g pnpm 
         # Now pnpm is available to run your install command
-        - pnpm install --frozen-lockfile
+        - pnpm install --no-frozen-lockfile
     build:
       commands:
         # Your Next.js build command
