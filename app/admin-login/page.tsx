@@ -19,7 +19,7 @@ import { getCalendarEvents } from "@/app/actions/calendar";
 import LoginSSOButton from "@/components/login-sso-button";
 import UserProfile from "@/components/user-profile";
 
-export default function Dashboard() {
+export default function AdminLoginPage() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showManageUsersModal, setShowManageUsersModal] = useState(false);
   const [showUserForm, setShowUserForm] = useState(false);
@@ -415,13 +415,13 @@ export default function Dashboard() {
               <CardDescription className="text-lg">Please sign in to access your workspace</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-y-2.5">
-              {/* <Button
+              <Button
                 onClick={() => setShowLoginModal(true)}
                 className="w-full text-lg py-6"
               >
                 Sign In
-              </Button> */}
-              <LoginSSOButton />
+              </Button>
+              {/* <LoginSSOButton /> */}
             </CardContent>
           </Card>
         </div>
