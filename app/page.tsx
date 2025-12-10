@@ -1,12 +1,32 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar, Users, Bell, FolderOpen, Clock, TrendingUp, Menu, LogOut, Settings } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Calendar,
+  Users,
+  Bell,
+  FolderOpen,
+  Clock,
+  TrendingUp,
+  Menu,
+  LogOut,
+  Settings,
+} from "lucide-react";
 import { LoginModal } from "@/components/login-modal";
 import { AdminOnly } from "@/components/admin-only";
 import { useAuth } from "@/contexts/auth-context";
@@ -86,11 +106,23 @@ export default function Dashboard() {
   useEffect(() => {
     const calculateStats = async () => {
       try {
-        const [projects, teamData, events] = await Promise.all([getProjects(), getTeamMembers(), getCalendarEvents()]);
+        const [projects, teamData, events] = await Promise.all([
+          getProjects(),
+          getTeamMembers(),
+          getCalendarEvents(),
+        ]);
 
-        const activeProjectsCount = projects.filter((project) => project.status && project.status !== "Complete" && project.status !== "Completed").length;
+        const activeProjectsCount = projects.filter(
+          (project) =>
+            project.status &&
+            project.status !== "Complete" &&
+            project.status !== "Completed"
+        ).length;
 
-        const totalTeamMembers = (teamData.founders?.length || 0) + (teamData.advisors?.length || 0) + (teamData.consultants?.length || 0);
+        const totalTeamMembers =
+          (teamData.founders?.length || 0) +
+          (teamData.advisors?.length || 0) +
+          (teamData.consultants?.length || 0);
 
         const now = new Date();
         const upcomingEventsCount = events.filter((event) => {
@@ -103,9 +135,16 @@ export default function Dashboard() {
           if (project.milestones) {
             project.milestones.forEach((milestone) => {
               if (milestone.endDate || milestone.end_date) {
-                const dueDate = new Date(milestone.endDate || milestone.end_date);
+                const dueDate = new Date(
+                  milestone.endDate || milestone.end_date
+                );
                 const daysDiff = (dueDate - now) / (1000 * 60 * 60 * 24);
-                if (daysDiff >= 0 && daysDiff <= 7 && milestone.status !== "completed" && milestone.status !== "done") {
+                if (
+                  daysDiff >= 0 &&
+                  daysDiff <= 7 &&
+                  milestone.status !== "completed" &&
+                  milestone.status !== "done"
+                ) {
                   pendingTasksCount++;
                 }
               }
@@ -139,7 +178,11 @@ export default function Dashboard() {
       const now = new Date();
 
       try {
-        const [announcements, events, projects] = await Promise.all([getAnnouncements(), getCalendarEvents(), getProjects()]);
+        const [announcements, events, projects] = await Promise.all([
+          getAnnouncements(),
+          getCalendarEvents(),
+          getProjects(),
+        ]);
 
         const recentAnnouncements = announcements.filter((announcement) => {
           const announcementDate = new Date(announcement.date);
@@ -181,14 +224,24 @@ export default function Dashboard() {
           if (project.milestones) {
             project.milestones.forEach((milestone) => {
               if (milestone.endDate || milestone.end_date) {
-                const dueDate = new Date(milestone.endDate || milestone.end_date);
+                const dueDate = new Date(
+                  milestone.endDate || milestone.end_date
+                );
                 const daysDiff = (dueDate - now) / (1000 * 60 * 60 * 24);
-                if (daysDiff >= 0 && daysDiff <= 7 && milestone.status !== "completed") {
+                if (
+                  daysDiff >= 0 &&
+                  daysDiff <= 7 &&
+                  milestone.status !== "completed"
+                ) {
                   notificationsList.push({
-                    id: `milestone-${project.id}-${milestone.name || milestone.title}`,
+                    id: `milestone-${project.id}-${
+                      milestone.name || milestone.title
+                    }`,
                     type: "milestone",
                     title: "Milestone Due Soon",
-                    message: `${milestone.name || milestone.title} in ${project.title}`,
+                    message: `${milestone.name || milestone.title} in ${
+                      project.title
+                    }`,
                     time: milestone.endDate || milestone.end_date,
                     icon: "clock",
                     link: `/projects/${project.id}`,
@@ -228,7 +281,9 @@ export default function Dashboard() {
         });
 
         // Sort by date (earliest first) and take first 6
-        const sortedEvents = futureEvents.sort((a, b) => new Date(a.start_time) - new Date(b.start_time)).slice(0, 6);
+        const sortedEvents = futureEvents
+          .sort((a, b) => new Date(a.start_time) - new Date(b.start_time))
+          .slice(0, 6);
 
         setUpcomingEvents(sortedEvents);
       } catch (error) {
@@ -242,11 +297,16 @@ export default function Dashboard() {
 
   const handleSaveUser = () => {
     if (editingUser) {
-      setUsers(users.map((u) => (u.id === editingUser.id ? { ...newUser, id: editingUser.id } : u)));
+      setUsers(
+        users.map((u) =>
+          u.id === editingUser.id ? { ...newUser, id: editingUser.id } : u
+        )
+      );
       console.log("[v0] Updated user:", newUser);
       alert(`User ${newUser.name} has been updated successfully!`);
     } else {
-      const newId = users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1;
+      const newId =
+        users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1;
       setUsers([...users, { ...newUser, id: newId, status: "active" }]);
       console.log("[v0] Added new user:", newUser);
       alert(`User ${newUser.name} has been added successfully!`);
@@ -304,10 +364,12 @@ export default function Dashboard() {
     const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
 
     if (diffInHours < 1) return "Just now";
-    if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+    if (diffInHours < 24)
+      return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
 
     const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+    if (diffInDays < 7)
+      return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
 
     return date.toLocaleDateString();
   };
@@ -410,25 +472,26 @@ export default function Dashboard() {
                   alt="Munus Logo"
                   className="h-12 w-auto"
                 />
-                <span className="text-3xl font-bold text-gray-900 font-serif">Munus Hub</span>
+                <span className="text-3xl font-bold text-gray-900 font-serif">
+                  Munus Hub
+                </span>
               </div>
-              <CardDescription className="text-lg">Please sign in to access your workspace</CardDescription>
+              <CardDescription className="text-lg">
+                Please sign in to access your workspace
+              </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-y-2.5">
-              {/* <Button
+              <Button
                 onClick={() => setShowLoginModal(true)}
                 className="w-full text-lg py-6"
               >
                 Sign In
-              </Button> */}
+              </Button>
               <LoginSSOButton />
             </CardContent>
           </Card>
         </div>
-        <LoginModal
-          open={showLoginModal}
-          onOpenChange={setShowLoginModal}
-        />
+        <LoginModal open={showLoginModal} onOpenChange={setShowLoginModal} />
       </div>
     );
   }
@@ -446,7 +509,9 @@ export default function Dashboard() {
                   alt="Munus Logo"
                   className="h-8 w-auto"
                 />
-                <span className="text-2xl md:text-3xl font-bold text-gray-900 font-serif">Munus Hub</span>
+                <span className="text-2xl md:text-3xl font-bold text-gray-900 font-serif">
+                  Munus Hub
+                </span>
               </div>
             </div>
 
@@ -536,13 +601,12 @@ export default function Dashboard() {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent
-                className="w-80 p-0"
-                align="end"
-              >
+              <PopoverContent className="w-80 p-0" align="end">
                 <div className="p-4 border-b">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900">Notifications</h3>
+                    <h3 className="font-semibold text-gray-900">
+                      Notifications
+                    </h3>
                     {unreadCount > 0 && (
                       <Button
                         variant="ghost"
@@ -564,11 +628,19 @@ export default function Dashboard() {
                         onClick={() => handleNotificationClick(notification)}
                       >
                         <div className="flex items-start gap-3">
-                          <div className="mt-1">{getNotificationIcon(notification.type)}</div>
+                          <div className="mt-1">
+                            {getNotificationIcon(notification.type)}
+                          </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">{notification.title}</p>
-                            <p className="text-sm text-gray-600 truncate">{notification.message}</p>
-                            <p className="text-xs text-gray-500 mt-1">{getNotificationTime(notification.time)}</p>
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {notification.title}
+                            </p>
+                            <p className="text-sm text-gray-600 truncate">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {getNotificationTime(notification.time)}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -606,7 +678,9 @@ export default function Dashboard() {
                 </AvatarFallback>
               </Avatar>
               <div className="hidden md:block">
-                <p className="text-sm font-medium text-gray-900">{user?.name?.split(" ")[0]}!</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {user?.name?.split(" ")[0]}!
+                </p>
                 <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
               </div>
               <Button
@@ -632,10 +706,7 @@ export default function Dashboard() {
                 <TrendingUp className="h-5 w-5" />
                 Dashboard
               </Button>
-              <Link
-                href="/projects"
-                onClick={() => setShowMobileMenu(false)}
-              >
+              <Link href="/projects" onClick={() => setShowMobileMenu(false)}>
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -644,10 +715,7 @@ export default function Dashboard() {
                   Projects
                 </Button>
               </Link>
-              <Link
-                href="/calendar"
-                onClick={() => setShowMobileMenu(false)}
-              >
+              <Link href="/calendar" onClick={() => setShowMobileMenu(false)}>
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -668,10 +736,7 @@ export default function Dashboard() {
                   Announcements
                 </Button>
               </Link>
-              <Link
-                href="/team"
-                onClick={() => setShowMobileMenu(false)}
-              >
+              <Link href="/team" onClick={() => setShowMobileMenu(false)}>
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -681,10 +746,7 @@ export default function Dashboard() {
                 </Button>
               </Link>
               <AdminOnly>
-                <Link
-                  href="/admin"
-                  onClick={() => setShowMobileMenu(false)}
-                >
+                <Link href="/admin" onClick={() => setShowMobileMenu(false)}>
                   <Button
                     variant="ghost"
                     className="w-full justify-start gap-3 text-gray-700 hover:bg-gray-50 hover:text-primary h-12 px-4 font-medium"
@@ -704,10 +766,13 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto space-y-8 md:space-y-12">
           {/* Welcome Section */}
           <div className="mb-8 md:mb-12">
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 font-serif">Welcome back, {user?.name?.split(" ")[0]}!</h2>
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 font-serif">
+              Welcome back, {user?.name?.split(" ")[0]}!
+            </h2>
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6 md:mb-8">
-              Our Munus Hub brings together all your essential tools and information in one centralized location, making collaboration seamless and productivity
-              effortless.
+              Our Munus Hub brings together all your essential tools and
+              information in one centralized location, making collaboration
+              seamless and productivity effortless.
             </p>
           </div>
 
@@ -715,52 +780,79 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mb-12 md:mb-16">
             <Card className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <CardTitle className="text-base sm:text-sm font-semibold text-gray-700">Active Projects</CardTitle>
+                <CardTitle className="text-base sm:text-sm font-semibold text-gray-700">
+                  Active Projects
+                </CardTitle>
                 <FolderOpen className="h-5 w-5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl sm:text-2xl font-bold text-gray-900 mb-1">{dashboardStats.activeProjects}</div>
-                <p className="text-sm sm:text-xs text-gray-500">Not completed</p>
+                <div className="text-3xl sm:text-2xl font-bold text-gray-900 mb-1">
+                  {dashboardStats.activeProjects}
+                </div>
+                <p className="text-sm sm:text-xs text-gray-500">
+                  Not completed
+                </p>
               </CardContent>
             </Card>
             <Card className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <CardTitle className="text-base sm:text-sm font-semibold text-gray-700">Team Members</CardTitle>
+                <CardTitle className="text-base sm:text-sm font-semibold text-gray-700">
+                  Team Members
+                </CardTitle>
                 <Users className="h-5 w-5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl sm:text-2xl font-bold text-gray-900 mb-1">{dashboardStats.teamMembers}</div>
-                <p className="text-sm sm:text-xs text-gray-500">Founders, advisors & consultants</p>
+                <div className="text-3xl sm:text-2xl font-bold text-gray-900 mb-1">
+                  {dashboardStats.teamMembers}
+                </div>
+                <p className="text-sm sm:text-xs text-gray-500">
+                  Founders, advisors & consultants
+                </p>
               </CardContent>
             </Card>
             <Card className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <CardTitle className="text-base sm:text-sm font-semibold text-gray-700">Upcoming Events</CardTitle>
+                <CardTitle className="text-base sm:text-sm font-semibold text-gray-700">
+                  Upcoming Events
+                </CardTitle>
                 <Calendar className="h-5 w-5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl sm:text-2xl font-bold text-gray-900 mb-1">{dashboardStats.upcomingEvents}</div>
-                <p className="text-sm sm:text-xs text-gray-500">From today onwards</p>
+                <div className="text-3xl sm:text-2xl font-bold text-gray-900 mb-1">
+                  {dashboardStats.upcomingEvents}
+                </div>
+                <p className="text-sm sm:text-xs text-gray-500">
+                  From today onwards
+                </p>
               </CardContent>
             </Card>
             <Card className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <CardTitle className="text-base sm:text-sm font-semibold text-gray-700">Pending Tasks</CardTitle>
+                <CardTitle className="text-base sm:text-sm font-semibold text-gray-700">
+                  Pending Tasks
+                </CardTitle>
                 <Clock className="h-5 w-5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl sm:text-2xl font-bold text-gray-900 mb-1">{dashboardStats.pendingTasks}</div>
-                <p className="text-sm sm:text-xs text-gray-500">Due this week</p>
+                <div className="text-3xl sm:text-2xl font-bold text-gray-900 mb-1">
+                  {dashboardStats.pendingTasks}
+                </div>
+                <p className="text-sm sm:text-xs text-gray-500">
+                  Due this week
+                </p>
               </CardContent>
             </Card>
           </div>
 
           <div className="bg-green-50 rounded-3xl p-6 md:p-12 mb-12 md:mb-16">
             <div className="max-w-4xl mx-auto text-center">
-              <h3 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4 md:mb-6 font-serif">Streamline Your Workflow</h3>
+              <h3 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4 md:mb-6 font-serif">
+                Streamline Your Workflow
+              </h3>
               <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6 md:mb-8">
-                Access your projects, calendar, team information, and announcements all in one place. Stay organized and keep your team aligned with real-time
-                updates.
+                Access your projects, calendar, team information, and
+                announcements all in one place. Stay organized and keep your
+                team aligned with real-time updates.
               </p>
               <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-4">
                 <Link href="/projects">
@@ -784,8 +876,12 @@ export default function Dashboard() {
             {/* Recent Projects */}
             <Card className="border-gray-100 shadow-sm">
               <CardHeader className="pb-6">
-                <CardTitle className="text-2xl lg:text-3xl font-semibold text-gray-900 font-serif">Recent Projects</CardTitle>
-                <CardDescription className="text-gray-600 text-base lg:text-sm">Latest project updates and milestones</CardDescription>
+                <CardTitle className="text-2xl lg:text-3xl font-semibold text-gray-900 font-serif">
+                  Recent Projects
+                </CardTitle>
+                <CardDescription className="text-gray-600 text-base lg:text-sm">
+                  Latest project updates and milestones
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {recentProjects.length > 0 ? (
@@ -798,24 +894,44 @@ export default function Dashboard() {
                       <div className="flex items-center gap-4">
                         <div
                           className={`h-12 w-12 rounded-xl flex items-center justify-center ${
-                            index === 0 ? "bg-primary/10" : index === 1 ? "bg-secondary/10" : "bg-chart-4/10"
+                            index === 0
+                              ? "bg-primary/10"
+                              : index === 1
+                              ? "bg-secondary/10"
+                              : "bg-chart-4/10"
                           }`}
                         >
-                          <FolderOpen className={`h-6 w-6 ${index === 0 ? "text-primary" : index === 1 ? "text-secondary" : "text-chart-4"}`} />
+                          <FolderOpen
+                            className={`h-6 w-6 ${
+                              index === 0
+                                ? "text-primary"
+                                : index === 1
+                                ? "text-secondary"
+                                : "text-chart-4"
+                            }`}
+                          />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900 text-lg lg:text-xl">{project.title}</h4>
-                          <p className="text-gray-600">{project.team?.length || 0} team members</p>
+                          <h4 className="font-semibold text-gray-900 text-lg lg:text-xl">
+                            {project.title}
+                          </h4>
+                          <p className="text-gray-600">
+                            {project.team?.length || 0} team members
+                          </p>
                           {project.description && (
                             <p className="text-sm lg:text-xs text-gray-500 mt-1">
-                              {project.description.length > 60 ? `${project.description.substring(0, 60)}...` : project.description}
+                              {project.description.length > 60
+                                ? `${project.description.substring(0, 60)}...`
+                                : project.description}
                             </p>
                           )}
                         </div>
                       </div>
                       <Badge
                         className={getStatusColor(project.status)}
-                        variant={project.status === "Planning" ? "outline" : "default"}
+                        variant={
+                          project.status === "Planning" ? "outline" : "default"
+                        }
                       >
                         {project.status}
                       </Badge>
@@ -833,8 +949,12 @@ export default function Dashboard() {
             {/* Recent Announcements */}
             <Card className="border-gray-100 shadow-sm">
               <CardHeader className="pb-6">
-                <CardTitle className="text-2xl lg:text-3xl font-semibold text-gray-900 font-serif">Recent Announcements</CardTitle>
-                <CardDescription className="text-gray-600 text-base lg:text-sm">Latest company news and updates</CardDescription>
+                <CardTitle className="text-2xl lg:text-3xl font-semibold text-gray-900 font-serif">
+                  Recent Announcements
+                </CardTitle>
+                <CardDescription className="text-gray-600 text-base lg:text-sm">
+                  Latest company news and updates
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {recentAnnouncements.length > 0 ? (
@@ -846,7 +966,9 @@ export default function Dashboard() {
                     >
                       <div className="flex items-start gap-4">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={announcement.avatar || "/placeholder.svg"} />
+                          <AvatarImage
+                            src={announcement.avatar || "/placeholder.svg"}
+                          />
                           <AvatarFallback>
                             {announcement.author
                               ?.split(" ")
@@ -855,12 +977,17 @@ export default function Dashboard() {
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 text-lg lg:text-xl mb-2">{announcement.title}</h4>
+                          <h4 className="font-semibold text-gray-900 text-lg lg:text-xl mb-2">
+                            {announcement.title}
+                          </h4>
                           <p className="text-gray-600 mb-3 leading-relaxed">
-                            {announcement.content.length > 80 ? `${announcement.content.substring(0, 80)}...` : announcement.content}
+                            {announcement.content.length > 80
+                              ? `${announcement.content.substring(0, 80)}...`
+                              : announcement.content}
                           </p>
                           <p className="text-sm lg:text-xs text-gray-500">
-                            {announcement.author} • {getRelativeTime(announcement.date)}
+                            {announcement.author} •{" "}
+                            {getRelativeTime(announcement.date)}
                           </p>
                         </div>
                       </div>
@@ -879,8 +1006,12 @@ export default function Dashboard() {
           {/* Upcoming Events */}
           <Card className="border-gray-100 shadow-sm">
             <CardHeader className="pb-6 md:pb-8">
-              <CardTitle className="text-xl lg:text-2xl font-semibold text-gray-900 font-serif">Upcoming Events & Deadlines</CardTitle>
-              <CardDescription className="text-gray-600 text-sm md:text-base">Important dates and milestones to keep track of</CardDescription>
+              <CardTitle className="text-xl lg:text-2xl font-semibold text-gray-900 font-serif">
+                Upcoming Events & Deadlines
+              </CardTitle>
+              <CardDescription className="text-gray-600 text-sm md:text-base">
+                Important dates and milestones to keep track of
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {upcomingEvents.length > 0 ? (
@@ -893,9 +1024,13 @@ export default function Dashboard() {
                     >
                       <div className="flex items-center gap-3 mb-4">
                         {getEventTypeIcon(event.type)}
-                        <span className="text-sm md:text-base font-semibold text-gray-700">{formatEventDate(event.start_time)}</span>
+                        <span className="text-sm md:text-base font-semibold text-gray-700">
+                          {formatEventDate(event.start_time)}
+                        </span>
                       </div>
-                      <h4 className="font-semibold text-gray-900 text-lg lg:text-xl mb-2">{event.title}</h4>
+                      <h4 className="font-semibold text-gray-900 text-lg lg:text-xl mb-2">
+                        {event.title}
+                      </h4>
                       <p className="text-gray-600 leading-relaxed">
                         {event.description
                           ? event.description.length > 80
